@@ -577,6 +577,30 @@
       if (triggerSelectList.length > 0) {
         
       }
+
+      /*=====AUTOMATIONS=====*/
+      if (automationsSelectList.length > 0) {
+        console.log(automationsSelectList);
+        client.request(getAutomations_dest()).then(
+          function(automationDestData){
+            console.log(automationDestData);
+            for (var i=0; i<automationsSelectList.length; i++){
+              var isExist = false;
+              for (var j=0; j<automationDestData.automations.length; j++) {
+                if (automationsSelectList[i].raw_title == automationDestData.automations[j].raw_title){
+                  isExist = true;
+                }
+              }
+              if (!isExist) {
+                
+              }
+            }
+          },
+          function(automationDestError){
+            console.log('====== automationDestError ======');
+            console.log(automationDestError);
+          });
+      }
     }
 
     function doCreateTicketForm (newTicketIds, ticketCount) {
