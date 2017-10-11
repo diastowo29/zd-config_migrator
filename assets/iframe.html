@@ -12,12 +12,13 @@
   <div id="mainContent" class="row" style="margin-top: 10px;">
 
     <ul class="nav nav-tabs">
-      <li class="active"><a data-toggle="tab" href="#home">Ticket Fields</a></li>
-      <li><a data-toggle="tab" href="#menu1">Ticket Forms</a></li>
+      <li class="active"><a data-toggle="tab" href="#fields">Ticket Fields</a></li>
+      <li><a data-toggle="tab" href="#forms">Ticket Forms</a></li>
+      <li><a data-toggle="tab" href="#automations">Automations</a></li>
     </ul>
 
     <div class="tab-content">
-      <div id="home" class="tab-pane fade in active">
+      <div id="fields" class="tab-pane fade in active">
         <div class="col-md-12" align="center">
           <div style="margin-bottom: 10px;">
             <label class="col-md-12" style="margin-top: 10px;">
@@ -47,11 +48,35 @@
         </div>
 
       </div>
-      <div id="menu1" class="tab-pane fade">
+      <div id="forms" class="tab-pane fade">
         <div class="col-md-12" align="center">
           <div style="margin-bottom: 10px;">
             <label class="col-md-12" style="margin-top: 10px;">
               Ticket Forms(s) selected: <span id="ticketFormsCounter">0</span>
+            </label>
+            <div class="dropdown col-md-12" style="min-height: 300px; max-height: 300px; overflow-x: hidden;" align="center">
+              <!-- <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Zendesk Ticket Forms
+              <span class="caret"></span></button> -->
+              <table id="usersTable" class="usersTable table table-hover table-condensed well" style="font-size: 12px;">
+                <thead>
+                  <tr id='firstRow' style="text-align: left">
+                    <th style="width: 50px;"><input id="selectallCheckTicketForm" type="checkbox" checked=true></th>
+                    <th>Name</th>
+                  </tr>
+                </thead>
+                <tbody class="ticketFormsContent">
+                  
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="automations" class="tab-pane fade">
+        <div class="col-md-12" align="center">
+          <div style="margin-bottom: 10px;">
+            <label class="col-md-12" style="margin-top: 10px;">
+              Automation(s) selected: <span id="ticketFormsCounter">0</span>
             </label>
             <div class="dropdown col-md-12" style="min-height: 300px; max-height: 300px; overflow-x: hidden;" align="center">
               <!-- <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Zendesk Ticket Forms

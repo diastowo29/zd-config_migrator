@@ -16,12 +16,12 @@
     // // // // // // // // this.deleteAllTicketFields();
     /*====== ** ======*/
 
-    var ZD_DOMAIN = "";
-    var ZD_TOKEN = "";
-    // var ZD_DOMAIN = "https://treesdemo11496822632.zendesk.com";
-    // var ZD_TOKEN = "basic ZWxkaWVuLmhhc21hbnRvQHRyZWVzc29sdXRpb25zLmNvbTpXM2xjb21lMTIz";
-    $('.migrate_button').attr("disabled", "disabled");
-    $('#myModal').modal('show');
+    // var ZD_DOMAIN = "";
+    // var ZD_TOKEN = "";
+    var ZD_DOMAIN = "https://treesdemo11496822632.zendesk.com";
+    var ZD_TOKEN = "basic ZWxkaWVuLmhhc21hbnRvQHRyZWVzc29sdXRpb25zLmNvbTpXM2xjb21lMTIz";
+    // $('.migrate_button').attr("disabled", "disabled");
+    // $('#myModal').modal('show');
 
     /*=============API PART============*/
     function getTriggers (input) {
