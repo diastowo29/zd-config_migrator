@@ -1,0 +1,17 @@
+{
+  "name": "Jendeks Config Migrator",
+  "author": {
+    "name": "Diastowo Faryduana",
+    "email": "diastowo.faryduana@treessolutions.com",
+    "url": ""
+  },
+  "defaultLocale": "en",
+  "private": true,
+  "location": {
+    "support": {
+      "nav_bar": "assets/iframe.html"
+    }
+  },
+  "version": "1.0",
+  "frameworkVersion": "2.0"
+}

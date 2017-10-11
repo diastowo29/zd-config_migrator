@@ -1,0 +1,837 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <!-- http://garden.zendesk.com -->
+  <link rel="stylesheet" href="https://assets.zendesk.com/apps/sdk-assets/css/1/zendesk_garden.css" type="text/css">
+  <link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" type="text/css" href="bootstrap/apps.css">
+  <script src="jquery/jquery-3.1.1.min.js"></script>
+  <script src="bootstrap/js/bootstrap.min.js"></script>
+</head>
+<body>
+  <div id="mainContent" class="row" style="margin-top: 10px;">
+    <div class="col-md-6 well">
+      <div>
+        <label class="col-md-12">
+          Select Ticket Field(s) you want to migrate:
+        </label>
+        <div class="dropdown col-md-12" style="min-height: 300px; max-height: 300px; overflow-x: hidden;">
+          <!-- <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Zendesk Ticket Fields
+          <span class="caret"></span></button> -->
+          <table id="usersTable" class="usersTable table table-hover table-condensed" style="font-size: 12px;">
+            <thead>
+              <tr id='firstRow' style="text-align: left">
+                <th style="width: 50px;"><input id="selectallCheckTicketField" type="checkbox" checked=true></th>
+                <th>Name</th>
+              </tr>
+            </thead>
+            <tbody class="ticketFieldContent">
+              
+            </tbody>
+          </table>
+          <!-- <ul class="custom_fields_list dropdown-menu" style="left: auto; max-height: 200px; overflow-x: hidden;"> -->
+            <!-- <li id="test" class="normal" onclick="getTriggerSelection('test')"><a href="#">Triggers 1</a></li>
+            <li id="test2" class="normal" onclick="getTriggerSelection('test2')"><a href="#">Triggers 2</a></li>
+            <li id="test3" class="normal" onclick="getTriggerSelection('test3')"><a href="#">Triggers 3</a></li> -->
+          <!-- </ul> -->
+        </div>
+
+      </div>
+      <div style="margin-top: 40px;">
+        <label class="col-md-12">
+          Ticket Field(s) selected: <span id="custom_fieldsCounter">0</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="col-md-6 well">
+      <div>
+        <label class="col-md-12">
+          Select Ticket Forms(s) you want to migrate:
+        </label>
+        <div class="dropdown col-md-12" style="min-height: 300px; max-height: 300px; overflow-x: hidden;">
+          <!-- <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Zendesk Ticket Forms
+          <span class="caret"></span></button> -->
+          <table id="usersTable" class="usersTable table table-hover table-condensed" style="font-size: 12px;">
+            <thead>
+              <tr id='firstRow' style="text-align: left">
+                <th style="width: 50px;"><input id="selectallCheckTicketForm" type="checkbox" checked=true></th>
+                <th>Name</th>
+              </tr>
+            </thead>
+            <tbody class="ticketFormsContent">
+              
+            </tbody>
+          </table>
+          <!-- <ul class="ticketForms_list dropdown-menu" style="left: auto; max-height: 200px; overflow-x: hidden;"> -->
+            <!-- <li id="test" class="normal" onclick="getTriggerSelection('test')"><a href="#">Triggers 1</a></li>
+            <li id="test2" class="normal" onclick="getTriggerSelection('test2')"><a href="#">Triggers 2</a></li>
+            <li id="test3" class="normal" onclick="getTriggerSelection('test3')"><a href="#">Triggers 3</a></li> -->
+          <!-- </ul> -->
+        </div>
+
+      </div>
+      <div style="margin-top: 20px;">
+        <label class="col-md-12">
+          Ticket Forms(s) selected: <span id="ticketFormsCounter">0</span>
+        </label>
+      </div>
+    </div>
+    
+
+    <br><br><br><br><br><br>
+
+    <!-- <div class="col-md-12">
+      <label class="col-md-12">
+        Select Trigger(s) you want to migrate:
+      </label>
+      <div class="dropdown col-md-12">
+        <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Zendesk Triggers
+        <span class="caret"></span></button>
+        <ul class="trigger_list dropdown-menu" style="left: auto; max-height: 200px; overflow-x: hidden;"> -->
+          <!-- <li id="test" class="normal" onclick="getTriggerSelection('test')"><a href="#">Triggers 1</a></li>
+          <li id="test2" class="normal" onclick="getTriggerSelection('test2')"><a href="#">Triggers 2</a></li>
+          <li id="test3" class="normal" onclick="getTriggerSelection('test3')"><a href="#">Triggers 3</a></li> -->
+        <!-- </ul>
+      </div>
+
+    </div>
+    <div class="col-md-12" style="margin-top: 10px;">
+      <label class="col-md-12">
+        Trigger(s) selected: <span id="triggCounter">0</span>
+      </label>
+    </div> -->
+    <div style="float: right; margin-right: 50px;">
+      <button class="btn btn-primary migrate_button" type="button" onclick="doMigrate()">Migrate</button>
+    </div>
+    <div id="myModal" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title">Configuration</h4>
+          </div>
+          <div class="modal-body row">
+            <form action="javascript:doSaveConfig();">
+              <div class="col-md-12">
+                <div class="col-md-12 form-group">
+                  <label for="usr">Zendesk Domain:</label>
+                  <input type="text" class="form-control" id="domain" placeholder="eg:anything.zendesk.com" required>
+                </div>
+                <div class="col-md-12 form-group">
+                  <label for="usr">Admin Username:</label>
+                  <input type="text" class="form-control" id="usr" placeholder="eg:anything@gmail.com" required>
+                </div>
+                <div class="col-md-12 form-group">
+                  <label for="usr">Admin Password:</label>
+                  <input type="password" class="form-control" id="psw" placeholder="your zendesk password" required>
+                </div>
+                <input style="float: right;" type="submit" class="btn btn-info" value="Submit">
+              </div>
+            </form>
+            
+          </div>
+          <div class="modal-footer">
+            <!-- <button type="button" class="btn btn-default" onclick="doSaveConfig()">Save</button> -->
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div id="myModalResult" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title">Migret Result</h4>
+          </div>
+          <div class="modal-body row">
+            <div id="error_result_header" class="col-md-12"><span class="spanError">Error(s) when Migrating:</span>
+              <ul class="errorList">
+              </ul>
+            </div>
+            
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Okay</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div id="modal_loading" data-backdrop="static" data-keyboard="false" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title">Hold on..</h4>
+          </div>
+          <div class="modal-body row">
+            <div id="error_result_header" class="col-md-12" align="center">
+              <span class="spanError">Fasten your seat belt..</span><br>
+              <span class="spanLoadType"></span>
+              <span class="spanLoadMsg"></span>
+            </div>
+          </div>
+          <div class="modal-footer">
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <div id="loader" class="loader" style="visibility: hidden;"></div>
+  <!-- Modal -->
+  
+
+  <!-- https://github.com/zendesk/zendesk_app_framework_sdk -->
+  <script type="text/javascript" src="bootstrap/zaf_sdk.js"></script>
+  <script>
+    // Initialise the Zendesk JavaScript API client
+    // https://developer.zendesk.com/apps/docs/apps-v2
+    var client = ZAFClient.init();
+    var triggerList = [];
+    var triggerSelectList = [];
+    
+    var ticketFields = [];
+    var ticketFieldsSelectList = [];
+
+    var ticketForms = [];
+    var ticketFormsSelectList = [];
+    // this.doLoading('Sate Padang');
+    this.init();
+    // this.deleteAllTicketFields();
+
+    // var ZD_DOMAIN = "";
+    // var ZD_TOKEN = "";
+    var ZD_DOMAIN = "https://treesdemo11496822632.zendesk.com";
+    var ZD_TOKEN = "basic ZWxkaWVuLmhhc21hbnRvQHRyZWVzc29sdXRpb25zLmNvbTpXM2xjb21lMTIz";
+    // $('.migrate_button').attr("disabled", "disabled");
+    // $('#myModal').modal('show');
+
+    /*=============API PART============*/
+    function getTriggers (input) {
+      var getTickets = {
+        url: '/api/v2/triggers.json',
+        type: 'GET',
+        dataType : "json",
+        contentType: "application/json; charset=utf-8",
+        async: false,
+      }
+      console.log(getTickets);
+      return getTickets;
+    }
+
+    function getTicketFields (input) {
+      var getTickets = {
+        url: '/api/v2/ticket_fields.json',
+        type: 'GET',
+        dataType : "json",
+        contentType: "application/json; charset=utf-8",
+        async: false,
+      }
+      console.log(getTickets);
+      return getTickets;
+    }
+
+    function deleteTicketFields (id) {
+      var getTickets = {
+        url: '/api/v2/ticket_fields/' + id + '.json',
+        type: 'DELETE',
+        dataType : "json",
+        contentType: "application/json; charset=utf-8",
+        async: false,
+      }
+      console.log(getTickets);
+      return getTickets;
+    }
+
+    function getTicketFieldsbyId (id) {
+      var getTickets = {
+        url: '/api/v2/ticket_fields/' + id + '.json',
+        type: 'GET',
+        dataType : "json",
+        contentType: "application/json; charset=utf-8",
+        async: false,
+      }
+      console.log(getTickets);
+      return getTickets;
+    }
+
+    function getBrands (id) {
+      var getTickets = {
+        url: '/api/v2/brands/' + id + '.json',
+        type: 'GET',
+        dataType : "json",
+        contentType: "application/json; charset=utf-8",
+        async: false,
+      }
+      console.log(getTickets);
+      return getTickets;
+    }
+
+    function createTicketFields (input, i) {
+      var getTickets = {
+        url: ZD_DOMAIN + '/api/v2/ticket_fields.json',
+        type: 'POST',
+        headers: {
+          "Authorization": ZD_TOKEN
+        },
+        dataType : "json",
+        data: input,
+        contentType: "application/json; charset=utf-8",
+        async: false,
+        cors: true,
+        success: function(data) {
+          console.log(i);
+          console.log(data);
+        }
+      }
+      console.log(getTickets);
+      return getTickets;
+    }
+
+    function getTicketForms (input) {
+      var getTickets = {
+        url: '/api/v2/ticket_forms.json',
+        type: 'GET',
+        dataType : "json",
+        contentType: "application/json; charset=utf-8",
+        async: false,
+      }
+      console.log(getTickets);
+      return getTickets;
+    }
+
+    /*=============FUNCTION PART============*/
+    function doSaveConfig(){
+      var domain = $('#domain').val();
+      var username = $('#usr').val();
+      var password = $('#psw').val();
+      if (!domain.includes('https://')) {
+        ZD_DOMAIN = 'https://' + $('#domain').val();
+      } else {
+        ZD_DOMAIN = $('#domain').val();
+      }
+      ZD_TOKEN = 'basic ' + btoa($('#usr').val() + ':' + $('#psw').val());
+      console.log(ZD_DOMAIN);
+      console.log(ZD_TOKEN);
+      $('#myModal').modal('hide');
+      $('.migrate_button').removeAttr("disabled");
+    }
+
+
+    function init () {
+      var ticketContent = '';
+      var formContent = '';
+      document.getElementById('loader').style.visibility = 'visible';
+      document.getElementById('mainContent').style.visibility = 'hidden';
+      client.request(this.getTicketFields()).then(
+        function(data) {
+          console.log(data);
+          ticketFields = data.ticket_fields;
+          for (var i = 0; i<data.count; i++) {
+            ticketContent += '<tr id="' + data.ticket_fields[i].id + '" class="'+i+'" onClick="editData(1, ' + data.ticket_fields[i].id + ', ' + i + ')" style="cursor:pointer;">'
+            +'<td><input class="ticketFeldInput" id="' + data.ticket_fields[i].id + '" type="checkbox"></td>'
+            +'<td>' + data.ticket_fields[i].title +'</td>';
+            // $('<li id="'+data.ticket_fields[i].id+'" class="normal" onclick="getTicketFieldsSelection('+i+', '+data.ticket_fields[i].id+')"><a href="#">'+data.ticket_fields[i].title+'</a></li>').appendTo( ".custom_fields_list" );
+          }
+          $('.ticketFieldContent').append(ticketContent);
+          document.getElementById('loader').style.visibility = 'hidden';
+          document.getElementById('mainContent').style.visibility = 'visible';
+        }, function (errors) {
+          console.log(errors);
+        });
+
+      /*client.request(this.getTriggers()).then(
+        function(data) {
+          console.log(data);
+          triggerList = data.triggers;
+          for (var i = 0; i<data.count; i++) {
+            $('<li id="'+data.triggers[i].id+'" class="normal" onclick="getTriggerSelection('+i+', '+data.triggers[i].id+')"><a href="#">'+data.triggers[i].title+'</a></li>').appendTo( ".trigger_list" );
+          }
+          document.getElementById('loader').style.visibility = 'hidden';
+          document.getElementById('mainContent').style.visibility = 'visible';
+        }, function (errors) {
+          console.log(errors);
+        });*/
+
+      client.request(this.getTicketForms()).then(
+        function(data) {
+          console.log(data);
+          ticketForms = data.ticket_forms;
+          for (var i = 0; i<data.count; i++) {
+            formContent += '<tr id="' + data.ticket_forms[i].id + '" class="'+i+'" onClick="editData(2, ' + data.ticket_forms[i].id + ', ' + i + ')" style="cursor:pointer;">'
+            +'<td><input class="ticketFormInput" id="' + data.ticket_forms[i].id + '" type="checkbox"></td>'
+            +'<td>' + data.ticket_forms[i].raw_name +'</td>';
+            
+            // $('<li id="'+data.ticket_forms[i].id+'" class="normal" onclick="getTicketFormsSelection('+i+', '+data.ticket_forms[i].id+')"><a href="#">'+data.ticket_forms[i].name+'</a></li>').appendTo( ".ticketForms_list" );
+          }
+          document.getElementById('loader').style.visibility = 'hidden';
+          document.getElementById('mainContent').style.visibility = 'visible';
+          $('.ticketFormsContent').append(formContent);
+        }, function (errors) {
+          console.log(errors);
+        });
+    }
+
+    $("#selectallCheckTicketField").change(function () {
+      $("input.ticketFeldInput:checkbox").prop('checked', $(this).prop("checked"));
+      
+      if ($("#selectallCheckTicketField").prop('checked')) {
+        ticketFieldsSelectList = ticketFields;
+      } else {
+        ticketFieldsSelectList = [];
+      }
+      console.log(ticketFieldsSelectList);
+
+    });
+
+    $("#selectallCheckTicketForm").change(function () {
+      $("input.ticketFormInput:checkbox").prop('checked', $(this).prop("checked"));
+
+      if ($("#selectallCheckTicketForm").prop('checked')) {
+        ticketFormsSelectList = ticketForms;
+      } else {
+        ticketFormsSelectList = [];
+      }
+      console.log(ticketFormsSelectList);
+    });
+
+    function editData (type , id, position) {
+      var isExist = false;
+      if ($('input[id=' + id + ']')[0].checked == false) {
+        $('input[id=' + id + ']')[0].checked = true;
+        if (type == 1) {
+          for (var i = 0; i<ticketFieldsSelectList.length; i++) {
+            if (ticketFieldsSelectList[i].id == id) {
+              isExist = true;
+            }
+          }
+          if (!isExist) {
+            ticketFieldsSelectList.push(ticketFields[position]);
+          }
+          
+        } else if (type == 2){
+          for (var j = 0; j<ticketFormsSelectList.length; j++) {
+            if (ticketFormsSelectList[j].id == id) {
+              isExist = true;
+            }
+          }
+          if (!isExist) {
+            ticketFormsSelectList.push(ticketForms[position]);
+          }
+        }
+      } else {
+        if (type == 1) {
+          for (var i = 0; i<ticketFieldsSelectList.length; i++) {
+            if (ticketFieldsSelectList[i].id == id) {
+              ticketFieldsSelectList.splice(i, 1);
+            }
+          }
+        } else if (type == 2) {
+          for (var j = 0; j<ticketFormsSelectList.length; j++) {
+            if (ticketFormsSelectList[j].id == id) {
+              ticketFormsSelectList.splice(j, 1);
+            }
+          }
+        }
+        $('input[id=' + id + ']')[0].checked = false;
+      }
+      isExist = false;
+      $('#custom_fieldsCounter').text(ticketFieldsSelectList.length);
+      $('#ticketFormsCounter').text(ticketFormsSelectList.length);
+    }
+
+    function getTriggerSelection (id, triggersId) {
+      var notExist = true;
+      $('#' + triggersId).prop('class', 'disabled');
+      for (var i=0; i<triggerSelectList.length; i++) {
+        if (triggerSelectList[i].id == triggersId) {
+          notExist = false;
+        }
+      }
+      if (notExist) {
+        triggerSelectList.push(triggerList[id]);
+      }
+      $('#triggCounter').text(triggerSelectList.length);
+    }
+
+    function getTicketFieldsSelection (id, ticketFieldsId) {
+      var notExist = true;
+      $('#' + ticketFieldsId).prop('class', 'disabled');
+      for (var i=0; i<ticketFieldsSelectList.length; i++) {
+        if (ticketFieldsSelectList[i].id == ticketFieldsId) {
+          notExist = false;
+        }
+      }
+      if (notExist) {
+        ticketFieldsSelectList.push(ticketFields[id]);
+      }
+      $('#custom_fieldsCounter').text(ticketFieldsSelectList.length);
+    }
+
+    function getTicketFormsSelection (id, ticketFormsId) {
+      var notExist = true;
+      $('#' + ticketFormsId).prop('class', 'disabled');
+      for (var i=0; i<ticketFormsSelectList.length; i++) {
+        if (ticketFormsSelectList[i].id == ticketFormsId) {
+          notExist = false;
+        }
+      }
+      if (notExist) {
+        ticketFormsSelectList.push(ticketForms[id]);
+      }
+      $('#ticketFormsCounter').text(ticketFormsSelectList.length);
+    }
+
+    function doMigrate () {
+      var migrateCounter = 0;
+      errorMigrate = [];
+      /*=====TICKET FIELDS=====*/
+      if (ticketFieldsSelectList.length > 0) {
+        migrateCounter++;
+        $.ajax({
+          url: ZD_DOMAIN + '/api/v2/ticket_fields.json',
+          type: 'GET',
+          headers: {
+            "Authorization": ZD_TOKEN
+          },
+          dataType : "json",
+          contentType: "application/json; charset=utf-8",
+          async: false,
+          cors: true,
+          success: function (data) {
+            for (var i=0; i<ticketFieldsSelectList.length; i++) {
+              this.doLoading('Ticket Fields', ticketFieldsSelectList[i].title);
+              var isExist = false;
+              var ticketDestId = '';
+              var ticketDestTitle = '';
+              for (var j = 0; j < data.ticket_fields.length; j++) {
+                if (ticketFieldsSelectList[i].title == data.ticket_fields[j].title) {
+                  isExist = true;
+                  ticketDestId = data.ticket_fields[j].id;
+                  ticketDestTitle = data.ticket_fields[j].title;
+                }
+              }
+              if (!isExist) {
+                var ticketFields = new Array({ticket_field:ticketFieldsSelectList[i]});
+                $.ajax({
+                  url: ZD_DOMAIN + '/api/v2/ticket_fields.json',
+                  type: 'POST',
+                  headers: {
+                    "Authorization": ZD_TOKEN
+                  },
+                  dataType : "json",
+                  data: JSON.stringify(ticketFields[0]),
+                  contentType: "application/json; charset=utf-8",
+                  async: false,
+                  cors: true,
+                  success: function(data) {
+                    console.log(data);
+                    if (i == (ticketFieldsSelectList.length-1)) {
+                      ticketFieldsSelectList = [];
+                      $('#custom_fieldsCounter').text(ticketFieldsSelectList.length);
+                      console.log(errorMigrate);
+                    }
+                  },
+                  error: function (errors) {
+                    console.log(errors);
+                    if (errors.responseJSON === undefined) {
+                      errorMigrate.push({
+                        name: ticketFieldsSelectList[i].title,
+                        errors: errors.statusText
+                      });
+                    } else {
+                      errorMigrate.push({
+                        name: ticketFieldsSelectList[i].title,
+                        errors: errors.responseJSON.details.base[0].description
+                      });
+                    }
+                    if (i == (ticketFieldsSelectList.length-1)) {
+                      ticketFieldsSelectList = [];
+                      $('#custom_fieldsCounter').text(ticketFieldsSelectList.length);
+                      console.log(errorMigrate);
+                    }
+                  }
+                });
+              } else {
+                /*var ticketFields = new Array({ticket_field:{title:ticketDestTitle + '_'}});
+                console.log(ticketFields);
+                $.ajax({
+                  url: ZD_DOMAIN + '/api/v2/ticket_fields/' + ticketDestId + '.json',
+                  type: 'PUT',
+                  headers: {
+                    "Authorization": ZD_TOKEN
+                  },
+                  dataType : "json",
+                  data: JSON.stringify(ticketFields[0]),
+                  contentType: "application/json; charset=utf-8",
+                  async: false,
+                  cors: true,
+                  success: function(dataUtf) {
+                    console.log(dataUtf);
+                  },
+                  error: function (errorsUtf) {
+                    console.log(errorsUtf);
+                  }
+                });*/
+              }
+            }
+          },
+          error: function (errorsTf) {
+            console.log('error ticket_fields destination');
+            console.log(errorsTf);
+          }
+        });
+        this.showResult(migrateCounter, errorMigrate);
+      }
+
+      /*=====TICKET FORMS=====*/
+      if (ticketFormsSelectList.length > 0) {
+        migrateCounter++;
+        var ticketCount = -1;
+        for (var i=0; i<ticketFormsSelectList.length; i++) {
+          var newTicketIds = [];
+          var isAllSystem = true;
+
+          var ticketFieldsForm = ticketFormsSelectList[i].ticket_field_ids;
+          var counter = 0;
+          for (var tff = 0; tff<ticketFieldsForm.length; tff++) {
+            client.request(this.getTicketFieldsbyId(ticketFieldsForm[tff])).then(
+              function (data){
+                console.log(data);
+                // this.doLoading('Ticket Forms', ticketFormsSelectList[i].title);
+                console.log('ticketCount: ' + ticketCount);
+                console.log('fieldCount: ' + counter);
+                if (counter == 0) {
+                  ticketCount++;
+                }
+                console.log('processing: ' + ticketFormsSelectList[ticketCount].title);
+                counter++;
+                // console.log(data);
+                if (data.ticket_field.removable) {
+                  isAllSystem = false;
+                  $.ajax({
+                    url: ZD_DOMAIN + '/api/v2/ticket_fields.json',
+                    type: 'GET',
+                    headers: {
+                      "Authorization": ZD_TOKEN
+                    },
+                    dataType : "json",
+                    contentType: "application/json; charset=utf-8",
+                    async: false,
+                    cors: true,
+                    success: function (newData) {
+                      var isExist = false;
+                      var ticketId = 0;
+                      for (var dtf = 0; dtf<newData.ticket_fields.length; dtf++) {
+                        if (data.ticket_field.title == newData.ticket_fields[dtf].title) {
+                          isExist = true;
+                          ticketId = newData.ticket_fields[dtf].id;
+                        }
+                      }
+                      if (isExist) {
+                        newTicketIds.push(ticketId);
+                      } else {
+                        // var ticketFields = new Array({ticket_field:ticketFieldsSelectList[i]});
+
+                        $.ajax({
+                          url: ZD_DOMAIN + '/api/v2/ticket_fields.json',
+                          type: 'POST',
+                          headers: {
+                            "Authorization": ZD_TOKEN
+                          },
+                          dataType : "json",
+                          data: JSON.stringify(data),
+                          contentType: "application/json; charset=utf-8",
+                          async: false,
+                          cors: true,
+                          success: function (newCreateData) {
+                            newTicketIds.push(newCreateData.ticket_field.id);
+                          },
+                          error: function (newCreateErrors) {
+                            console.log("ERROR - create ticket_field from destination Domain");
+                            console.log(newCreateErrors);
+                          }
+                        });
+
+                      }
+                    },
+                    error: function (newErrors) {
+                      console.log("ERROR - get ticket_field from destination Domain");
+                      console.log(newErrors);
+                    }
+                  });
+                  if (counter == ticketFormsSelectList[ticketCount].ticket_field_ids.length) {
+                    console.log('ajax finished');
+                    console.log(newTicketIds);
+                    this.doCreateTicketForm(newTicketIds, ticketCount);
+                    counter = 0;
+                    if (ticketCount == ticketFormsSelectList.length-1) {
+                      console.log('ITS DONE');
+                      this.showResult(migrateCounter, errorMigrate);
+                    }
+                    newTicketIds = [];
+                  }
+
+                }
+              },
+              function (errors){
+                console.log(errors);
+              });
+            }
+          }
+      }
+      /*=====TRIGGERS=====*/ /*WILL BE CONTINUED LATER.. PANJANG..!*/
+      if (triggerSelectList.length > 0) {
+        /*for (var i=0; i<triggerSelectList.length; i++) {
+          console.log(triggerSelectList[i]);
+          var ticketFields = new Array({ticket_field:triggerSelectList[i]});
+          $.ajax({
+            url: ZD_DOMAIN + '/api/v2/ticket_fields.json',
+            type: 'POST',
+            headers: {
+              "Authorization": ZD_TOKEN
+            },
+            dataType : "json",
+            data: JSON.stringify(ticketFields[0]),
+            contentType: "application/json; charset=utf-8",
+            async: false,
+            cors: true,
+            success: function(data) {
+              console.log(data);
+              if (i == (triggerSelectList.length-1)) {
+                triggerSelectList = [];
+                $('#custom_fieldsCounter').text(triggerSelectList.length);
+                console.log(errorMigrate);
+              }
+            },
+            error: function (errors) {
+              console.log(errors);
+              if (errors.responseJSON === undefined) {
+                errorMigrate.push({
+                  name: triggerSelectList[i].title,
+                  errors: errors.statusText
+                });
+              } else {
+                errorMigrate.push({
+                  name: triggerSelectList[i].title,
+                  errors: errors.responseJSON.details.base[0].description
+                });
+              }
+              if (i == (triggerSelectList.length-1)) {
+                triggerSelectList = [];
+                $('#custom_fieldsCounter').text(triggerSelectList.length);
+                console.log(errorMigrate);
+              }
+            }
+          });
+        }*/
+      }
+      // this.showResult(errorMigrate);
+    }
+
+    function doCreateTicketForm (newTicketIds, ticketCount) {
+      /*DO_CREATE_TICKET_FORM*/
+      ticketFormsSelectList[ticketCount].ticket_field_ids = newTicketIds;
+      var ticketForms = new Array({ticket_form:ticketFormsSelectList[ticketCount]});
+      $.ajax({
+        url: ZD_DOMAIN + '/api/v2/ticket_forms.json',
+        type: 'POST',
+        headers: {
+          "Authorization": ZD_TOKEN
+        },
+        dataType : "json",
+        data: JSON.stringify(ticketForms[0]),
+        contentType: "application/json; charset=utf-8",
+        async: false,
+        cors: true,
+        success: function(data) {
+          console.log(data);
+          if (ticketCount == (ticketFormsSelectList.length-1)) {
+            ticketFormsSelectList = [];
+            $('#ticketFormsCounter').text(ticketFormsSelectList.length);
+            console.log(errorMigrate);
+          }
+        },
+        error: function (errors) {
+          console.log(errors);
+          if (errors.responseJSON === undefined) {
+            errorMigrate.push({
+              name: ticketFormsSelectList[ticketCount].title,
+              errors: errors.statusText
+            });
+          } else {
+            errorMigrate.push({
+              name: ticketFormsSelectList[ticketCount].title,
+              errors: errors.responseJSON.details.base[0].description
+            });
+          }
+          if (ticketCount == (ticketFormsSelectList.length-1)) {
+            ticketFormsSelectList = [];
+            $('#ticketFormsCounter').text(ticketFormsSelectList.length);
+            console.log(errorMigrate);
+          }
+        }
+      });
+    }
+
+    function showResult(migrateCounter, errorMigrate) {
+      $('.errorList').empty();
+      if (errorMigrate.length > 0) {
+        for (var i=0; i<errorMigrate.length; i++) {
+          $('<li><b>'+errorMigrate[i].name+'</b>: '+errorMigrate[i].errors+'</li>').appendTo('.errorList');
+        }
+      } else {
+        $('.spanError').text('Migret process is done.. !');
+      }
+      $('#myModalResult').modal('show');
+    }
+
+    function deleteAllTicketFields () {
+      client.request(getTicketFields()).then(
+        function (data){
+          console.log(data);
+          for (var i=0; i<data.ticket_fields.length; i++) {
+            if (data.ticket_fields[i].removable) {
+              if (data.ticket_fields[i].title != 'Type') {
+                if (data.ticket_fields[i].title != 'Priority') {
+                  console.log(data.ticket_fields[i].title);
+                  client.request(deleteTicketFields(data.ticket_fields[i].id)).then(
+                    function (deleteData){
+                      console.log(deleteData);
+                    },
+                    function(errorDeleteData){
+                      console.log(errorDeleteData);
+                    });
+                }
+              }
+            }
+          }
+        },
+        function (errorData){
+          console.log(errorData);
+        });
+    }
+
+    function doLoading (type, message) {
+
+      /*CHECK IF MODAL SHOWN OR HIDDEN*/
+      if ($('#modal_loading').hasClass('in')) {
+        $('.spanLoadMsg').text('Processing:  ' + message);
+        $('.spanLoadType').text(type);
+      } else {
+        $('#modal_loading').modal('show');
+      }
+
+    }
+
+  </script>
+</body>
+</html>

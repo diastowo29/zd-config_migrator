@@ -1,0 +1,89 @@
+.usersTable {
+	/*visibility: hidden !important;*/
+	/*table-layout: fixed;*/
+	font-size: 12px;
+	white-space: nowrap;
+}
+
+.inputShift {
+	font-weight: bold !important;
+}
+
+/*table{
+	font-family: Arial, Verdana, sans-serif;
+	color: #0000FF;
+}
+
+td{
+	word-wrap: break-word;
+	padding-left: 20px;
+}*/
+
+/*.td_judul{
+	padding-right: 15px;
+	padding-left: 15px;
+	border: 1px solid black;
+	background-color: #FFE1A5;
+}
+.th_judul{
+	background-color: #FFE1A5;
+	padding-right: 15px;
+	padding-left: 15px;
+	border: 1px solid black;
+}
+
+.tr_invoice{
+	padding: 20px;
+	font-size:	5px;
+}
+
+.tr_invoice:hover{
+	background-color: white !important;
+	cursor: pointer;
+}*/
+
+/*SPINNER*/
+.loader {
+	display: block;
+	position: fixed;
+	left : 50%;
+	top : 50%;
+	background-position:center;
+	border: 10px solid #f3f3f3;
+	border-radius: 100%;
+	border-top: 10px solid blue;
+	width: 30px;
+	height: 30px;
+	-webkit-animation: spin 0.5s linear infinite;
+	animation: spin 0.5s linear infinite;
+}
+
+@-webkit-keyframes spin {
+	0% { -webkit-transform: rotate(0deg); }
+	100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+	0% { transform: rotate(0deg); }
+	100% { transform: rotate(360deg); }
+}
+/*SPINNER*/
+
+.btn-calc{
+	background-color: #78a300;
+	border-color: #78a300;
+}
+.btn-calc:active,
+.btn-calc.active,
+.btn-calc:active.focus,
+.btn-calc.active.focus,
+.btn-calc:hover,
+.btn-calc.hover,
+.btn-calc:focus{
+  background-color: #03363d;
+  border-color: #03363d;
+}
+
+.customRow{
+	padding-right: 10px;
+}
