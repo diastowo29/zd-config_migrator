@@ -9,6 +9,9 @@
 
     var ticketForms = [];
     var ticketFormsSelectList = [];
+
+    var automations = [];
+    var automationsSelectList = [];
     // this.doLoading('Sate Padang');
     this.init();
 
@@ -47,6 +50,34 @@
       console.log(getTickets);
       return getTickets;
     }
+
+    function getAutomations (input) {
+      var getTickets = {
+        url: '/api/v2/automations.json',
+        type: 'GET',
+        dataType : "json",
+        contentType: "application/json; charset=utf-8",
+        async: false,
+      }
+      console.log(getTickets);
+      return getTickets;
+    }
+
+    function getAutomations_dest (input) {
+      var getTickets = {
+        url: ZD_DOMAIN + '/api/v2/automations.json',
+        type: 'GET',
+        headers: {
+          "Authorization": ZD_TOKEN
+        },
+        dataType : "json",
+        contentType: "application/json; charset=utf-8",
+        async: false,
+        cors: true
+      }
+      console.log(getTickets);
+      return getTickets;
+    }    
 
     function getTicketFields_dest (input) {
       var getTickets = {
@@ -192,6 +223,7 @@
     function init () {
       var ticketContent = '';
       var formContent = '';
+      var automationsContent = '';
       document.getElementById('loader').style.visibility = 'visible';
       document.getElementById('mainContent').style.visibility = 'hidden';
       client.request(this.getTicketFields()).then(
@@ -232,14 +264,30 @@
             formContent += '<tr id="' + data.ticket_forms[i].id + '" class="'+i+'" onClick="editData(2, ' + data.ticket_forms[i].id + ', ' + i + ')" style="cursor:pointer;">'
             +'<td><input class="ticketFormInput" id="' + data.ticket_forms[i].id + '" type="checkbox"></td>'
             +'<td>' + data.ticket_forms[i].raw_name +'</td>';
-            
-            // $('<li id="'+data.ticket_forms[i].id+'" class="normal" onclick="getTicketFormsSelection('+i+', '+data.ticket_forms[i].id+')"><a href="#">'+data.ticket_forms[i].name+'</a></li>').appendTo( ".ticketForms_list" );
           }
           document.getElementById('loader').style.visibility = 'hidden';
           document.getElementById('mainContent').style.visibility = 'visible';
           $('.ticketFormsContent').append(formContent);
         }, function (errors) {
           console.log(errors);
+        });
+
+      client.request(getAutomations()).then(
+        function(automationsData){
+          console.log(automationsData);
+          automations = automationsData.automations;
+          for (var i=0; i<automationsData.automations.length; i++) {
+            automationsContent += '<tr id="' + automationsData.automations[i].id + '" class="'+i+'" onClick="editData(3, ' + automationsData.automations[i].id + ', ' + i + ')" style="cursor:pointer;">'
+            +'<td><input class="ticketFormInput" id="' + automationsData.automations[i].id + '" type="checkbox"></td>'
+            +'<td>' + automationsData.automations[i].raw_title +'</td>';
+          }
+          document.getElementById('loader').style.visibility = 'hidden';
+          document.getElementById('mainContent').style.visibility = 'visible';
+          $('.automationContent').append(automationsContent);
+        },
+        function(automationsError){
+          console.log('automationsError');
+          console.log(automationsError);
         });
     }
 
@@ -289,6 +337,15 @@
           if (!isExist) {
             ticketFormsSelectList.push(ticketForms[position]);
           }
+        } else if (type == 3) {
+          for (var j = 0; j<automationsSelectList.length; j++) {
+            if (automationsSelectList[j].id == id) {
+              isExist = true;
+            }
+          }
+          if (!isExist) {
+            automationsSelectList.push(automations[position]);
+          }
         }
       } else {
         if (type == 1) {
@@ -303,12 +360,19 @@
               ticketFormsSelectList.splice(j, 1);
             }
           }
+        } else if (type == 3) {
+          for (var j = 0; j<automationsSelectList.length; j++) {
+            if (automationsSelectList[j].id == id) {
+              automationsSelectList.splice(j, 1);
+            }
+          }
         }
         $('input[id=' + id + ']')[0].checked = false;
       }
       isExist = false;
       $('#custom_fieldsCounter').text(ticketFieldsSelectList.length);
       $('#ticketFormsCounter').text(ticketFormsSelectList.length);
+      $('#automationCounter').text(automationsSelectList.length);
     }
 
     function getTriggerSelection (id, triggersId) {
@@ -325,6 +389,7 @@
       $('#triggCounter').text(triggerSelectList.length);
     }
 
+    /*====== NOT USED =======*/
     function getTicketFieldsSelection (id, ticketFieldsId) {
       var notExist = true;
       $('#' + ticketFieldsId).prop('class', 'disabled');
@@ -352,6 +417,7 @@
       }
       $('#ticketFormsCounter').text(ticketFormsSelectList.length);
     }
+    /*====== NOT USED =======*/
 
     function doMigrate () {
       var migrateCounter = 0;
