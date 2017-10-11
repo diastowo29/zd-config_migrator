@@ -18,15 +18,15 @@
 
     <div class="tab-content">
       <div id="home" class="tab-pane fade in active">
-        <div class="col-md-6" align="center">
+        <div class="col-md-12" align="center">
           <div style="margin-bottom: 10px;">
-            <label class="col-md-12">
-              Select Ticket Field(s) you want to migrate:
+            <label class="col-md-12" style="margin-top: 10px;">
+              Ticket Field(s) selected: <span id="custom_fieldsCounter">0</span>
             </label>
             <div class="dropdown col-md-12" style="min-height: 300px; max-height: 300px; overflow-x: hidden;" align="center">
               <!-- <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Zendesk Ticket Fields
               <span class="caret"></span></button> -->
-              <table id="usersTable" class="usersTable table table-hover table-condensed well" style="font-size: 12px; margin: auto; width: 60%;">
+              <table id="usersTable" class="usersTable table table-hover table-condensed well" style="font-size: 12px;">
                 <thead>
                   <tr id='firstRow' style="text-align: left">
                     <th style="width: 50px;"><input id="selectallCheckTicketField" type="checkbox" checked=true></th>
@@ -44,27 +44,19 @@
             </div>
 
           </div>
-          <div style="margin-top: 40px;">
-            <label class="col-md-12">
-              Ticket Field(s) selected: <span id="custom_fieldsCounter">0</span>
-            </label>
-          </div>
-          <div style="float: right; margin-right: 50px;">
-            <button class="btn btn-primary migrate_button" type="button" onclick="doMigrate()">Migrate</button>
-          </div>
         </div>
 
       </div>
       <div id="menu1" class="tab-pane fade">
-        <div class="col-md-6 well">
-          <div>
-            <label class="col-md-12">
-              Select Ticket Forms(s) you want to migrate:
+        <div class="col-md-12" align="center">
+          <div style="margin-bottom: 10px;">
+            <label class="col-md-12" style="margin-top: 10px;">
+              Ticket Forms(s) selected: <span id="ticketFormsCounter">0</span>
             </label>
-            <div class="dropdown col-md-12" style="min-height: 300px; max-height: 300px; overflow-x: hidden;">
+            <div class="dropdown col-md-12" style="min-height: 300px; max-height: 300px; overflow-x: hidden;" align="center">
               <!-- <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Zendesk Ticket Forms
               <span class="caret"></span></button> -->
-              <table id="usersTable" class="usersTable table table-hover table-condensed" style="font-size: 12px;">
+              <table id="usersTable" class="usersTable table table-hover table-condensed well" style="font-size: 12px;">
                 <thead>
                   <tr id='firstRow' style="text-align: left">
                     <th style="width: 50px;"><input id="selectallCheckTicketForm" type="checkbox" checked=true></th>
@@ -75,26 +67,15 @@
                   
                 </tbody>
               </table>
-              <!-- <ul class="ticketForms_list dropdown-menu" style="left: auto; max-height: 200px; overflow-x: hidden;"> -->
-                <!-- <li id="test" class="normal" onclick="getTriggerSelection('test')"><a href="#">Triggers 1</a></li>
-                <li id="test2" class="normal" onclick="getTriggerSelection('test2')"><a href="#">Triggers 2</a></li>
-                <li id="test3" class="normal" onclick="getTriggerSelection('test3')"><a href="#">Triggers 3</a></li> -->
-              <!-- </ul> -->
             </div>
-
           </div>
-          <div style="margin-top: 20px;">
-            <label class="col-md-12">
-              Ticket Forms(s) selected: <span id="ticketFormsCounter">0</span>
-            </label>
-          </div>
-        </div>
-        <div style="float: right; margin-right: 50px;">
-          <button class="btn btn-primary migrate_button" type="button" onclick="doMigrate()">Migrate</button>
         </div>
       </div>
     </div>
 
+    <div style="float: right; margin-top: 10px; margin-right: 50px;">
+      <button class="btn btn-primary migrate_button" type="button" onclick="doMigrate()">Migrate</button>
+    </div>
     
     
     
