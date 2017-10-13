@@ -27,6 +27,33 @@
     // $('#myModal').modal('show');
 
     /*=============API PART============*/
+    function getUsers(input) {
+      var getTickets = {
+        url: '/api/v2/users/' + input + '.json',
+        type: 'GET',
+        dataType : "json",
+        contentType: "application/json; charset=utf-8",
+        async: false,
+      }
+      console.log(getTickets);
+      return getTickets;
+    }
+
+    function srcUserByEmail_dest(input) {
+      var getTickets = {
+        url: ZD_DOMAIN + '/api/v2/search.json?query=type:user%20email:' + input,
+        type: 'GET',
+        headers: {
+          "Authorization": ZD_TOKEN
+        },
+        dataType : "json",
+        contentType: "application/json; charset=utf-8",
+        cors: true,
+      }
+      console.log(getTickets);
+      return getTickets;
+    }
+
     function getTriggers (input) {
       var getTickets = {
         url: '/api/v2/triggers.json',
@@ -50,34 +77,6 @@
       console.log(getTickets);
       return getTickets;
     }
-
-    function getAutomations (input) {
-      var getTickets = {
-        url: '/api/v2/automations.json',
-        type: 'GET',
-        dataType : "json",
-        contentType: "application/json; charset=utf-8",
-        async: false,
-      }
-      console.log(getTickets);
-      return getTickets;
-    }
-
-    function getAutomations_dest (input) {
-      var getTickets = {
-        url: ZD_DOMAIN + '/api/v2/automations.json',
-        type: 'GET',
-        headers: {
-          "Authorization": ZD_TOKEN
-        },
-        dataType : "json",
-        contentType: "application/json; charset=utf-8",
-        async: false,
-        cors: true
-      }
-      console.log(getTickets);
-      return getTickets;
-    }    
 
     function getTicketFields_dest (input) {
       var getTickets = {
@@ -201,6 +200,50 @@
       return getTickets;
     }
 
+    function getAutomations () {
+      var getTickets = {
+        url: '/api/v2/automations.json',
+        type: 'GET',
+        dataType : "json",
+        contentType: "application/json; charset=utf-8",
+        async: false,
+      }
+      console.log(getTickets);
+      return getTickets;
+    }
+
+    function getAutomations_dest () {
+      var getTickets = {
+        url: ZD_DOMAIN + '/api/v2/automations.json',
+        type: 'GET',
+        headers: {
+          "Authorization": ZD_TOKEN
+        },
+        dataType : "json",
+        contentType: "application/json; charset=utf-8",
+        async: false,
+        cors: true
+      }
+      console.log(getTickets);
+      return getTickets;
+    }
+
+    function createAutomations (input) {
+      var getTickets = {
+        url: ZD_DOMAIN + '/api/v2/automations.json',
+        type: 'POST',
+        headers: {
+          "Authorization": ZD_TOKEN
+        },
+        data: input,
+        dataType : "json",
+        contentType: "application/json; charset=utf-8",
+        async: false,
+        cors: true
+      }
+      console.log(getTickets);
+      return getTickets;
+    }
 
     /*=============FUNCTION PART============*/
     function doSaveConfig(){
@@ -539,7 +582,7 @@
                             if (ticketFieldsCount == ticketFormsSelectList[ticketFormsCounter].ticket_field_ids.length) {
                               console.log('ticket fields done');
                               ticketFormsSelectList[ticketFormsCounter].ticket_field_ids = newTicketIds;
-                              var ticketForms = new Array({ticket_form:ticketFormsSelectList[ticketFormsCounter]})
+                              var ticketForms = new Array({ticket_form:ticketFormsSelectList[ticketFormsCounter]});
                               client.request(createTicketForms(JSON.stringify(ticketForms[0]))).then(
                                 function (createFormData){
                                   console.log(createFormData);
@@ -580,11 +623,15 @@
 
       /*=====AUTOMATIONS=====*/
       if (automationsSelectList.length > 0) {
+        var newNotifAutomationsSelectList = [];
+        var newCustFieldAutomationsSelectList = [];
         console.log(automationsSelectList);
         client.request(getAutomations_dest()).then(
           function(automationDestData){
             console.log(automationDestData);
             for (var i=0; i<automationsSelectList.length; i++){
+              var isNotifiedUsers = false;
+              var isThereisTicketFields = false;
               var isExist = false;
               for (var j=0; j<automationDestData.automations.length; j++) {
                 if (automationsSelectList[i].raw_title == automationDestData.automations[j].raw_title){
@@ -592,15 +639,271 @@
                 }
               }
               if (!isExist) {
-                
+                if (automationsSelectList[i].actions.length > 0){
+                  for (var ac=0; ac<automationsSelectList[i].actions.length; ac++) {
+                    if (automationsSelectList[i].actions[ac].field == 'notification_user') {
+                      for (var v=0; v<automationsSelectList[i].actions[ac].value.length; v++) {
+                        if (isNumeric(automationsSelectList[i].actions[ac].value[v])) {
+                          isNotifiedUsers = true;
+                        }
+                      }
+                    }
+                    if (automationsSelectList[i].actions[ac].field.includes('custom_fields_') 
+                      || automationsSelectList[i].actions[ac].field.includes('ticket_fields_')) {
+                      isThereisTicketFields = true;
+                    }
+                  }
+                  if (!isNotifiedUsers && !isThereisTicketFields) {
+                    console.log('CREATE AUTOMATIONS WITH NO NOTIFY USERS OR TICKET_FIELDS: ');
+                    var createAuto = new Array({automation:automationsSelectList[i]});
+                    console.log(createAuto);
+                    doCreateAutomations(JSON.stringify(createAuto[0]));
+                  } else if (isNotifiedUsers && !isThereisTicketFields) {
+                    var automationsNotify = automationsSelectList[i];
+                    var notifActionCounter = 0;
+                    for (var acn=0; acn<automationsNotify.actions.length; acn++) {
+                      if (automationsNotify.actions[acn].field == 'notification_user') {
+                        var actionIndex = acn;
+                        var acnValueIndex = '';
+                        var userId = '';
+
+                        for (var acnv=0; acnv<automationsNotify.actions[acn].value.length; acnv++) {
+                          if (isNumeric(automationsNotify.actions[acn].value[acnv])) {
+                            acnValueIndex = acnv;
+                            userId = automationsNotify.actions[acn].value[acnv];
+                          }
+                        }
+                        client.request(getUsers(userId)).then(
+                          function(usersData){
+                            if (usersData.user.email != null || usersData.user.email != '') {
+                              console.log('===== SEARCHING USER ======');
+                              client.request(srcUserByEmail_dest(usersData.user.email)).then(
+                                function(srcUserData){
+                                  notifActionCounter++;
+                                  console.log('===== USER FOUND ======');
+                                  if (notifActionCounter == automationsNotify.actions.length) {
+                                    console.log('===== CREATE AUTOMATIONS NOTIFY USERS ======');
+                                    automationsNotify.actions[actionIndex].value[acnValueIndex] = srcUserData.results[0].id;
+                                    console.log(automationsNotify);
+                                    var createAuto = new Array({automation:automationsNotify});
+                                    console.log(createAuto);
+                                    doCreateAutomations(JSON.stringify(createAuto[0]));
+                                  }
+                                },
+                                function(srcUserError){
+                                  console.log('===== srcUserError =====');
+                                  console.log(srcUserError);
+                                })
+                            }
+                          },
+                          function(usersError){
+                            console.log('===== usersError =====');
+                            console.log(usersError);
+                          });
+                      } else {
+                        notifActionCounter++;
+                      }
+                    }
+                  } else if (isThereisTicketFields && !isNotifiedUsers) {
+                    var automationsTicketField = automationsSelectList[i];
+                    client.request(getTicketFields_dest()).then(
+                      function(tfDataDest){
+                        var ticketFieldsIndex = -1;
+                        for (var atf=0; atf<automationsTicketField.actions.length; atf++) {
+                          if (automationsTicketField.actions[atf].field.includes('custom_fields_')) {
+                            var ticketFields = automationsTicketField.actions[atf].field.split('_');
+                            client.request(getTicketFieldsbyId(ticketFields[2])).then(
+                              function(ticketFieldsData){
+                                ticketFieldsIndex++;
+                                for (tfd in tfDataDest.ticket_fields) {
+                                  if (ticketFieldsData.ticket_field.title == tfDataDest.ticket_fields[tfd].title) {
+                                    automationsTicketField.actions[ticketFieldsIndex].field = 'custom_fields_' + tfDataDest.ticket_fields[tfd].id;
+                                  }
+                                }
+                                if (ticketFieldsIndex == automationsTicketField.actions.length-1) {
+                                  console.log('===== CREATE AUTOMATIONS TICKET_FIELDS =====');
+                                  var createAuto = new Array({automation:automationsTicketField});
+                                  console.log(createAuto);
+                                  doCreateAutomations(JSON.stringify(createAuto[0]));
+                                }
+                              },
+                              function(ticketFieldsError){
+                                console.log('===== ticketFieldsError =====');
+                                console.log(ticketFieldsError);
+                              });
+                          } else {
+                            ticketFieldsIndex++;
+                            if (ticketFieldsIndex == automationsTicketField.actions.length-1) {
+                              console.log('TICKET FIELDS FINIS');
+                              console.log(automationsTicketField);
+                            }
+                          }
+                        }
+                      },
+                      function(tfDataDestError){
+                        console.log('===== tfDataDestError =====');
+                        console.log(tfDataDestError);
+                      });
+                  }
+                } else {
+                  console.log('CREATE AUTOMATIONS WITH NO ACTIONS: ');
+                  console.log(automationsSelectList[i]);
+                  var createAuto = new Array({automation:automationsSelectList[i]});
+                  console.log(createAuto);
+                  doCreateAutomations(JSON.stringify(createAuto[0]));
+                }
+                /*OLD FLOW*/
+                // console.log(automationsSelectList[i].actions);
+                // if (automationsSelectList[i].actions.length > 0) {
+                //   var autoActions = automationsSelectList[i].actions;
+                //   var thereIsNotfUser = false;
+                //   for (actions in autoActions) {
+                //     if (autoActions[actions].field == 'notification_user') {
+                //       thereIsNotfUser = true;
+                //       /*for (var k=0; k<autoActions[actions].value.length; k++) {
+                //         if (k == 0) {
+                //           console.log(autoActions[actions].value[k]);
+                //           if (isNumeric(autoActions[actions].value[k])){
+                //             client.request(getUsers(autoActions[actions].value[k])).then(
+                //               function(userData){
+                //                 console.log(userData);
+                //                 if (userData.user.email != null || userData.user.email != '') {
+                //                   client.request(srcUserByEmail_dest(userData.user.email)).then(
+                //                     function(srcUserData){
+                //                       console.log(srcUserData);
+                //                       console.log(automationsSelectList[i]);
+                //                     },
+                //                     function(srcUserError){
+                //                       console.log('===== srcUserError =====');
+                //                       console.log(srcUserError);
+                //                     });
+                //                 }
+                //               },
+                //               function(userError){
+                //                 console.log('===== userError =====');
+                //                 console.log(userError);
+                //               });
+                //           }
+                //         }
+                //       }*/
+                //     }
+                //     if (autoActions[actions].field.includes('custom_fields_') 
+                //       || autoActions[actions].field.includes('ticket_fields_')) {
+                //       thereIsNotfUser = true;
+                //     }
+                //   }
+                //   if (!thereIsNotfUser) {
+                //     /*===== CREATING AUTOMATIONS =====*/
+                //     /*===== NO NOTIFY USER =====*/
+                //     var createAuto = new Array({automation:automationsSelectList[i]});
+                //     console.log(createAuto);
+                //     console.log('CREATING AUTOMATIONS NO NOTIFY USER');
+                //     doCreateAutomations(JSON.stringify(createAuto[0]));
+                //   } else {
+                //     var notfUserRequester = true;
+                //     for (actions in autoActions) {
+                //       for (var k=0; k<autoActions[actions].value.length; k++) {
+                //         if (k==0) {
+                //           if (isNumeric(autoActions[actions].value[k])){
+                //             notfUserRequester = false;
+                //           }
+                //         }
+                //       }
+                //     }
+                //     if (notfUserRequester) {
+                //       /*===== CREATING AUTOMATIONS =====*/
+                //       /*===== NOTIFICATION USER REQUESTER PLACEHOLDER ======*/
+                //       var createAuto = new Array({automation:automationsSelectList[i]});
+                //       console.log(createAuto);
+                //       console.log('CREATING AUTOMATIONS USER REQUESTER PLACEHOLDER');
+                //       doCreateAutomations(JSON.stringify(createAuto[0]));
+                //     } else {
+                //       /*===== AUTOMATIONS SULIT ======*/
+                //       console.log('AUTOMATIONS SULIT');
+                //       newNotifAutomationsSelectList.push(automationsSelectList[i]);
+                //     }
+                //   }
+                // } else {
+                //   /*===== CREATING AUTOMATIONS =====*/
+                //   /*===== NO ACTION ON AUTOMATIONS ======*/
+                //   var createAuto = new Array({automation:automationsSelectList[i]});
+                //   console.log(createAuto);
+                //   console.log('CREATING AUTOMATIONS NO ACTION');
+                //   doCreateAutomations(JSON.stringify(createAuto[0]));
+                // }
+                /*OLD FLOW*/
               }
             }
+            /*OLD FLOW*/
+            // console.log(newNotifAutomationsSelectList);
+            // var autoCounter = -1;
+            // for (var n=0; n<newNotifAutomationsSelectList.length; n++){
+            //   var actionCounter = -1;
+            //   for (var ac=0; ac<newNotifAutomationsSelectList[n].actions.length; ac++){
+            //     actionCounter++;
+            //     if (newNotifAutomationsSelectList[n].actions[ac].field == 'notification_user')  {
+            //       autoCounter++;
+            //       var notifCounter = actionCounter;
+            //       var actions = newNotifAutomationsSelectList[n].actions[ac].value;
+            //       var actionValueCounter = -1;
+            //       for (values in actions) {
+            //         if (isNumeric(actions[values])) {
+            //           actionValueCounter++;
+            //           var newAutomations = actions[values];
+            //           client.request(getUsers(actions[values])).then(
+            //             function(userData){
+            //               console.log(userData);
+            //               if (userData.user.email != null || userData.user.email != '') {
+            //                 client.request(srcUserByEmail_dest(userData.user.email)).then(
+            //                   function(srcUserData){
+            //                     // console.log(autoCounter);
+            //                     // console.log(newNotifAutomationsSelectList[autoCounter]);
+            //                     // console.log('USER FOUND');
+            //                     // console.log(srcUserData);
+            //                     newNotifAutomationsSelectList[autoCounter].actions[notifCounter].value[actionValueCounter] = srcUserData.results[0].id;
+            //                     // console.log(newNotifAutomationsSelectList);
+
+            //                     var createAuto = new Array({automation:newNotifAutomationsSelectList[autoCounter]});
+            //                     console.log(createAuto);
+            //                     console.log('CREATING AUTOMATIONS NOTIFY USERS');
+            //                     doCreateAutomations(JSON.stringify(createAuto[0]));
+            //                   },
+            //                   function(srcUserError){
+            //                     console.log('===== srcUserError =====');
+            //                     console.log(srcUserError);
+            //                   });
+            //               }
+            //             },
+            //             function(userError){
+            //               console.log('===== userError =====');
+            //               console.log(userError);
+            //             });
+            //         }
+            //       }
+            //     } else if (autoActions[actions].field.includes('custom_fields_') 
+            //           || autoActions[actions].field.includes('ticket_fields_')) {
+            //       autoCounter++;
+            //     }
+            //   }
+            // }
+            /*OLD FLOW*/
           },
           function(automationDestError){
             console.log('====== automationDestError ======');
             console.log(automationDestError);
           });
       }
+    }
+
+    function doCreateAutomations (parameter) {
+      client.request(createAutomations(parameter)).then(
+        function(createAutomationsData){
+          console.log(createAutomationsData);
+        },
+        function(createAutomationsError){
+          console.log('===== createAutomationsError =====');
+          console.log(createAutomationsError);
+        });
     }
 
     function doCreateTicketForm (newTicketIds, ticketCount) {
@@ -696,4 +999,8 @@
         $('#modal_loading').modal('show');
       }
 
+    }
+
+    function isNumeric(n) {
+      return !isNaN(parseFloat(n)) && isFinite(n);
     }
