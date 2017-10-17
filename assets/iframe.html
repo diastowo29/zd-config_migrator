@@ -15,6 +15,7 @@
       <li class="active"><a data-toggle="tab" href="#fields">Ticket Fields</a></li>
       <li><a data-toggle="tab" href="#forms">Ticket Forms</a></li>
       <li><a data-toggle="tab" href="#automations">Automations</a></li>
+      <li><a data-toggle="tab" href="#sla">SLA Policies</a></li>
     </ul>
 
     <div class="tab-content">
@@ -84,6 +85,30 @@
                   </tr>
                 </thead>
                 <tbody class="automationContent">
+                  
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="sla" class="tab-pane fade">
+        <div class="col-md-12" align="center">
+          <div style="margin-bottom: 10px;">
+            <label class="col-md-12" style="margin-top: 10px;">
+              SLA(s) selected: <span id="slaCounter">0</span>
+            </label>
+            <div class="dropdown col-md-12" style="min-height: 300px; max-height: 300px; overflow-x: hidden;" align="center">
+              <!-- <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Zendesk Ticket Forms
+              <span class="caret"></span></button> -->
+              <table id="usersTable" class="usersTable table table-hover table-condensed well" style="font-size: 12px;">
+                <thead>
+                  <tr id='firstRow' style="text-align: left">
+                    <th style="width: 50px;"><input id="selectallCheckSla" type="checkbox" checked=true></th>
+                    <th>Name</th>
+                  </tr>
+                </thead>
+                <tbody class="slaContent">
                   
                 </tbody>
               </table>

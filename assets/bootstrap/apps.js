@@ -12,6 +12,9 @@
 
     var automations = [];
     var automationsSelectList = [];
+
+    var slas = [];
+    var slaSelectList = [];
     // this.doLoading('Sate Padang');
     this.init();
     // this.initsss();
@@ -84,6 +87,19 @@
       return getTickets;
     }
 
+    function getBrands (id) {
+      var getTickets = {
+        url: '/api/v2/brands/' + id + '.json',
+        type: 'GET',
+        dataType : "json",
+        contentType: "application/json; charset=utf-8",
+        async: false,
+      }
+      console.log(getTickets);
+      return getTickets;
+    }
+
+    /*TICKET FIELDS PART*/
     function getTicketFields (input) {
       var getTickets = {
         url: '/api/v2/ticket_fields.json',
@@ -137,18 +153,6 @@
       return getTickets;
     }
 
-    function getBrands (id) {
-      var getTickets = {
-        url: '/api/v2/brands/' + id + '.json',
-        type: 'GET',
-        dataType : "json",
-        contentType: "application/json; charset=utf-8",
-        async: false,
-      }
-      console.log(getTickets);
-      return getTickets;
-    }
-
     function createTicketFields (input, i) {
       var getTickets = {
         url: ZD_DOMAIN + '/api/v2/ticket_fields.json',
@@ -169,7 +173,9 @@
       console.log(getTickets);
       return getTickets;
     }
+    /*TICKET FIELDS PART*/
 
+    /*TICKET FORMS PART*/
     function getTicketForms (input) {
       var getTickets = {
         url: '/api/v2/ticket_forms.json',
@@ -218,7 +224,9 @@
       console.log(getTickets);
       return getTickets;
     }
+    /*TICKET FORMS PART*/
 
+    /*AUTOMATIONS PART*/
     function getAutomations () {
       var getTickets = {
         url: '/api/v2/automations.json',
@@ -263,7 +271,9 @@
       console.log(getTickets);
       return getTickets;
     }
+    /*AUTOMATIONS PART*/
 
+    /*GROUP PART*/
     function getGroups (id) {
       var getTickets = {
         url: '/api/v2/groups/' + id + '.json',
@@ -290,6 +300,53 @@
       console.log(getTickets);
       return getTickets;
     }
+    /*GROUP PART*/
+
+    /*SLA PART*/
+    function getSla () {
+      var getTickets = {
+        url: '/api/v2/slas/policies.json',
+        type: 'GET',
+        dataType : "json",
+        contentType: "application/json; charset=utf-8",
+        async: false,
+      }
+      console.log(getTickets);
+      return getTickets;
+    }
+
+    function srcSla_dest () {
+      var getTickets = {
+        url: ZD_DOMAIN + '/api/v2/slas/policies.json',
+        type: 'GET',
+        headers: {
+          "Authorization": ZD_TOKEN
+        },
+        dataType : "json",
+        contentType: "application/json; charset=utf-8",
+        cors: true,
+      }
+      console.log(getTickets);
+      return getTickets;
+    }
+
+    function createSla_dest (parameter) {
+      var getTickets = {
+        url: ZD_DOMAIN + '/api/v2/slas/policies.json',
+        type: 'POST',
+        headers: {
+          "Authorization": ZD_TOKEN
+        },
+        data: parameter,
+        dataType : "json",
+        contentType: "application/json; charset=utf-8",
+        cors: true,
+      }
+      console.log(getTickets);
+      return getTickets;
+    }
+    /*SLA PART*/
+
 
     /*=============FUNCTION PART============*/
     function doSaveConfig(){
@@ -313,6 +370,7 @@
       var ticketContent = '';
       var formContent = '';
       var automationsContent = '';
+      var slaContent = '';
       document.getElementById('loader').style.visibility = 'visible';
       document.getElementById('mainContent').style.visibility = 'hidden';
       client.request(this.getTicketFields()).then(
@@ -377,6 +435,15 @@
         function(automationsError){
           console.log('automationsError');
           console.log(automationsError);
+        });
+
+      client.request().then(
+        function(slaData){
+          console.log(slaData);
+        },
+        function(slaError){
+          console.log('slaError');
+          console.log(slaError);
         });
     }
 
