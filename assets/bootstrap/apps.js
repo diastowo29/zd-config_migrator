@@ -14,6 +14,7 @@
     var automationsSelectList = [];
     // this.doLoading('Sate Padang');
     this.init();
+    // this.initsss();
 
     /*====== DO NOT UNCOMMENT THIS LINE BELOW ======*/
     // // // // // // // // this.deleteAllTicketFields();
@@ -25,6 +26,23 @@
     var ZD_TOKEN = "basic ZWxkaWVuLmhhc21hbnRvQHRyZWVzc29sdXRpb25zLmNvbTpXM2xjb21lMTIz";
     // $('.migrate_button').attr("disabled", "disabled");
     // $('#myModal').modal('show');
+
+    function initsss () {
+      for (var i=0; i<10; i++) {
+        if (i==3) {
+          (function(ctr){
+            client.request(getAutomations()).then(
+              function(data){
+                console.log(data);
+                console.log(ctr);
+              },
+              function(errorData){
+                console.log(errorData);
+              });
+          })(i);
+        }
+      }
+    }
 
     /*=============API PART============*/
     function getUsers(input) {
@@ -73,6 +91,7 @@
         dataType : "json",
         contentType: "application/json; charset=utf-8",
         async: false,
+        timeout: 1000
       }
       console.log(getTickets);
       return getTickets;
@@ -240,6 +259,33 @@
         contentType: "application/json; charset=utf-8",
         async: false,
         cors: true
+      }
+      console.log(getTickets);
+      return getTickets;
+    }
+
+    function getGroups (id) {
+      var getTickets = {
+        url: '/api/v2/groups/' + id + '.json',
+        type: 'GET',
+        dataType : "json",
+        contentType: "application/json; charset=utf-8",
+        async: false,
+      }
+      console.log(getTickets);
+      return getTickets;
+    }
+
+    function srcGroups_dest (input) {
+      var getTickets = {
+        url: ZD_DOMAIN + '/api/v2/search.json?query=type:group%20name:' + input,
+        type: 'GET',
+        headers: {
+          "Authorization": ZD_TOKEN
+        },
+        dataType : "json",
+        contentType: "application/json; charset=utf-8",
+        cors: true,
       }
       console.log(getTickets);
       return getTickets;
@@ -623,287 +669,202 @@
 
       /*=====AUTOMATIONS=====*/
       if (automationsSelectList.length > 0) {
-        var newNotifAutomationsSelectList = [];
-        var newCustFieldAutomationsSelectList = [];
-        console.log(automationsSelectList);
-        client.request(getAutomations_dest()).then(
-          function(automationDestData){
-            console.log(automationDestData);
-            for (var i=0; i<automationsSelectList.length; i++){
-              var isNotifiedUsers = false;
-              var isThereisTicketFields = false;
-              var isExist = false;
-              for (var j=0; j<automationDestData.automations.length; j++) {
-                if (automationsSelectList[i].raw_title == automationDestData.automations[j].raw_title){
-                  isExist = true;
+        client.request(getTicketFields_dest()).then(
+          function(ticketFieldsDestData){
+            for (var i=0; i<automationsSelectList.length; i++) {
+            console.log(automationsSelectList[i]);
+            if (automationsSelectList[i].conditions.all.length > 0){
+              (function(counterI){
+                for (var cll=0; cll<automationsSelectList[i].conditions.all.length; cll++) {
+                  if (automationsSelectList[i].conditions.all[cll].field.includes('group_id')) {
+                    (function(counterJ){
+                      client.request(getGroups(automationsSelectList[i].conditions.all[cll].value)).then(
+                        function(groupData){
+                          if (groupData.group.name != null || groupData.group.name != '') {
+                            client.request(srcGroups_dest(groupData.group.name)).then(
+                              function(srcGroupDataDest){
+                                automationsSelectList[counterI].conditions.all[counterJ].value = srcGroupDataDest.results[0].id;
+                              },
+                              function(srcGroupDataDestError){
+                                console.log('=== FAILED SEARCH GROUP ===');
+                                console.log(srcGroupDataDestError);
+                              });
+                          }
+                        },
+                        function(groupError){
+                          console.log('=== FAILED GET GROUP');
+                          console.log(groupError);
+                        });
+                    })(cll);
+                  }
                 }
-              }
-              if (!isExist) {
-                if (automationsSelectList[i].actions.length > 0){
-                  for (var ac=0; ac<automationsSelectList[i].actions.length; ac++) {
-                    if (automationsSelectList[i].actions[ac].field == 'notification_user') {
-                      for (var v=0; v<automationsSelectList[i].actions[ac].value.length; v++) {
-                        if (isNumeric(automationsSelectList[i].actions[ac].value[v])) {
-                          isNotifiedUsers = true;
+              })(i);
+            }
+            if (automationsSelectList[i].conditions.any.length > 0) {
+              (function(counterI){
+                for (var cll=0; cll<automationsSelectList[i].conditions.any.length; cll++) {
+                  if (automationsSelectList[i].conditions.any[cll].field.includes('group_id')) {
+                    (function(counterJ){
+                      client.request(getGroups(automationsSelectList[i].conditions.any[cll].value)).then(
+                        function(groupData){
+                          if (groupData.group.name != null || groupData.group.name != '') {
+                            client.request(srcGroups_dest(groupData.group.name)).then(
+                              function(srcGroupDataDest){
+                                automationsSelectList[counterI].conditions.any[counterJ].value = srcGroupDataDest.results[0].id;
+                              },
+                              function(srcGroupDataDestError){
+                                console.log('=== FAILED SEARCH GROUP ===');
+                                console.log(srcGroupDataDestError);
+                              });
+                          }
+                        },
+                        function(groupError){
+                          console.log('=== FAILED GET GROUP');
+                          console.log(groupError);
+                        });
+                    })(cll); 
+                  }
+                }
+              })(i);
+            }
+            if (automationsSelectList[i].actions.length > 0) {
+              (function(counterI){
+                var actionCounter = 0;
+                for (var j=0; j<automationsSelectList[i].actions.length; j++) {
+                  (function(counterA){
+                    if (automationsSelectList[i].actions[j].field == 'notification_user') {
+                      if (isNumeric(automationsSelectList[i].actions[j].value[0])){
+                        (function(counterJ){
+                          client.request(getUsers(automationsSelectList[counterI].actions[j].value[0])).then(
+                            function(usersData){
+                              if (usersData.user.email != null || usersData.user.email != '') {
+                                client.request(srcUserByEmail_dest(usersData.user.email)).then(
+                                  function(srcUserData){
+                                    if (srcUserData.results.length > 0) {
+                                      actionCounter++;
+                                      console.log('notif_user: ' + counterA);
+                                      var userId = srcUserData.results[0].id;
+                                      automationsSelectList[counterI].actions[counterJ].value[0] = userId;
+                                      console.log('USER FOUND');
+                                      if (actionCounter == automationsSelectList[counterI].actions.length) {
+                                        console.log('AUTOMATIONS FINISH');
+                                        console.log(automationsSelectList[counterI]);
+                                      }
+                                    } else {
+                                      console.log('=== FAILED GET USER, USER DOESNT EXIST ===');
+                                    }
+                                  },
+                                  function(srcUserDataError){
+                                    console.log('=== FAILED SEARCH USERS ===');
+                                    console.log(srcUserDataError);
+                                  });
+                              }
+                            },
+                            function(usersError){
+                              console.log('=== FAILED GET USERS ===');
+                              console.log(usersError);
+                            });
+                        })(j);
+                      } else {
+                        actionCounter++;
+                        console.log('notif_user no id: ' + counterA);
+                        if (actionCounter == automationsSelectList[counterI].actions.length) {
+                          console.log('AUTOMATIONS NO USERS ID');
+                          console.log(automationsSelectList[counterI]); 
                         }
                       }
                     }
-                    if (automationsSelectList[i].actions[ac].field.includes('custom_fields_') 
-                      || automationsSelectList[i].actions[ac].field.includes('ticket_fields_')) {
-                      isThereisTicketFields = true;
-                    }
-                  }
-                  if (!isNotifiedUsers && !isThereisTicketFields) {
-                    console.log('CREATE AUTOMATIONS WITH NO NOTIFY USERS OR TICKET_FIELDS: ');
-                    var createAuto = new Array({automation:automationsSelectList[i]});
-                    console.log(createAuto);
-                    doCreateAutomations(JSON.stringify(createAuto[0]));
-                  } else if (isNotifiedUsers && !isThereisTicketFields) {
-                    var automationsNotify = automationsSelectList[i];
-                    var notifActionCounter = 0;
-                    for (var acn=0; acn<automationsNotify.actions.length; acn++) {
-                      if (automationsNotify.actions[acn].field == 'notification_user') {
-                        var actionIndex = acn;
-                        var acnValueIndex = '';
-                        var userId = '';
-
-                        for (var acnv=0; acnv<automationsNotify.actions[acn].value.length; acnv++) {
-                          if (isNumeric(automationsNotify.actions[acn].value[acnv])) {
-                            acnValueIndex = acnv;
-                            userId = automationsNotify.actions[acn].value[acnv];
-                          }
+                    if (automationsSelectList[i].actions[j].field == 'notification_group') {
+                      if (isNumeric(automationsSelectList[i].actions[j].value[0])){
+                        (function(counterJ){
+                          client.request(getGroups(automationsSelectList[counterI].actions[j].value[0])).then(
+                            function(groupData){
+                              if (groupData.group.name != null || groupData.group.name != '') {
+                                client.request(srcGroups_dest(groupData.group.name)).then(
+                                  function(srcGroupData){                                  
+                                    if (srcGroupData.results.length > 0) {
+                                      actionCounter++;
+                                      console.log('notif_group: ' + counterA);
+                                      var userId = srcGroupData.results[0].id;
+                                      automationsSelectList[counterI].actions[counterJ].value[0] = userId;
+                                      console.log('GROUP FOUND');
+                                      if (actionCounter == automationsSelectList[counterI].actions.length) {
+                                        console.log('AUTOMATIONS FINISH');
+                                        console.log(automationsSelectList[counterI]);
+                                      }
+                                    } else {
+                                      console.log('=== FAILED GET GROUP, GROUP DOESNT EXIST ===');
+                                    }
+                                  },
+                                  function(srcGroupDataError){
+                                    console.log('=== FAILED SEARCH GROUP ===');
+                                    console.log(srcUserDataError);
+                                  });
+                              }
+                            },
+                            function(groupDataError){
+                              console.log('=== FAILED GET GROUP ===');
+                              console.log(groupDataError);
+                            });
+                        })(j);
+                      } else {
+                        actionCounter++;
+                        console.log('notif_group no id: ' + counterA);
+                        if (actionCounter == automationsSelectList[counterI].actions.length) {
+                          console.log('AUTOMATIONS NO GROUPS ID');
+                          console.log(automationsSelectList[counterI]);
                         }
-                        client.request(getUsers(userId)).then(
-                          function(usersData){
-                            if (usersData.user.email != null || usersData.user.email != '') {
-                              console.log('===== SEARCHING USER ======');
-                              client.request(srcUserByEmail_dest(usersData.user.email)).then(
-                                function(srcUserData){
-                                  notifActionCounter++;
-                                  console.log('===== USER FOUND ======');
-                                  if (notifActionCounter == automationsNotify.actions.length) {
-                                    console.log('===== CREATE AUTOMATIONS NOTIFY USERS ======');
-                                    automationsNotify.actions[actionIndex].value[acnValueIndex] = srcUserData.results[0].id;
-                                    console.log(automationsNotify);
-                                    var createAuto = new Array({automation:automationsNotify});
-                                    console.log(createAuto);
-                                    doCreateAutomations(JSON.stringify(createAuto[0]));
-                                  }
-                                },
-                                function(srcUserError){
-                                  console.log('===== srcUserError =====');
-                                  console.log(srcUserError);
-                                })
+                      }
+                    }
+                    if (automationsSelectList[i].actions[j].field.includes('custom_fields_')) {
+                      var ticketFieldsId = automationsSelectList[i].actions[j].field.split('_');
+                      (function(counterJ){
+                        client.request(getTicketFieldsbyId(ticketFieldsId[2])).then(
+                          function(ticketFieldsData){
+                            for (var x=0; x<ticketFieldsDestData.ticket_fields.length; x++){
+                              if (ticketFieldsData.ticket_field.title == ticketFieldsDestData.ticket_fields[x].title){
+                                actionCounter++;
+                                automationsSelectList[counterI].actions[counterJ].field = 'custom_fields_' + ticketFieldsDestData.ticket_fields[x].id;
+                              }
+                            }
+                            if (actionCounter == automationsSelectList[counterI].actions.length) {
+                              console.log('AUTOMATIONS FINISH');
+                              console.log(automationsSelectList[counterI]);
                             }
                           },
-                          function(usersError){
-                            console.log('===== usersError =====');
-                            console.log(usersError);
+                          function(ticketFieldsError){
+                            console.log('=== FAILED GET TICKET FIELDS ===');
+                            console.log(ticketFieldsError);
                           });
-                      } else {
-                        notifActionCounter++;
-                      }
+                      })(j);
                     }
-                  } else if (isThereisTicketFields && !isNotifiedUsers) {
-                    var automationsTicketField = automationsSelectList[i];
-                    client.request(getTicketFields_dest()).then(
-                      function(tfDataDest){
-                        var ticketFieldsIndex = -1;
-                        for (var atf=0; atf<automationsTicketField.actions.length; atf++) {
-                          if (automationsTicketField.actions[atf].field.includes('custom_fields_')) {
-                            var ticketFields = automationsTicketField.actions[atf].field.split('_');
-                            client.request(getTicketFieldsbyId(ticketFields[2])).then(
-                              function(ticketFieldsData){
-                                ticketFieldsIndex++;
-                                for (tfd in tfDataDest.ticket_fields) {
-                                  if (ticketFieldsData.ticket_field.title == tfDataDest.ticket_fields[tfd].title) {
-                                    automationsTicketField.actions[ticketFieldsIndex].field = 'custom_fields_' + tfDataDest.ticket_fields[tfd].id;
-                                  }
-                                }
-                                if (ticketFieldsIndex == automationsTicketField.actions.length-1) {
-                                  console.log('===== CREATE AUTOMATIONS TICKET_FIELDS =====');
-                                  var createAuto = new Array({automation:automationsTicketField});
-                                  console.log(createAuto);
-                                  doCreateAutomations(JSON.stringify(createAuto[0]));
-                                }
-                              },
-                              function(ticketFieldsError){
-                                console.log('===== ticketFieldsError =====');
-                                console.log(ticketFieldsError);
-                              });
-                          } else {
-                            ticketFieldsIndex++;
-                            if (ticketFieldsIndex == automationsTicketField.actions.length-1) {
-                              console.log('TICKET FIELDS FINIS');
-                              console.log(automationsTicketField);
-                            }
-                          }
-                        }
-                      },
-                      function(tfDataDestError){
-                        console.log('===== tfDataDestError =====');
-                        console.log(tfDataDestError);
-                      });
-                  }
-                } else {
-                  console.log('CREATE AUTOMATIONS WITH NO ACTIONS: ');
-                  console.log(automationsSelectList[i]);
-                  var createAuto = new Array({automation:automationsSelectList[i]});
-                  console.log(createAuto);
-                  doCreateAutomations(JSON.stringify(createAuto[0]));
+                  })(j);
                 }
-                /*OLD FLOW*/
-                // console.log(automationsSelectList[i].actions);
-                // if (automationsSelectList[i].actions.length > 0) {
-                //   var autoActions = automationsSelectList[i].actions;
-                //   var thereIsNotfUser = false;
-                //   for (actions in autoActions) {
-                //     if (autoActions[actions].field == 'notification_user') {
-                //       thereIsNotfUser = true;
-                //       /*for (var k=0; k<autoActions[actions].value.length; k++) {
-                //         if (k == 0) {
-                //           console.log(autoActions[actions].value[k]);
-                //           if (isNumeric(autoActions[actions].value[k])){
-                //             client.request(getUsers(autoActions[actions].value[k])).then(
-                //               function(userData){
-                //                 console.log(userData);
-                //                 if (userData.user.email != null || userData.user.email != '') {
-                //                   client.request(srcUserByEmail_dest(userData.user.email)).then(
-                //                     function(srcUserData){
-                //                       console.log(srcUserData);
-                //                       console.log(automationsSelectList[i]);
-                //                     },
-                //                     function(srcUserError){
-                //                       console.log('===== srcUserError =====');
-                //                       console.log(srcUserError);
-                //                     });
-                //                 }
-                //               },
-                //               function(userError){
-                //                 console.log('===== userError =====');
-                //                 console.log(userError);
-                //               });
-                //           }
-                //         }
-                //       }*/
-                //     }
-                //     if (autoActions[actions].field.includes('custom_fields_') 
-                //       || autoActions[actions].field.includes('ticket_fields_')) {
-                //       thereIsNotfUser = true;
-                //     }
-                //   }
-                //   if (!thereIsNotfUser) {
-                //     /*===== CREATING AUTOMATIONS =====*/
-                //     /*===== NO NOTIFY USER =====*/
-                //     var createAuto = new Array({automation:automationsSelectList[i]});
-                //     console.log(createAuto);
-                //     console.log('CREATING AUTOMATIONS NO NOTIFY USER');
-                //     doCreateAutomations(JSON.stringify(createAuto[0]));
-                //   } else {
-                //     var notfUserRequester = true;
-                //     for (actions in autoActions) {
-                //       for (var k=0; k<autoActions[actions].value.length; k++) {
-                //         if (k==0) {
-                //           if (isNumeric(autoActions[actions].value[k])){
-                //             notfUserRequester = false;
-                //           }
-                //         }
-                //       }
-                //     }
-                //     if (notfUserRequester) {
-                //       /*===== CREATING AUTOMATIONS =====*/
-                //       /*===== NOTIFICATION USER REQUESTER PLACEHOLDER ======*/
-                //       var createAuto = new Array({automation:automationsSelectList[i]});
-                //       console.log(createAuto);
-                //       console.log('CREATING AUTOMATIONS USER REQUESTER PLACEHOLDER');
-                //       doCreateAutomations(JSON.stringify(createAuto[0]));
-                //     } else {
-                //       /*===== AUTOMATIONS SULIT ======*/
-                //       console.log('AUTOMATIONS SULIT');
-                //       newNotifAutomationsSelectList.push(automationsSelectList[i]);
-                //     }
-                //   }
-                // } else {
-                //   /*===== CREATING AUTOMATIONS =====*/
-                //   /*===== NO ACTION ON AUTOMATIONS ======*/
-                //   var createAuto = new Array({automation:automationsSelectList[i]});
-                //   console.log(createAuto);
-                //   console.log('CREATING AUTOMATIONS NO ACTION');
-                //   doCreateAutomations(JSON.stringify(createAuto[0]));
-                // }
-                /*OLD FLOW*/
-              }
+              })(i);
+            } else {
+              console.log('automations has no actions');
             }
-            /*OLD FLOW*/
-            // console.log(newNotifAutomationsSelectList);
-            // var autoCounter = -1;
-            // for (var n=0; n<newNotifAutomationsSelectList.length; n++){
-            //   var actionCounter = -1;
-            //   for (var ac=0; ac<newNotifAutomationsSelectList[n].actions.length; ac++){
-            //     actionCounter++;
-            //     if (newNotifAutomationsSelectList[n].actions[ac].field == 'notification_user')  {
-            //       autoCounter++;
-            //       var notifCounter = actionCounter;
-            //       var actions = newNotifAutomationsSelectList[n].actions[ac].value;
-            //       var actionValueCounter = -1;
-            //       for (values in actions) {
-            //         if (isNumeric(actions[values])) {
-            //           actionValueCounter++;
-            //           var newAutomations = actions[values];
-            //           client.request(getUsers(actions[values])).then(
-            //             function(userData){
-            //               console.log(userData);
-            //               if (userData.user.email != null || userData.user.email != '') {
-            //                 client.request(srcUserByEmail_dest(userData.user.email)).then(
-            //                   function(srcUserData){
-            //                     // console.log(autoCounter);
-            //                     // console.log(newNotifAutomationsSelectList[autoCounter]);
-            //                     // console.log('USER FOUND');
-            //                     // console.log(srcUserData);
-            //                     newNotifAutomationsSelectList[autoCounter].actions[notifCounter].value[actionValueCounter] = srcUserData.results[0].id;
-            //                     // console.log(newNotifAutomationsSelectList);
-
-            //                     var createAuto = new Array({automation:newNotifAutomationsSelectList[autoCounter]});
-            //                     console.log(createAuto);
-            //                     console.log('CREATING AUTOMATIONS NOTIFY USERS');
-            //                     doCreateAutomations(JSON.stringify(createAuto[0]));
-            //                   },
-            //                   function(srcUserError){
-            //                     console.log('===== srcUserError =====');
-            //                     console.log(srcUserError);
-            //                   });
-            //               }
-            //             },
-            //             function(userError){
-            //               console.log('===== userError =====');
-            //               console.log(userError);
-            //             });
-            //         }
-            //       }
-            //     } else if (autoActions[actions].field.includes('custom_fields_') 
-            //           || autoActions[actions].field.includes('ticket_fields_')) {
-            //       autoCounter++;
-            //     }
-            //   }
-            // }
-            /*OLD FLOW*/
+          }
           },
-          function(automationDestError){
-            console.log('====== automationDestError ======');
-            console.log(automationDestError);
+          function(ticketFieldsDestError){
+            console.log('===== FAILED GET TICKET DEST DATA =====');
+            console.log(ticketFieldsDestError);
           });
+        
       }
     }
 
     function doCreateAutomations (parameter) {
-      client.request(createAutomations(parameter)).then(
-        function(createAutomationsData){
-          console.log(createAutomationsData);
-        },
-        function(createAutomationsError){
-          console.log('===== createAutomationsError =====');
-          console.log(createAutomationsError);
-        });
+      console.log('CREATING AUTOMATIONS');
+      // console.log(parameter);
+      // client.request(createAutomations(parameter)).then(
+      //   function(createAutomationsData){
+      //     console.log(createAutomationsData);
+      //   },
+      //   function(createAutomationsError){
+      //     console.log('===== createAutomationsError =====');
+      //     console.log(createAutomationsError);
+      //   });
     }
 
     function doCreateTicketForm (newTicketIds, ticketCount) {
