@@ -23,31 +23,40 @@
     // // // // // // // // this.deleteAllTicketFields();
     /*====== ** ======*/
 
-    // var ZD_DOMAIN = "";
-    // var ZD_TOKEN = "";
-    var ZD_DOMAIN = "https://treesdemo11496822632.zendesk.com";
-    var ZD_TOKEN = "basic ZWxkaWVuLmhhc21hbnRvQHRyZWVzc29sdXRpb25zLmNvbTpXM2xjb21lMTIz";
-    // $('.migrate_button').attr("disabled", "disabled");
-    // $('#myModal').modal('show');
+    var ZD_DOMAIN = "";
+    var ZD_TOKEN = "";
+    // var ZD_DOMAIN = "https://treesdemo11496822632.zendesk.com";
+    // var ZD_TOKEN = "basic ZWxkaWVuLmhhc21hbnRvQHRyZWVzc29sdXRpb25zLmNvbTpXM2xjb21lMTIz";
+    $('.migrate_button').attr("disabled", "disabled");
+    $('#myModal').modal('show');
 
     function initsss () {
-      for (var i=0; i<10; i++) {
-        if (i==3) {
-          (function(ctr){
-            client.request(getAutomations()).then(
-              function(data){
-                console.log(data);
-                console.log(ctr);
-              },
-              function(errorData){
-                console.log(errorData);
-              });
-          })(i);
+      var sjson = {
+        "ticket_form" : {
+          "name": "diastowo",
+          "end_user": "faryduana"
         }
       }
+      console.log(sjson);
+      // for (var i=0; i<10; i++) {
+      //   if (i==3) {
+      //     (function(ctr){
+      //       client.request(getAutomations()).then(
+      //         function(data){
+      //           console.log(data);
+      //           console.log(ctr);
+      //         },
+      //         function(errorData){
+      //           console.log(errorData);
+      //         });
+      //     })(i);
+      //   }
+      // }
     }
 
     /*=============API PART============*/
+
+    /*USERS PART*/
     function getUsers(input) {
       var getTickets = {
         url: '/api/v2/users/' + input + '.json',
@@ -74,6 +83,7 @@
       console.log(getTickets);
       return getTickets;
     }
+    /*USERS PART*/
 
     function getTriggers (input) {
       var getTickets = {
@@ -437,9 +447,18 @@
           console.log(automationsError);
         });
 
-      client.request().then(
+      client.request(getSla()).then(
         function(slaData){
           console.log(slaData);
+          slas = slaData.sla_policies;
+          for (slas in slaData.sla_policies){
+            slaContent += '<tr id="' + slaData.sla_policies[slas].id + '" class="'+slas+'" onClick="editData(4, ' + slaData.sla_policies[slas].id + ', ' + slas + ')" style="cursor:pointer;">'
+            +'<td><input class="ticketFormInput" id="' + slaData.sla_policies[slas].id + '" type="checkbox"></td>'
+            +'<td>' + slaData.sla_policies[slas].title +'</td>';
+          }
+          document.getElementById('loader').style.visibility = 'hidden';
+          document.getElementById('mainContent').style.visibility = 'visible';
+          $('.slaContent').append(slaContent);
         },
         function(slaError){
           console.log('slaError');
@@ -502,6 +521,15 @@
           if (!isExist) {
             automationsSelectList.push(automations[position]);
           }
+        } else if (type == 4) {
+          for (var j = 0; j<slaSelectList.length; j++) {
+            if (slaSelectList[j].id == id) {
+              isExist = true;
+            }
+          }
+          if (!isExist) {
+            slaSelectList.push(slas[position]);
+          }
         }
       } else {
         if (type == 1) {
@@ -522,6 +550,12 @@
               automationsSelectList.splice(j, 1);
             }
           }
+        } else if (type == 4) {
+          for (var j = 0; j<slaSelectList.length; j++) {
+            if (slaSelectList[j].id == id) {
+              slaSelectList.splice(j, 1);
+            }
+          }
         }
         $('input[id=' + id + ']')[0].checked = false;
       }
@@ -529,6 +563,7 @@
       $('#custom_fieldsCounter').text(ticketFieldsSelectList.length);
       $('#ticketFormsCounter').text(ticketFormsSelectList.length);
       $('#automationCounter').text(automationsSelectList.length);
+      $('#slaCounter').text(slaSelectList.length);
     }
 
     function getTriggerSelection (id, triggersId) {
@@ -627,7 +662,79 @@
 
       /*=====TICKET FORMS=====*/
       if (ticketFormsSelectList.length > 0) {
-        var ticketFormsCounter = -1;
+        client.request(getTicketFields()).then(
+          function(ticketFieldsData){
+            client.request(getTicketFields_dest()).then(
+              function(ticketFieldsDestData){
+                client.request(getTicketForms_dest()).then(
+                  function(ticketFormsDestData){
+                    for (var i=0; i<ticketFormsSelectList.length; i++){
+                      var isExist = false;
+                      for (var j=0; j<ticketFormsDestData.ticket_forms.length; j++) {
+                        if (ticketFormsSelectList[i].name == ticketFormsDestData.ticket_forms[j].name) {
+                          isExist = true;
+                        }
+                      }
+                      if (!isExist) {
+                        var ticketFieldsExist = false;
+                        var ticketFieldsCounter = 0;
+                        var ticketFieldsFrom = '';
+                        var newTicketIds = [];
+                        for (var tf=0; tf<ticketFormsSelectList[i].ticket_field_ids.length; tf++){
+                          for (var tfFrom=0; tfFrom<ticketFieldsData.ticket_fields.length; tfFrom++) {
+                            if (ticketFormsSelectList[i].ticket_field_ids[tf] == ticketFieldsData.ticket_fields[tfFrom].id) {
+                              ticketFieldsFrom = ticketFieldsData.ticket_fields[tfFrom];
+                            }
+                          }
+                          for (var tfDest=0; tfDest<ticketFieldsDestData.ticket_fields.length; tfDest++){
+                            if (ticketFieldsFrom.title == ticketFieldsDestData.ticket_fields[tfDest].title) {
+                              ticketFieldsExist = true;
+                              newTicketIds.push(ticketFieldsDestData.ticket_fields[tfDest].id);
+                            }
+                          }
+                          if (ticketFieldsExist) {
+                            ticketFieldsCounter++;
+                          } else {
+                            console.log('===== have to create some ticket fields =====');
+                          }
+                          ticketFieldsExist = false;
+                        }
+                        if (ticketFieldsCounter == ticketFormsSelectList[i].ticket_field_ids.length) {
+                          ticketFormsSelectList[i].ticket_field_ids = newTicketIds;
+                          console.log('===== done processing ticket fields ======');
+                          console.log(ticketFormsSelectList[i]);
+                          var ticketForms = new Array({ticket_form:ticketFormsSelectList[i]});
+                          console.log(ticketForms);
+                          client.request(createTicketForms(JSON.stringify(ticketForms[0]))).then(
+                            function(createData){
+                              console.log('===== CREATE SUCCESS =====');
+                              console.log(createData);
+                            },
+                            function(createError){
+                              console.log('===== createError =====');
+                              console.log(createError);
+                            });
+                          newTicketIds = [];
+                        }
+                      } else {
+                        console.log('===== ticket forms is exist =====');
+                      }
+                    }
+                  },
+                  function(ticketFormsDestError){
+
+                  });
+              },
+              function(ticketFieldsDestError){
+                console.log('ticketFieldsDestError');
+                console.log(ticketFieldsDestError);
+              });
+          },
+          function(ticketFieldsError){
+            console.log('ticketFieldsError');
+            console.log(ticketFieldsError);
+          });
+        /*var ticketFormsCounter = -1;
         client.request(getTicketFields_dest()).then(
           function(tfDestData){
             client.request(getTicketForms_dest()).then(
@@ -726,7 +833,7 @@
           function (errorTfDestData){
 
           });
-        
+        */
       }
 
       /*=====TRIGGERS=====*/
@@ -918,6 +1025,11 @@
             console.log(ticketFieldsDestError);
           });
         
+      }
+
+      /*=====SLA======*/
+      if (slaSelectList.lengt > 0) {
+
       }
     }
 
