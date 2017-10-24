@@ -15,6 +15,12 @@
 
     var slas = [];
     var slaSelectList = [];
+
+    var groups = [];
+    var groupSelectList = [];
+
+    var membershipsList = [];
+    var allUsers = [];
     // this.doLoading('Sate Padang');
     this.init();
     // this.initsss();
@@ -23,21 +29,63 @@
     // // // // // // // // this.deleteAllTicketFields();
     /*====== ** ======*/
 
-    var ZD_DOMAIN = "";
-    var ZD_TOKEN = "";
-    // var ZD_DOMAIN = "https://treesdemo11496822632.zendesk.com";
-    // var ZD_TOKEN = "basic ZWxkaWVuLmhhc21hbnRvQHRyZWVzc29sdXRpb25zLmNvbTpXM2xjb21lMTIz";
-    $('.migrate_button').attr("disabled", "disabled");
-    $('#myModal').modal('show');
+    // var ZD_DOMAIN = "";
+    // var ZD_TOKEN = "";
+    var ZD_DOMAIN = "https://treesdemo11496822632.zendesk.com";
+    var ZD_TOKEN = "basic ZWxkaWVuLmhhc21hbnRvQHRyZWVzc29sdXRpb25zLmNvbTpXM2xjb21lMTIz";
+    // $('.migrate_button').attr("disabled", "disabled");
+    // $('#myModal').modal('show');
 
-    function initsss () {
-      var sjson = {
-        "ticket_form" : {
-          "name": "diastowo",
-          "end_user": "faryduana"
+    function initsss (parameter) {
+      var nextPage = '';
+      if (parameter === null) {
+        for (var i=0; i<allUsers.length; i++) {
+          var newUsers = new Array({user:allUsers[i]});
+          client.request().then(
+            function(createUser){
+              console.log(createUser);
+            },
+            function(createError){
+              console.log('createError');
+              console.log(createError);
+            });
+        }
+      } else {
+        if (parameter === undefined) {
+          client.request(getAllUsers()).then(
+            function(allUsersData){
+              for (var i=0; i<allUsersData.users.length; i++) {
+                if (allUsersData.users[i].role == 'admin') {
+                  allUsers.push(allUsersData.users[i]);
+                }
+              }
+              if (allUsersData.next_page != null || allUsersData.next_page != '') {
+                initsss(allUsersData.next_page);
+              }
+            },
+            function(allUsersError){
+              console.log('allUsersError');
+              console.log(allUsersError);
+            });
+        } else {
+          client.request(customs(parameter)).then(
+            function(allUsersData){
+              for (var i=0; i<allUsersData.users.length; i++) {
+                if (allUsersData.users[i].role == 'admin') {
+                  allUsers.push(allUsersData.users[i]);
+                }
+              }
+              if (allUsersData.next_page != null || allUsersData.next_page != '') {
+                initsss(allUsersData.next_page);
+              }
+            },
+            function(allUsersError){
+              console.log('allUsersError');
+              console.log(allUsersError);
+            });
         }
       }
-      console.log(sjson);
+
       // for (var i=0; i<10; i++) {
       //   if (i==3) {
       //     (function(ctr){
@@ -56,10 +104,34 @@
 
     /*=============API PART============*/
 
+    function customs(input) {
+      var getTickets = {
+        url: input,
+        type: 'GET',
+        dataType : "json",
+        contentType: "application/json; charset=utf-8",
+        async: false,
+      }
+      console.log(getTickets);
+      return getTickets;
+    }
+
     /*USERS PART*/
     function getUsers(input) {
       var getTickets = {
         url: '/api/v2/users/' + input + '.json',
+        type: 'GET',
+        dataType : "json",
+        contentType: "application/json; charset=utf-8",
+        async: false,
+      }
+      console.log(getTickets);
+      return getTickets;
+    }
+
+    function getAllUsers(input) {
+      var getTickets = {
+        url: '/api/v2/users.json',
         type: 'GET',
         dataType : "json",
         contentType: "application/json; charset=utf-8",
@@ -109,6 +181,49 @@
       return getTickets;
     }
 
+    function getAllBrandsDest (id) {
+      var getTickets = {
+        url: ZD_DOMAIN + '/api/v2/brands.json',
+        type: 'GET',
+        headers: {
+          "Authorization": ZD_TOKEN
+        },
+        dataType : "json",
+        contentType: "application/json; charset=utf-8",
+        async: false,
+        cors: true
+      }
+      console.log(getTickets);
+      return getTickets;
+    }
+
+    function getOrganizationsById (id) {
+      var getTickets = {
+        url: '/api/v2/organizations/' + id + '.json',
+        type: 'GET',
+        dataType : "json",
+        contentType: "application/json; charset=utf-8",
+        async: false,
+      }
+      console.log(getTickets);
+      return getTickets;
+    }
+
+    function srcOrganizationDest (input) {
+      var getTickets = {
+        url: ZD_DOMAIN + '/api/v2/search.json?query=type:organization%20name:' + input,
+        type: 'GET',
+        headers: {
+          "Authorization": ZD_TOKEN
+        },
+        dataType : "json",
+        contentType: "application/json; charset=utf-8",
+        cors: true,
+      }
+      console.log(getTickets);
+      return getTickets;
+    }
+
     /*TICKET FIELDS PART*/
     function getTicketFields (input) {
       var getTickets = {
@@ -117,7 +232,6 @@
         dataType : "json",
         contentType: "application/json; charset=utf-8",
         async: false,
-        timeout: 1000
       }
       console.log(getTickets);
       return getTickets;
@@ -163,6 +277,34 @@
       return getTickets;
     }
 
+    function getTicketFieldsbyIdOption (id) {
+      var getTickets = {
+        url: '/api/v2/ticket_fields/' + id + '/options.json',
+        type: 'GET',
+        dataType : "json",
+        contentType: "application/json; charset=utf-8",
+        async: false,
+      }
+      console.log(getTickets);
+      return getTickets;
+    }
+
+    function getTicketFieldsbyIdOptionDest (id) {
+      var getTickets = {
+        url:  ZD_DOMAIN + '/api/v2/ticket_fields/' + id + '/options.json',
+        type: 'GET',
+        headers: {
+          "Authorization": ZD_TOKEN
+        },
+        dataType : "json",
+        contentType: "application/json; charset=utf-8",
+        async: false,
+        cors: true,
+      }
+      console.log(getTickets);
+      return getTickets;
+    }
+
     function createTicketFields (input, i) {
       var getTickets = {
         url: ZD_DOMAIN + '/api/v2/ticket_fields.json',
@@ -189,6 +331,18 @@
     function getTicketForms (input) {
       var getTickets = {
         url: '/api/v2/ticket_forms.json',
+        type: 'GET',
+        dataType : "json",
+        contentType: "application/json; charset=utf-8",
+        async: false,
+      }
+      console.log(getTickets);
+      return getTickets;
+    }
+
+    function getTicketFormsById (input) {
+      var getTickets = {
+        url: '/api/v2/ticket_forms/' + input + '.json',
         type: 'GET',
         dataType : "json",
         contentType: "application/json; charset=utf-8",
@@ -284,9 +438,33 @@
     /*AUTOMATIONS PART*/
 
     /*GROUP PART*/
+    function getAllGroup () {
+      var getTickets = {
+        url: '/api/v2/groups.json',
+        type: 'GET',
+        dataType : "json",
+        contentType: "application/json; charset=utf-8",
+        async: false,
+      }
+      console.log(getTickets);
+      return getTickets;
+    }
+
     function getGroups (id) {
       var getTickets = {
         url: '/api/v2/groups/' + id + '.json',
+        type: 'GET',
+        dataType : "json",
+        contentType: "application/json; charset=utf-8",
+        async: false,
+      }
+      console.log(getTickets);
+      return getTickets;
+    }
+
+    function getGroupMembership (id) {
+      var getTickets = {
+        url: '/api/v2/groups/' + id + '/memberships.json',
         type: 'GET',
         dataType : "json",
         contentType: "application/json; charset=utf-8",
@@ -303,6 +481,38 @@
         headers: {
           "Authorization": ZD_TOKEN
         },
+        dataType : "json",
+        contentType: "application/json; charset=utf-8",
+        cors: true,
+      }
+      console.log(getTickets);
+      return getTickets;
+    }
+
+    function createGroup_dest (parameter) {
+      var getTickets = {
+        url: ZD_DOMAIN + '/api/v2/groups.json',
+        type: 'POST',
+        headers: {
+          "Authorization": ZD_TOKEN
+        },
+        data: parameter,
+        dataType : "json",
+        contentType: "application/json; charset=utf-8",
+        cors: true,
+      }
+      console.log(getTickets);
+      return getTickets;
+    }
+
+    function createGroupMembership_dest (parameter) {
+      var getTickets = {
+        url: ZD_DOMAIN + '/api/v2/group_memberships/create_many.json',
+        type: 'POST',
+        headers: {
+          "Authorization": ZD_TOKEN
+        },
+        data: parameter,
         dataType : "json",
         contentType: "application/json; charset=utf-8",
         cors: true,
@@ -381,24 +591,25 @@
       var formContent = '';
       var automationsContent = '';
       var slaContent = '';
+      var groupContent = '';
       document.getElementById('loader').style.visibility = 'visible';
       document.getElementById('mainContent').style.visibility = 'hidden';
-      client.request(this.getTicketFields()).then(
-        function(data) {
-          console.log(data);
-          ticketFields = data.ticket_fields;
-          for (var i = 0; i<data.count; i++) {
-            ticketContent += '<tr id="' + data.ticket_fields[i].id + '" class="'+i+'" onClick="editData(1, ' + data.ticket_fields[i].id + ', ' + i + ')" style="cursor:pointer;">'
-            +'<td><input class="ticketFeldInput" id="' + data.ticket_fields[i].id + '" type="checkbox"></td>'
-            +'<td>' + data.ticket_fields[i].title +'</td>';
-            // $('<li id="'+data.ticket_fields[i].id+'" class="normal" onclick="getTicketFieldsSelection('+i+', '+data.ticket_fields[i].id+')"><a href="#">'+data.ticket_fields[i].title+'</a></li>').appendTo( ".custom_fields_list" );
-          }
-          $('.ticketFieldContent').append(ticketContent);
-          document.getElementById('loader').style.visibility = 'hidden';
-          document.getElementById('mainContent').style.visibility = 'visible';
-        }, function (errors) {
-          console.log(errors);
-        });
+      // client.request(this.getTicketFields()).then(
+      //   function(data) {
+      //     console.log(data);
+      //     ticketFields = data.ticket_fields;
+      //     for (var i = 0; i<data.count; i++) {
+      //       ticketContent += '<tr id="' + data.ticket_fields[i].id + '" class="'+i+'" onClick="editData(1, ' + data.ticket_fields[i].id + ', ' + i + ')" style="cursor:pointer;">'
+      //       +'<td><input class="ticketFeldInput" id="' + data.ticket_fields[i].id + '" type="checkbox"></td>'
+      //       +'<td>' + data.ticket_fields[i].title +'</td>';
+      //       // $('<li id="'+data.ticket_fields[i].id+'" class="normal" onclick="getTicketFieldsSelection('+i+', '+data.ticket_fields[i].id+')"><a href="#">'+data.ticket_fields[i].title+'</a></li>').appendTo( ".custom_fields_list" );
+      //     }
+      //     $('.ticketFieldContent').append(ticketContent);
+      //     document.getElementById('loader').style.visibility = 'hidden';
+      //     document.getElementById('mainContent').style.visibility = 'visible';
+      //   }, function (errors) {
+      //     console.log(errors);
+      //   });
 
       /*client.request(this.getTriggers()).then(
         function(data) {
@@ -413,48 +624,48 @@
           console.log(errors);
         });*/
 
-      client.request(this.getTicketForms()).then(
-        function(data) {
-          console.log(data);
-          ticketForms = data.ticket_forms;
-          for (var i = 0; i<data.count; i++) {
-            formContent += '<tr id="' + data.ticket_forms[i].id + '" class="'+i+'" onClick="editData(2, ' + data.ticket_forms[i].id + ', ' + i + ')" style="cursor:pointer;">'
-            +'<td><input class="ticketFormInput" id="' + data.ticket_forms[i].id + '" type="checkbox"></td>'
-            +'<td>' + data.ticket_forms[i].raw_name +'</td>';
-          }
-          document.getElementById('loader').style.visibility = 'hidden';
-          document.getElementById('mainContent').style.visibility = 'visible';
-          $('.ticketFormsContent').append(formContent);
-        }, function (errors) {
-          console.log(errors);
-        });
+      // client.request(this.getTicketForms()).then(
+      //   function(data) {
+      //     console.log(data);
+      //     ticketForms = data.ticket_forms;
+      //     for (var i = 0; i<data.count; i++) {
+      //       formContent += '<tr id="' + data.ticket_forms[i].id + '" class="'+i+'" onClick="editData(2, ' + data.ticket_forms[i].id + ', ' + i + ')" style="cursor:pointer;">'
+      //       +'<td><input class="ticketFormInput" id="' + data.ticket_forms[i].id + '" type="checkbox"></td>'
+      //       +'<td>' + data.ticket_forms[i].raw_name +'</td>';
+      //     }
+      //     document.getElementById('loader').style.visibility = 'hidden';
+      //     document.getElementById('mainContent').style.visibility = 'visible';
+      //     $('.ticketFormsContent').append(formContent);
+      //   }, function (errors) {
+      //     console.log(errors);
+      //   });
 
-      client.request(getAutomations()).then(
-        function(automationsData){
-          console.log(automationsData);
-          automations = automationsData.automations;
-          for (var i=0; i<automationsData.automations.length; i++) {
-            automationsContent += '<tr id="' + automationsData.automations[i].id + '" class="'+i+'" onClick="editData(3, ' + automationsData.automations[i].id + ', ' + i + ')" style="cursor:pointer;">'
-            +'<td><input class="ticketFormInput" id="' + automationsData.automations[i].id + '" type="checkbox"></td>'
-            +'<td>' + automationsData.automations[i].raw_title +'</td>';
-          }
-          document.getElementById('loader').style.visibility = 'hidden';
-          document.getElementById('mainContent').style.visibility = 'visible';
-          $('.automationContent').append(automationsContent);
-        },
-        function(automationsError){
-          console.log('automationsError');
-          console.log(automationsError);
-        });
+      // client.request(getAutomations()).then(
+      //   function(automationsData){
+      //     console.log(automationsData);
+      //     automations = automationsData.automations;
+      //     for (var i=0; i<automationsData.automations.length; i++) {
+      //       automationsContent += '<tr id="' + automationsData.automations[i].id + '" class="'+i+'" onClick="editData(3, ' + automationsData.automations[i].id + ', ' + i + ')" style="cursor:pointer;">'
+      //       +'<td><input class="ticketFormInput" id="' + automationsData.automations[i].id + '" type="checkbox"></td>'
+      //       +'<td>' + automationsData.automations[i].raw_title +'</td>';
+      //     }
+      //     document.getElementById('loader').style.visibility = 'hidden';
+      //     document.getElementById('mainContent').style.visibility = 'visible';
+      //     $('.automationContent').append(automationsContent);
+      //   },
+      //   function(automationsError){
+      //     console.log('automationsError');
+      //     console.log(automationsError);
+      //   });
 
       client.request(getSla()).then(
         function(slaData){
           console.log(slaData);
           slas = slaData.sla_policies;
-          for (slas in slaData.sla_policies){
-            slaContent += '<tr id="' + slaData.sla_policies[slas].id + '" class="'+slas+'" onClick="editData(4, ' + slaData.sla_policies[slas].id + ', ' + slas + ')" style="cursor:pointer;">'
-            +'<td><input class="ticketFormInput" id="' + slaData.sla_policies[slas].id + '" type="checkbox"></td>'
-            +'<td>' + slaData.sla_policies[slas].title +'</td>';
+          for (slases in slaData.sla_policies){
+            slaContent += '<tr id="' + slaData.sla_policies[slases].id + '" class="'+slases+'" onClick="editData(4, ' + slaData.sla_policies[slases].id + ', ' + slases + ')" style="cursor:pointer;">'
+            +'<td><input class="ticketFormInput" id="' + slaData.sla_policies[slases].id + '" type="checkbox"></td>'
+            +'<td>' + slaData.sla_policies[slases].title +'</td>';
           }
           document.getElementById('loader').style.visibility = 'hidden';
           document.getElementById('mainContent').style.visibility = 'visible';
@@ -464,6 +675,24 @@
           console.log('slaError');
           console.log(slaError);
         });
+
+      // client.request(getAllGroup()).then(
+      //   function(groupData){
+      //     console.log(groupData);
+      //     groups = groupData.groups;
+      //     for (var i=0; i<groupData.groups.length; i++) {
+      //       groupContent += '<tr id="' + groupData.groups[i].id + '" class="'+i+'" onClick="editData(5, ' + groupData.groups[i].id + ', ' + i + ')" style="cursor:pointer;">'
+      //       +'<td><input class="ticketFormInput" id="' + groupData.groups[i].id + '" type="checkbox"></td>'
+      //       +'<td>' + groupData.groups[i].name +'</td>';
+      //     }
+      //     document.getElementById('loader').style.visibility = 'hidden';
+      //     document.getElementById('mainContent').style.visibility = 'visible';
+      //     $('.groupContent').append(groupContent);
+      //   },
+      //   function(groupError){
+      //     console.log('groupError');
+      //     console.log(groupError);
+      //   });
     }
 
     $("#selectallCheckTicketField").change(function () {
@@ -530,6 +759,15 @@
           if (!isExist) {
             slaSelectList.push(slas[position]);
           }
+        } else if (type == 5) {
+          for (var j = 0; j<groupSelectList.length; j++) {
+            if (groupSelectList[j].id == id) {
+              isExist = true;
+            }
+          }
+          if (!isExist) {
+            groupSelectList.push(groups[position]);
+          }
         }
       } else {
         if (type == 1) {
@@ -556,6 +794,12 @@
               slaSelectList.splice(j, 1);
             }
           }
+        } else if (type == 5) {
+          for (var j = 0; j<groupSelectList.length; j++) {
+            if (groupSelectList[j].id == id) {
+              groupSelectList.splice(j, 1);
+            }
+          }
         }
         $('input[id=' + id + ']')[0].checked = false;
       }
@@ -564,6 +808,7 @@
       $('#ticketFormsCounter').text(ticketFormsSelectList.length);
       $('#automationCounter').text(automationsSelectList.length);
       $('#slaCounter').text(slaSelectList.length);
+      $('#groupCounter').text(groupSelectList.length);
     }
 
     function getTriggerSelection (id, triggersId) {
@@ -611,6 +856,7 @@
     /*====== NOT USED =======*/
 
     function doMigrate () {
+      membershipsList = [];
       var migrateCounter = 0;
       errorMigrate = [];
       /*=====TICKET FIELDS=====*/
@@ -680,6 +926,7 @@
                         var ticketFieldsCounter = 0;
                         var ticketFieldsFrom = '';
                         var newTicketIds = [];
+                        var ticketFieldsError = false;
                         for (var tf=0; tf<ticketFormsSelectList[i].ticket_field_ids.length; tf++){
                           for (var tfFrom=0; tfFrom<ticketFieldsData.ticket_fields.length; tfFrom++) {
                             if (ticketFormsSelectList[i].ticket_field_ids[tf] == ticketFieldsData.ticket_fields[tfFrom].id) {
@@ -695,27 +942,41 @@
                           if (ticketFieldsExist) {
                             ticketFieldsCounter++;
                           } else {
+                            ticketFieldsError = true;
                             console.log('===== have to create some ticket fields =====');
+
                           }
                           ticketFieldsExist = false;
                         }
-                        if (ticketFieldsCounter == ticketFormsSelectList[i].ticket_field_ids.length) {
-                          ticketFormsSelectList[i].ticket_field_ids = newTicketIds;
-                          console.log('===== done processing ticket fields ======');
-                          console.log(ticketFormsSelectList[i]);
-                          var ticketForms = new Array({ticket_form:ticketFormsSelectList[i]});
-                          console.log(ticketForms);
-                          client.request(createTicketForms(JSON.stringify(ticketForms[0]))).then(
-                            function(createData){
-                              console.log('===== CREATE SUCCESS =====');
-                              console.log(createData);
-                            },
-                            function(createError){
-                              console.log('===== createError =====');
-                              console.log(createError);
-                            });
-                          newTicketIds = [];
+                        if (ticketFieldsError) {
+                          errorMigrate.push({
+                            name: ticketFormsSelectList[i].name,
+                            error: 'some ticket fields not exist'
+                          });
                         }
+                        (function(counterI){
+                          if (ticketFieldsCounter == ticketFormsSelectList[i].ticket_field_ids.length) {
+                            ticketFormsSelectList[i].ticket_field_ids = newTicketIds;
+                            console.log('===== done processing ticket fields ======');
+                            console.log(ticketFormsSelectList[i]);
+                            var ticketForms = new Array({ticket_form:ticketFormsSelectList[i]});
+                            console.log(ticketForms);
+                            client.request(createTicketForms(JSON.stringify(ticketForms[0]))).then(
+                              function(createData){
+                                console.log('===== CREATE SUCCESS =====');
+                                console.log(createData);
+                              },
+                              function(createError){
+                                console.log('===== createError =====');
+                                console.log(createError);
+                                errorMigrate.push({
+                                  name: ticketFormsSelectList[counterI].name,
+                                  error: createError
+                                });
+                              });
+                            newTicketIds = [];
+                          }
+                        })(i);
                       } else {
                         console.log('===== ticket forms is exist =====');
                       }
@@ -1028,9 +1289,600 @@
       }
 
       /*=====SLA======*/
-      if (slaSelectList.lengt > 0) {
+      if (slaSelectList.length > 0) {
+        client.request(getTicketFields_dest()).then(
+          function(ticketFieldDestData){
+            client.request(getAllBrandsDest()).then(
+              function(brandsDest){
+                client.request(getTicketForms_dest()).then(
+                  function(ticketFormsDest){
+                    for (var i=0; i<slaSelectList.length; i++) {
+                      var filterFinish = 0;;
+                      (function(counterI){
+                        if (slaSelectList[i].filter.all.length >0) {
+                          var filterAllCounter = 0;
+                          for (var f=0; f<slaSelectList[i].filter.all.length; f++) {
+                            (function(counterF){
+                              if (slaSelectList[i].filter.all[f].field.includes('ticket_fields_')) {
+                                var ticketId = slaSelectList[i].filter.all[f].field.split('_');
+                                client.request(getTicketFieldsbyId(ticketId[2])).then(
+                                  function(ticketFieldData){
+                                    client.request(getTicketFieldsbyIdOption(ticketFieldData.ticket_field.id)).then(
+                                      function(fieldOption){
+                                        var optionString = '';
+                                        for (var o=0; o<fieldOption.custom_field_options.length; o++) {
+                                          if (fieldOption.custom_field_options[o].id == slaSelectList[counterI].filter.all[counterF].value) {
+                                            optionString = fieldOption.custom_field_options[o].name;
+                                          }
+                                        }
+                                        var ticketFieldFound = false;
+                                        for (var d=0; d<ticketFieldDestData.ticket_fields.length; d++) {
+                                          (function(counterD){
+                                            if (ticketFieldData.ticket_field.title == ticketFieldDestData.ticket_fields[d].title) {
+                                              ticketFieldFound = true;
+                                              client.request(getTicketFieldsbyIdOptionDest(ticketFieldDestData.ticket_fields[d].id)).then(
+                                                function(fieldOptionDest){
+                                                  for (var od=0; od<fieldOptionDest.custom_field_options.length; od++) {
+                                                    filterAllCounter++;
+                                                    if (fieldOptionDest.custom_field_options[od].name == optionString) {
+                                                      slaSelectList[counterI].filter.all[counterF].field = 'ticket_fields_' + ticketFieldDestData.ticket_fields[counterD].id;
+                                                      slaSelectList[counterI].filter.all[counterF].value = fieldOptionDest.custom_field_options[od].id;
+                                                    }
+                                                    if (filterAllCounter == slaSelectList[counterI].filter.all.length) {
+                                                      console.log('all filter has finish');
+                                                      console.log(slaSelectList[counterI]);
+                                                      filterFinish++;
+                                                      if (filterFinish == 2) {
+                                                        doCreateSla();
+                                                      }
+                                                    }
+                                                  }
+                                                },
+                                                function(fieldOptionDestError){
+                                                  console.log('===== fieldOptionDestError =====');
+                                                  console.log(fieldOptionDestError);
+                                                });
+                                            }
+                                          })(d);
+                                        }
+                                        if (!ticketFieldFound) {
+                                          console.log('===== ticket field doest exist =====');
+                                        }
+                                      },
+                                      function(fieldOptionError){
+                                        console.log('fieldOptionError');
+                                        console.log(fieldOptionError);
+                                      });
+                                  },
+                                  function(ticketFieldsError){
+                                    console.log('===== ticketFieldsError =====');
+                                    console.log(ticketFieldsError);
+                                  });
+                              } else if (slaSelectList[i].filter.all[f].field.includes('brand_id')) {
+                                client.request(getBrands(slaSelectList[i].filter.all[f].value)).then(
+                                  function(brands){
+                                    var brandsIsFound = false;
+                                    for (var br=0; br<brandsDest.brands.length; br++) {
+                                      if (brands.brand.name == brandsDest.brands[br].name) {
+                                        brandsIsFound = true;
+                                        console.log('brands found');
+                                        filterAllCounter++;
+                                        slaSelectList[counterI].filter.all[counterF].value = brandsDest.brands[br].id;
+                                        if (filterAllCounter == slaSelectList[counterI].filter.all.length) {
+                                          console.log('all filter has finish');
+                                          console.log(slaSelectList[counterI]);
+                                          filterFinish++;
+                                          if (filterFinish == 2) {
+                                            doCreateSla();
+                                          }
+                                        }
+                                      }
+                                    }
+                                    if (!brandsIsFound) {
+                                      console.log('===== brands not found =====');
+                                    }
+                                  },
+                                  function(brandsError){
+                                    console.log('===== brandsError =====');
+                                    console.log(brandsError);
+                                  });
+                              } else if (slaSelectList[i].filter.all[f].field.includes('ticket_form_id')) {
+                                client.request(getTicketFormsById(slaSelectList[i].filter.all[f].value)).then(
+                                  function(ticketForm){
+                                    var ticketFormFound = false;
+                                    for (var tf=0; tf<ticketFormsDest.ticket_forms.length; tf++){
+                                      if (ticketForm.ticket_form.name == ticketFormsDest.ticket_forms[tf].name) {
+                                        ticketFormFound = true;
+                                        console.log('===== ticket forms found =====');
+                                        filterAllCounter++;
+                                        slaSelectList[counterI].filter.all[counterF].value = ticketFormsDest.ticket_forms[tf].id;
+                                        if (filterAllCounter == slaSelectList[counterI].filter.all.length) {
+                                          console.log('all filter has finish');
+                                          console.log(slaSelectList[counterI]);
+                                          filterFinish++;
+                                          if (filterFinish == 2) {
+                                            doCreateSla();
+                                          }
+                                        }
+                                      }
+                                    }
+                                    if (!ticketFormFound) {
+                                      console.log('===== ticket form not found =====');
+                                    }
+                                  },
+                                  function(ticketFormError){
+                                    console.log('===== ticketFormError =====');
+                                    console.log(ticketFormError);
+                                  });
+                              } else if (slaSelectList[i].filter.all[f].field.includes('ticket_type_id')) {
+                                console.log('ticket_type_id.. no process needed');
+                                filterAllCounter++;
+                                if (filterAllCounter == slaSelectList[counterI].filter.all.length) {
+                                  console.log('all filter has finish');
+                                  console.log(slaSelectList[counterI]);
+                                  filterFinish++;
+                                  if (filterFinish == 2) {
+                                    doCreateSla();
+                                  }
+                                }
+                              } else if (slaSelectList[i].filter.all[f].field.includes('group_id')) {
+                                client.request(getGroups(slaSelectList[i].filter.all[f].value)).then(
+                                  function(groups){
+                                    client.request(srcGroups_dest(groups.group.name)).then(
+                                      function(srcGroup){
+                                        if (srcGroup.results.length > 0) {
+                                          console.log('===== group found =====');
+                                          filterAllCounter++;
+                                          slaSelectList[counterI].filter.all[counterF].value = srcGroup.results[0].id;
+                                          if (filterAllCounter == slaSelectList[counterI].filter.all.length) {
+                                            console.log('all filter has finish');
+                                            console.log(slaSelectList[counterI]);
+                                            filterFinish++;
+                                            if (filterFinish == 2) {
+                                              doCreateSla();
+                                            }
+                                          }
+                                        } else {
+                                          console.log('===== group not found =====')
+                                        }
+                                      },
+                                      function(srcGroupError){
+                                        console.log('===== srcGroupError =====');
+                                        console.log(srcGroupError);
+                                      });
+                                  },
+                                  function(groupsError){
+                                    console.log('===== groupsError =====');
+                                    console.log(groupsError);
+                                  });
+                              } else if (slaSelectList[i].filter.all[f].field.includes('organization_id')) {
+                                client.request(getOrganizationsById(slaSelectList[i].filter.all[f].value)).then(
+                                  function(org){
+                                    client.request(srcOrganizationDest(org.organization.name)).then(
+                                      function(orgDest){
+                                        if (orgDest.results.length > 0) {
+                                          console.log('===== organization found =====');
+                                          slaSelectList[counterI].filter.all[counterF].value = orgDest.results[0].id;
+                                          filterAllCounter++;
+                                          if (filterAllCounter == slaSelectList[counterI].filter.all.length) {
+                                            console.log('all filter has finish');
+                                            console.log(slaSelectList[counterI]);
+                                            filterFinish++;
+                                            if (filterFinish == 2) {
+                                              doCreateSla();
+                                            }
+                                          }
+                                        } else {
+                                          console.log('===== organization not found =====');
+                                        }
+                                      },
+                                      function(orgDestError){
+                                        console.log('===== orgDestError =====');
+                                        console.log(orgDestError);
+                                      });
+                                  },
+                                  function(orgError){
+                                    console.log('===== orgError =====');
+                                    console.log(orgError);
+                                  });
+                              } else if (slaSelectList[i].filter.all[f].field.includes('via_id')) {
+                                console.log('via_id.. no process needed');
+                                filterAllCounter++;
+                                if (filterAllCounter == slaSelectList[counterI].filter.all.length) {
+                                  console.log('all filter has finish');
+                                  console.log(slaSelectList[counterI]);
+                                  filterFinish++;
+                                  if (filterFinish == 2) {
+                                    doCreateSla();
+                                  }
+                                }
+                              } else if (slaSelectList[i].filter.all[f].field.includes('exact_created_at')) {
+                                console.log('exact_created_at.. no process needed');
+                                filterAllCounter++;
+                                if (filterAllCounter == slaSelectList[counterI].filter.all.length) {
+                                  console.log('all filter has finish');
+                                  console.log(slaSelectList[counterI]);
+                                  filterFinish++;
+                                  if (filterFinish == 2) {
+                                    doCreateSla();
+                                  }
+                                }
+                              }
+                            })(f);
+                          }
+                          // if (slaSelectList[i].filter.all)
+                        } else {
+                          console.log('filter all null');
+                        }
 
+                        if (slaSelectList[i].filter.any.length > 0) {
+                          var filterAnyCounter = 0;
+                          for (var f=0; f<slaSelectList[i].filter.any.length; f++) {
+                            (function(counterF){
+                              if (slaSelectList[i].filter.any[f].field.includes('ticket_fields_')) {
+                                var ticketId = slaSelectList[i].filter.any[f].field.split('_');
+                                client.request(getTicketFieldsbyId(ticketId[2])).then(
+                                  function(ticketFieldData){
+                                    client.request(getTicketFieldsbyIdOption(ticketFieldData.ticket_field.id)).then(
+                                      function(fieldOption){
+                                        var optionString = '';
+                                        for (var o=0; o<fieldOption.custom_field_options.length; o++) {
+                                          if (fieldOption.custom_field_options[o].id == slaSelectList[counterI].filter.any[counterF].value) {
+                                            optionString = fieldOption.custom_field_options[o].name;
+                                          }
+                                        }
+                                        var ticketFieldFound = false;
+                                        for (var d=0; d<ticketFieldDestData.ticket_fields.length; d++) {
+                                          (function(counterD){
+                                            if (ticketFieldData.ticket_field.title == ticketFieldDestData.ticket_fields[d].title) {
+                                              ticketFieldFound = true;
+                                              client.request(getTicketFieldsbyIdOptionDest(ticketFieldDestData.ticket_fields[d].id)).then(
+                                                function(fieldOptionDest){
+                                                  for (var od=0; od<fieldOptionDest.custom_field_options.length; od++) {
+                                                    filterAnyCounter++;
+                                                    if (fieldOptionDest.custom_field_options[od].name == optionString) {
+                                                      slaSelectList[counterI].filter.any[counterF].field = 'ticket_fields_' + ticketFieldDestData.ticket_fields[counterD].id;
+                                                      slaSelectList[counterI].filter.any[counterF].value = fieldOptionDest.custom_field_options[od].id;
+                                                    }
+                                                    if (filterAnyCounter == slaSelectList[counterI].filter.any.length) {
+                                                      console.log('any filter has finish');
+                                                      console.log(slaSelectList[counterI]);
+                                                      filterFinish++;
+                                                      if (filterFinish == 2) {
+                                                        doCreateSla();
+                                                      }
+                                                    }
+                                                  }
+                                                },
+                                                function(fieldOptionDestError){
+                                                  console.log('===== fieldOptionDestError =====');
+                                                  console.log(fieldOptionDestError);
+                                                });
+                                            }
+                                          })(d);
+                                        }
+                                        if (!ticketFieldFound) {
+                                          console.log('===== ticket field doest exist =====');
+                                        }
+                                      },
+                                      function(fieldOptionError){
+                                        console.log('fieldOptionError');
+                                        console.log(fieldOptionError);
+                                      });
+                                  },
+                                  function(ticketFieldsError){
+                                    console.log('===== ticketFieldsError =====');
+                                    console.log(ticketFieldsError);
+                                  });
+                              } else if (slaSelectList[i].filter.any[f].field.includes('brand_id')) {
+                                client.request(getBrands(slaSelectList[i].filter.any[f].value)).then(
+                                  function(brands){
+                                    var brandsIsFound = false;
+                                    for (var br=0; br<brandsDest.brands.length; br++) {
+                                      if (brands.brand.name == brandsDest.brands[br].name) {
+                                        brandsIsFound = true;
+                                        console.log('brands found');
+                                        filterAnyCounter++;
+                                        slaSelectList[counterI].filter.any[counterF].value = brandsDest.brands[br].id;
+                                        if (filterAnyCounter == slaSelectList[counterI].filter.any.length) {
+                                          console.log('any filter has finish');
+                                          console.log(slaSelectList[counterI]);
+                                          filterFinish++;
+                                          if (filterFinish == 2) {
+                                            doCreateSla();
+                                          }
+                                        }
+                                      }
+                                    }
+                                    if (!brandsIsFound) {
+                                      console.log('===== brands not found =====');
+                                    }
+                                  },
+                                  function(brandsError){
+                                    console.log('===== brandsError =====');
+                                    console.log(brandsError);
+                                  });
+                              } else if (slaSelectList[i].filter.any[f].field.includes('ticket_form_id')) {
+                                client.request(getTicketFormsById(slaSelectList[i].filter.any[f].value)).then(
+                                  function(ticketForm){
+                                    var ticketFormFound = false;
+                                    for (var tf=0; tf<ticketFormsDest.ticket_forms.length; tf++){
+                                      if (ticketForm.ticket_form.name == ticketFormsDest.ticket_forms[tf].name) {
+                                        ticketFormFound = true;
+                                        console.log('===== ticket forms found =====');
+                                        filterAnyCounter++;
+                                        slaSelectList[counterI].filter.any[counterF].value = ticketFormsDest.ticket_forms[tf].id;
+                                        if (filterAnyCounter == slaSelectList[counterI].filter.any.length) {
+                                          console.log('any filter has finish');
+                                          console.log(slaSelectList[counterI]);
+                                          filterFinish++;
+                                          if (filterFinish == 2) {
+                                            doCreateSla();
+                                          }
+                                        }
+                                      }
+                                    }
+                                    if (!ticketFormFound) {
+                                      console.log('===== ticket form not found =====');
+                                    }
+                                  },
+                                  function(ticketFormError){
+                                    console.log('===== ticketFormError =====');
+                                    console.log(ticketFormError);
+                                  });
+                              } else if (slaSelectList[i].filter.any[f].field.includes('ticket_type_id')) {
+                                console.log('ticket_type_id.. no process needed');
+                                filterAnyCounter++;
+                                if (filterAnyCounter == slaSelectList[counterI].filter.any.length) {
+                                  console.log('any filter has finish');
+                                  console.log(slaSelectList[counterI]);
+                                  filterFinish++;
+                                  if (filterFinish == 2) {
+                                    doCreateSla();
+                                  }
+                                }
+                              } else if (slaSelectList[i].filter.any[f].field.includes('group_id')) {
+                                client.request(getGroups(slaSelectList[i].filter.any[f].value)).then(
+                                  function(groups){
+                                    client.request(srcGroups_dest(groups.group.name)).then(
+                                      function(srcGroup){
+                                        if (srcGroup.results.length > 0) {
+                                          console.log('===== group found =====');
+                                          filterAnyCounter++;
+                                          slaSelectList[counterI].filter.any[counterF].value = srcGroup.results[0].id;
+                                          if (filterAnyCounter == slaSelectList[counterI].filter.any.length) {
+                                            console.log('any filter has finish');
+                                            console.log(slaSelectList[counterI]);
+                                            filterFinish++;
+                                            if (filterFinish == 2) {
+                                              doCreateSla();
+                                            }
+                                          }
+                                        } else {
+                                          console.log('===== group not found =====')
+                                        }
+                                      },
+                                      function(srcGroupError){
+                                        console.log('===== srcGroupError =====');
+                                        console.log(srcGroupError);
+                                      });
+                                  },
+                                  function(groupsError){
+                                    console.log('===== groupsError =====');
+                                    console.log(groupsError);
+                                  });
+                              } else if (slaSelectList[i].filter.any[f].field.includes('organization_id')) {
+                                client.request(getOrganizationsById(slaSelectList[i].filter.any[f].value)).then(
+                                  function(org){
+                                    client.request(srcOrganizationDest(org.organization.name)).then(
+                                      function(orgDest){
+                                        if (orgDest.results.length > 0) {
+                                          console.log('===== organization found =====');
+                                          slaSelectList[counterI].filter.any[counterF].value = orgDest.results[0].id;
+                                          filterAnyCounter++;
+                                          if (filterAnyCounter == slaSelectList[counterI].filter.any.length) {
+                                            console.log('any filter has finish');
+                                            console.log(slaSelectList[counterI]);
+                                            filterFinish++;
+                                            if (filterFinish == 2) {
+                                              doCreateSla();
+                                            }
+                                          }
+                                        } else {
+                                          console.log('===== organization not found =====');
+                                        }
+                                      },
+                                      function(orgDestError){
+                                        console.log('===== orgDestError =====');
+                                        console.log(orgDestError);
+                                      });
+                                  },
+                                  function(orgError){
+                                    console.log('===== orgError =====');
+                                    console.log(orgError);
+                                  });
+                              } else if (slaSelectList[i].filter.any[f].field.includes('via_id')) {
+                                console.log('via_id.. no process needed');
+                                filterAnyCounter++;
+                                if (filterAnyCounter == slaSelectList[counterI].filter.any.length) {
+                                  console.log('any filter has finish');
+                                  console.log(slaSelectList[counterI]);
+                                  filterFinish++;
+                                  if (filterFinish == 2) {
+                                    doCreateSla();
+                                  }
+                                }
+                              } else if (slaSelectList[i].filter.any[f].field.includes('exact_created_at')) {
+                                console.log('exact_created_at.. no process needed');
+                                filterAnyCounter++;
+                                if (filterAnyCounter == slaSelectList[counterI].filter.any.length) {
+                                  console.log('any filter has finish');
+                                  console.log(slaSelectList[counterI]);
+                                  filterFinish++;
+                                  if (filterFinish == 2) {
+                                    doCreateSla();
+                                  }
+                                }
+                              }
+                            })(f);
+                          }
+                        } else {
+                          console.log('filter any null');
+                        }
+                      })(i);
+                    }
+                  },
+                  function(ticketFormsDestError){
+                    console.log('===== ticketFormsDestError =====');
+                    console.log(ticketFormsDestError);
+                  });
+              },
+              function(brandsDestError){
+                console.log('===== brandsDestError =====');
+                console.log(brandsDestError);
+              });
+          },
+          function(ticketFieldsDestError){
+            console.log('===== ticketFieldsDestError =====');
+            console.log(ticketFieldsDestError);
+          });
       }
+
+      /*=====GROUPS=====*/
+      if (groupSelectList.length > 0) {
+        var groupIds = [];
+        var groupCounter = 0;
+        for (var i=0; i<groupSelectList.length; i++) {
+          (function(counterI){
+            client.request(srcGroups_dest(groupSelectList[i].name)).then(
+              function(srcGroupData){
+                console.log(srcGroupData);
+                var isGroupExist = false;
+                var idGroup = '';
+                if (srcGroupData.results.length > 0) {
+                  isGroupExist =  true;
+                  idGroup = srcGroupData.results[0].id;
+                  groupIds.push({
+                    index: counterI,
+                    groupid: idGroup,
+                    oldGroup: groupSelectList[counterI].id
+                  });
+                  groupCounter++;
+                  if (groupCounter == groupSelectList.length) {
+                    doGenerateGroupMembership(groupIds);
+                  }
+                } else {
+                  console.log('groups is not exist');
+                  var createGroup = new Array({group:groupSelectList[counterI]});
+                  client.request(createGroup_dest(JSON.stringify(createGroup[0]))).then(
+                    function(createGroupData){
+                      groupCounter++;
+                      idGroup = createGroupData.group.id;
+                      groupIds.push({
+                        index: counterI,
+                        groupid: idGroup,
+                        oldGroup: groupSelectList[counterI].id
+                      });
+                      if (groupCounter == groupSelectList.length) {
+                        doGenerateGroupMembership(groupIds);
+                      }
+                    },
+                    function(createGroupError){
+                      console.log('=====failed create group=====');
+                      console.log(createGroupError);
+                      errorMigrate.push({
+                        name: groupSelectList[counterI],
+                        error: createGroupError,
+                        type: 'group'
+                      })
+                    });
+                  isGroupExist = false;
+                }
+              },
+              function(srcGroupError){
+                console.log('=====error search groups=====');
+                console.log(srcGroupError);
+              });
+          })(i);
+        }
+      }
+    }
+
+    function doCreateSla() {
+      console.log('CILUK BA...!');
+    }
+
+    function doGenerateGroupMembership (groupIds) {
+      console.log(groupIds);
+      for (var i=0; i<groupIds.length; i++) {
+        (function(counterI){
+          client.request(getGroupMembership(groupIds[i].oldGroup)).then(
+            function(membershipData){
+              var createMembership = [];
+              if (membershipData.group_memberships.length > 0) {
+                for (var j=0; j<membershipData.group_memberships.length; j++) {
+                  (function(counterJ){
+                    client.request(getUsers(membershipData.group_memberships[j].user_id)).then(
+                      function(userData){
+                        console.log(userData);
+                        if (userData.user.email != null || userData.user.email != '') {
+                          client.request(srcUserByEmail_dest(userData.user.email)).then(
+                            function(userDestData){
+                              if (userDestData.results.length > 0) {
+                                console.log('===== user exist =====');
+                                membershipsList.push({
+                                  user_id: userDestData.results[0].id,
+                                  group_id: groupIds[counterI].groupid
+                                });
+                                console.log(membershipsList);
+                              } else {
+                                console.log('=====user doesnt exist=====');
+                                console.log(membershipsList);
+                              }
+                              if (counterI == groupIds.length-1) {
+                                console.log('=====group has finish=====');
+                                console.log(membershipsList);
+                                doCreateMemberships(membershipsList);
+                              }
+                            },
+                            function(userDestEror){
+                              console.log('=====error search users======');
+                              console.log(userDestEror);
+                            });
+                        }
+                      },
+                      function(userError){
+                        console.log('=====error get users=====');
+                        console.log(userError);
+                      });
+                  })(j);
+                }
+              } else {
+                console.log('=====group has no member=====');
+                console.log(groupSelectList[counterI]);
+              }
+            },
+            function(membershipError){
+              console.log('=====ERROR GET MEMBERSHIPS=====');
+              console.log(membershipError);
+            });
+        })(i);
+      }
+    }
+
+    function doCreateMemberships (memberships) {
+      var newMember = new Array({group_memberships: memberships});
+      console.log(newMember);
+      console.log('create memberships');
+      console.log(JSON.stringify(newMember[0]));
+      client.request(createGroupMembership_dest(JSON.stringify(newMember[0]))).then(
+        function(createMembershipsData){
+          console.log(createMembershipsData);
+        },
+        function(createMembershipsError){
+          console.log('createMembershipsError');
+          console.log(createMembershipsError);
+        });
     }
 
     function doCreateAutomations (parameter) {
