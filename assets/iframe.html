@@ -14,9 +14,12 @@
     <ul class="nav nav-tabs" style="padding: 0 20px !important;">
       <li class="active"><a data-toggle="tab" href="#fields">Ticket Fields</a></li>
       <li><a data-toggle="tab" href="#forms">Ticket Forms</a></li>
+      <li><a data-toggle="tab" href="#brands">Brands</a></li>
       <li><a data-toggle="tab" href="#automations">Automations</a></li>
       <li><a data-toggle="tab" href="#sla">SLA Policies</a></li>
       <li><a data-toggle="tab" href="#group">Groups</a></li>
+      <li><a data-toggle="tab" href="#views">Views</a></li>
+      <li><a data-toggle="tab" href="#macros">Macros</a></li>
     </ul>
 
     <div class="tab-content">
@@ -141,6 +144,54 @@
           </div>
         </div>
       </div>
+      <div id="views" class="tab-pane fade">
+        <div class="col-md-12" align="center">
+          <div style="margin-bottom: 10px;">
+            <label class="col-md-12" style="margin-top: 10px;">
+              Views(s) selected: <span id="viewsCounter">0</span>
+            </label>
+            <div class="dropdown col-md-12" style="min-height: 300px; max-height: 300px; overflow-x: hidden;" align="center">
+              <!-- <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Zendesk Ticket Forms
+              <span class="caret"></span></button> -->
+              <table id="usersTable" class="usersTable table table-hover table-condensed well" style="font-size: 12px;">
+                <thead>
+                  <tr id='firstRow' style="text-align: left">
+                    <th style="width: 50px;"><input id="selectallCheckViews" type="checkbox" checked=true></th>
+                    <th>Name</th>
+                  </tr>
+                </thead>
+                <tbody class="viewsContent">
+                  
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="brands" class="tab-pane fade">
+        <div class="col-md-12" align="center">
+          <div style="margin-bottom: 10px;">
+            <label class="col-md-12" style="margin-top: 10px;">
+              Brands(s) selected: <span id="brandsCounter">0</span>
+            </label>
+            <div class="dropdown col-md-12" style="min-height: 300px; max-height: 300px; overflow-x: hidden;" align="center">
+              <!-- <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Zendesk Ticket Forms
+              <span class="caret"></span></button> -->
+              <table id="usersTable" class="usersTable table table-hover table-condensed well" style="font-size: 12px;">
+                <thead>
+                  <tr id='firstRow' style="text-align: left">
+                    <th style="width: 50px;"><input id="selectallCheckBrands" type="checkbox" checked=true></th>
+                    <th>Name</th>
+                  </tr>
+                </thead>
+                <tbody class="brandsContent">
+                  
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div style="float: right; margin-top: 10px; margin-right: 50px;">
@@ -190,14 +241,21 @@
         <div class="modal-content">
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal">&times;</button>
-            <h4 class="modal-title">Migret Result</h4>
+            <h4 class="modal-title" style="font-size: 14px;">On Progress..</h4>
           </div>
           <div class="modal-body row">
-            <div id="error_result_header" class="col-md-12"><span class="spanError">Error(s) when Migrating:</span>
-              <ul class="errorList">
-              </ul>
+            <div id="error_result_header" class="col-md-12"><span class="spanError" style="font-size: 13px;">Error(s) when Migrating:</span>
+              <table class="table table-striped" style="font-size: 12px;">
+                <thead>
+                  <tr>
+                    <th>Type</th>
+                    <th>Message</th>
+                  </tr>
+                </thead>
+                <tbody class="bodyMessage">
+                </tbody>
+              </table>
             </div>
-            
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Okay</button>

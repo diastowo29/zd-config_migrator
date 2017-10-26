@@ -19,6 +19,12 @@
     var groups = [];
     var groupSelectList = [];
 
+    var views = [];
+    var viewSelectList = [];
+
+    var brands = [];
+    var brandsSelectList = [];
+
     var membershipsList = [];
     var allUsers = [];
     // this.doLoading('Sate Padang');
@@ -181,6 +187,18 @@
       return getTickets;
     }
 
+    function getAllBrands (id) {
+      var getTickets = {
+        url: '/api/v2/brands.json',
+        type: 'GET',
+        dataType : "json",
+        contentType: "application/json; charset=utf-8",
+        async: false,
+      }
+      console.log(getTickets);
+      return getTickets;
+    }
+
     function getAllBrandsDest (id) {
       var getTickets = {
         url: ZD_DOMAIN + '/api/v2/brands.json',
@@ -197,7 +215,25 @@
       return getTickets;
     }
 
+    function createBrands (parameter) {
+      var getTickets = {
+        url: ZD_DOMAIN + '/api/v2/brands.json',
+        type: 'POST',
+        headers: {
+          "Authorization": ZD_TOKEN
+        },
+        data: parameter,
+        dataType : "json",
+        contentType: "application/json; charset=utf-8",
+        async: false,
+        cors: true
+      }
+      console.log(getTickets);
+      return getTickets;
+    }
+
     function getOrganizationsById (id) {
+     
       var getTickets = {
         url: '/api/v2/organizations/' + id + '.json',
         type: 'GET',
@@ -212,6 +248,33 @@
     function srcOrganizationDest (input) {
       var getTickets = {
         url: ZD_DOMAIN + '/api/v2/search.json?query=type:organization%20name:' + input,
+        type: 'GET',
+        headers: {
+          "Authorization": ZD_TOKEN
+        },
+        dataType : "json",
+        contentType: "application/json; charset=utf-8",
+        cors: true,
+      }
+      console.log(getTickets);
+      return getTickets;
+    }
+
+    function getSharingAgreement (id) {
+      var getTickets = {
+        url: '/api/v2/sharing_agreements/' + id + '.json',
+        type: 'GET',
+        dataType : "json",
+        contentType: "application/json; charset=utf-8",
+        async: false,
+      }
+      console.log(getTickets);
+      return getTickets;
+    }
+
+    function getAllSharingAgreementDest (input) {
+      var getTickets = {
+        url: ZD_DOMAIN + '/api/v2/sharing_agreements.json',
         type: 'GET',
         headers: {
           "Authorization": ZD_TOKEN
@@ -567,6 +630,53 @@
     }
     /*SLA PART*/
 
+    /*VIEWS PART*/
+    function getViews () {
+      var getTickets = {
+        url: '/api/v2/views.json',
+        type: 'GET',
+        dataType : "json",
+        contentType: "application/json; charset=utf-8",
+        async: false,
+      }
+      console.log(getTickets);
+      return getTickets;
+    }
+
+    function getViewsDest () {
+      var getTickets = {
+        url: ZD_DOMAIN + '/api/v2/views.json',
+        type: 'GET',
+        headers: {
+          "Authorization": ZD_TOKEN
+        },
+        dataType : "json",
+        contentType: "application/json; charset=utf-8",
+        async: false,
+        cors: true,
+      }
+      console.log(getTickets);
+      return getTickets;
+    }
+
+    function createViews (parameter) {
+      var getTickets = {
+        url: ZD_DOMAIN + '/api/v2/views.json',
+        type: 'POST',
+        data: parameter,
+        headers: {
+          "Authorization": ZD_TOKEN
+        },
+        dataType : "json",
+        contentType: "application/json; charset=utf-8",
+        async: false,
+        cors: true,
+      }
+      console.log(getTickets);
+      return getTickets;
+    }
+    /*VIEWS PART*/
+
 
     /*=============FUNCTION PART============*/
     function doSaveConfig(){
@@ -592,24 +702,25 @@
       var automationsContent = '';
       var slaContent = '';
       var groupContent = '';
+      var viewsContent = '';
+      var brandsContent = '';
       document.getElementById('loader').style.visibility = 'visible';
       document.getElementById('mainContent').style.visibility = 'hidden';
-      // client.request(this.getTicketFields()).then(
-      //   function(data) {
-      //     console.log(data);
-      //     ticketFields = data.ticket_fields;
-      //     for (var i = 0; i<data.count; i++) {
-      //       ticketContent += '<tr id="' + data.ticket_fields[i].id + '" class="'+i+'" onClick="editData(1, ' + data.ticket_fields[i].id + ', ' + i + ')" style="cursor:pointer;">'
-      //       +'<td><input class="ticketFeldInput" id="' + data.ticket_fields[i].id + '" type="checkbox"></td>'
-      //       +'<td>' + data.ticket_fields[i].title +'</td>';
-      //       // $('<li id="'+data.ticket_fields[i].id+'" class="normal" onclick="getTicketFieldsSelection('+i+', '+data.ticket_fields[i].id+')"><a href="#">'+data.ticket_fields[i].title+'</a></li>').appendTo( ".custom_fields_list" );
-      //     }
-      //     $('.ticketFieldContent').append(ticketContent);
-      //     document.getElementById('loader').style.visibility = 'hidden';
-      //     document.getElementById('mainContent').style.visibility = 'visible';
-      //   }, function (errors) {
-      //     console.log(errors);
-      //   });
+      client.request(this.getTicketFields()).then(
+        function(data) {
+          console.log(data);
+          ticketFields = data.ticket_fields;
+          for (var i = 0; i<data.count; i++) {
+            ticketContent += '<tr id="' + data.ticket_fields[i].id + '" class="'+i+'" onClick="editData(1, ' + data.ticket_fields[i].id + ', ' + i + ')" style="cursor:pointer;">'
+            +'<td><input class="ticketFeldInput" id="' + data.ticket_fields[i].id + '" type="checkbox"></td>'
+            +'<td>' + data.ticket_fields[i].title +'</td>';
+          }
+          $('.ticketFieldContent').append(ticketContent);
+          document.getElementById('loader').style.visibility = 'hidden';
+          document.getElementById('mainContent').style.visibility = 'visible';
+        }, function (errors) {
+          console.log(errors);
+        });
 
       /*client.request(this.getTriggers()).then(
         function(data) {
@@ -624,21 +735,21 @@
           console.log(errors);
         });*/
 
-      // client.request(this.getTicketForms()).then(
-      //   function(data) {
-      //     console.log(data);
-      //     ticketForms = data.ticket_forms;
-      //     for (var i = 0; i<data.count; i++) {
-      //       formContent += '<tr id="' + data.ticket_forms[i].id + '" class="'+i+'" onClick="editData(2, ' + data.ticket_forms[i].id + ', ' + i + ')" style="cursor:pointer;">'
-      //       +'<td><input class="ticketFormInput" id="' + data.ticket_forms[i].id + '" type="checkbox"></td>'
-      //       +'<td>' + data.ticket_forms[i].raw_name +'</td>';
-      //     }
-      //     document.getElementById('loader').style.visibility = 'hidden';
-      //     document.getElementById('mainContent').style.visibility = 'visible';
-      //     $('.ticketFormsContent').append(formContent);
-      //   }, function (errors) {
-      //     console.log(errors);
-      //   });
+      client.request(this.getTicketForms()).then(
+        function(data) {
+          console.log(data);
+          ticketForms = data.ticket_forms;
+          for (var i = 0; i<data.count; i++) {
+            formContent += '<tr id="' + data.ticket_forms[i].id + '" class="'+i+'" onClick="editData(2, ' + data.ticket_forms[i].id + ', ' + i + ')" style="cursor:pointer;">'
+            +'<td><input class="ticketFormInput" id="' + data.ticket_forms[i].id + '" type="checkbox"></td>'
+            +'<td>' + data.ticket_forms[i].raw_name +'</td>';
+          }
+          document.getElementById('loader').style.visibility = 'hidden';
+          document.getElementById('mainContent').style.visibility = 'visible';
+          $('.ticketFormsContent').append(formContent);
+        }, function (errors) {
+          console.log(errors);
+        });
 
       // client.request(getAutomations()).then(
       //   function(automationsData){
@@ -676,23 +787,59 @@
           console.log(slaError);
         });
 
-      // client.request(getAllGroup()).then(
-      //   function(groupData){
-      //     console.log(groupData);
-      //     groups = groupData.groups;
-      //     for (var i=0; i<groupData.groups.length; i++) {
-      //       groupContent += '<tr id="' + groupData.groups[i].id + '" class="'+i+'" onClick="editData(5, ' + groupData.groups[i].id + ', ' + i + ')" style="cursor:pointer;">'
-      //       +'<td><input class="ticketFormInput" id="' + groupData.groups[i].id + '" type="checkbox"></td>'
-      //       +'<td>' + groupData.groups[i].name +'</td>';
-      //     }
-      //     document.getElementById('loader').style.visibility = 'hidden';
-      //     document.getElementById('mainContent').style.visibility = 'visible';
-      //     $('.groupContent').append(groupContent);
-      //   },
-      //   function(groupError){
-      //     console.log('groupError');
-      //     console.log(groupError);
-      //   });
+      client.request(getAllGroup()).then(
+        function(groupData){
+          console.log(groupData);
+          groups = groupData.groups;
+          for (var i=0; i<groupData.groups.length; i++) {
+            groupContent += '<tr id="' + groupData.groups[i].id + '" class="'+i+'" onClick="editData(5, ' + groupData.groups[i].id + ', ' + i + ')" style="cursor:pointer;">'
+            +'<td><input class="ticketFormInput" id="' + groupData.groups[i].id + '" type="checkbox"></td>'
+            +'<td>' + groupData.groups[i].name +'</td>';
+          }
+          document.getElementById('loader').style.visibility = 'hidden';
+          document.getElementById('mainContent').style.visibility = 'visible';
+          $('.groupContent').append(groupContent);
+        },
+        function(groupError){
+          console.log('groupError');
+          console.log(groupError);
+        });
+
+      client.request(getViews()).then(
+        function(viewses){
+          console.log(viewses)
+          views = viewses.views;
+          for (viewes in viewses.views){
+            viewsContent += '<tr id="' + viewses.views[viewes].id + '" class="'+viewes+'" onClick="editData(6, ' + viewses.views[viewes].id + ', ' + viewes + ')" style="cursor:pointer;">'
+            +'<td><input class="ticketFormInput" id="' + viewses.views[viewes].id + '" type="checkbox"></td>'
+            +'<td>' + viewses.views[viewes].title +'</td>';
+          }
+          document.getElementById('loader').style.visibility = 'hidden';
+          document.getElementById('mainContent').style.visibility = 'visible';
+          $('.viewsContent').append(viewsContent);
+        },
+        function(viewsError){
+          console.log('viewsError');
+          console.log(viewsError);
+        });
+
+      client.request(getAllBrands()).then(
+        function(allBrands){
+          console.log(allBrands);
+          brands = allBrands.brands;
+          for (br in allBrands.brands){
+            brandsContent += '<tr id="' + allBrands.brands[br].id + '" class="'+br+'" onClick="editData(7, ' + allBrands.brands[br].id + ', ' + br + ')" style="cursor:pointer;">'
+            +'<td><input class="ticketFormInput" id="' + allBrands.brands[br].id + '" type="checkbox"></td>'
+            +'<td>' + allBrands.brands[br].name +'</td>';
+          }
+          document.getElementById('loader').style.visibility = 'hidden';
+          document.getElementById('mainContent').style.visibility = 'visible';
+          $('.brandsContent').append(brandsContent);
+        },
+        function(brandsError){
+          console.log('brandsError');
+          console.log(brandsError);
+        });
     }
 
     $("#selectallCheckTicketField").change(function () {
@@ -768,6 +915,24 @@
           if (!isExist) {
             groupSelectList.push(groups[position]);
           }
+        } else if (type == 6) {
+          for (var j = 0; j<viewSelectList.length; j++) {
+            if (viewSelectList[j].id == id) {
+              isExist = true;
+            }
+          }
+          if (!isExist) {
+            viewSelectList.push(views[position]);
+          }
+        } else if (type == 7) {
+          for (var j = 0; j<brandsSelectList.length; j++) {
+            if (brandsSelectList[j].id == id) {
+              isExist = true;
+            }
+          }
+          if (!isExist) {
+            brandsSelectList.push(brands[position]);
+          }
         }
       } else {
         if (type == 1) {
@@ -800,6 +965,18 @@
               groupSelectList.splice(j, 1);
             }
           }
+        } else if (type == 6) {
+          for (var j = 0; j<viewSelectList.length; j++) {
+            if (viewSelectList[j].id == id) {
+              viewSelectList.splice(j, 1);
+            }
+          }
+        } else if (type == 7) {
+          for (var j = 0; j<brandsSelectList.length; j++) {
+            if (brandsSelectList[j].id == id) {
+              brandsSelectList.splice(j, 1);
+            }
+          }
         }
         $('input[id=' + id + ']')[0].checked = false;
       }
@@ -809,6 +986,8 @@
       $('#automationCounter').text(automationsSelectList.length);
       $('#slaCounter').text(slaSelectList.length);
       $('#groupCounter').text(groupSelectList.length);
+      $('#viewsCounter').text(viewSelectList.length);
+      $('#brandsCounter').text(brandsSelectList.length);
     }
 
     function getTriggerSelection (id, triggersId) {
@@ -859,12 +1038,14 @@
       membershipsList = [];
       var migrateCounter = 0;
       errorMigrate = [];
+      showResult();
+      $(".bodyMessage").empty();
       /*=====TICKET FIELDS=====*/
       if (ticketFieldsSelectList.length > 0) {
         var tfCounter = 0;
         client.request(getTicketFields_dest()).then(
           function (data){
-            console.log('get ticket_fields dest');
+            // console.log('get ticket_fields dest');
             for (var i=0; i<ticketFieldsSelectList.length; i++) {
               var ticketFieldsExist = false;
               for (var j = 0; j< data.ticket_fields.length; j++) {
@@ -872,32 +1053,35 @@
                   ticketFieldsExist = true;
                 }
               }
-              if (!ticketFieldsExist) {
-                console.log('ticket_fields notExist');
-                var ticketData = new Array({ticket_field:ticketFieldsSelectList[i]});
-                client.request(createTicketFields(JSON.stringify(ticketData[0]))).then(
-                  function (createData){
-                    tfCounter++;
-                    console.log(createData);
-                    if (tfCounter == ticketFieldsSelectList.length) {
-                      console.log('its DONE');
-                    }
-                  },
-                  function (errorCreateData){
-                    tfCounter++;
-                    if (tfCounter == ticketFieldsSelectList.length) {
-                      console.log('its DONE');
-                    }
-                    console.log('===== error create ticket_fields dest ======');
-                    console.log(errorCreateData);
-                  });
-              } else {
-                tfCounter++;
-                if (tfCounter == ticketFieldsSelectList.length) {
-                  console.log('its DONE');
+              (function(counterI){
+                if (!ticketFieldsExist) {
+                  // console.log('ticket_fields notExist');
+                  var ticketData = new Array({ticket_field:ticketFieldsSelectList[i]});
+                  client.request(createTicketFields(JSON.stringify(ticketData[0]))).then(
+                    function (createData){
+                      tfCounter++;
+                      console.log('create success');
+                      // if (tfCounter == ticketFieldsSelectList.length) {
+                      //   console.log('its DONE');
+                      // }
+                    },
+                    function (errorCreateData){
+                      tfCounter++;
+                      // if (tfCounter == ticketFieldsSelectList.length) {
+                      //   console.log('its DONE');
+                      // }
+                      console.log('===== error create ticket_fields dest ======');
+                      console.log(errorCreateData);
+                      updateProgress('Ticket Fields', 'Error Create Ticket: ' + ticketFieldsSelectList[counterI].title);
+                    });
+                } else {
+                  tfCounter++;
+                  // if (tfCounter == ticketFieldsSelectList.length) {
+                  //   console.log('its DONE');
+                  // }
+                  console.log('ticket_fields Exist');
                 }
-                console.log('ticket_fields Exist');
-              }
+              })(i);
             }
           },
           function (errorData){
@@ -924,15 +1108,18 @@
                       if (!isExist) {
                         var ticketFieldsExist = false;
                         var ticketFieldsCounter = 0;
-                        var ticketFieldsFrom = '';
+                        var ticketFieldsFrom = [];
                         var newTicketIds = [];
                         var ticketFieldsError = false;
                         for (var tf=0; tf<ticketFormsSelectList[i].ticket_field_ids.length; tf++){
+                          ticketFieldsFrom = [];
+                          ticketFieldsExist = false;
                           for (var tfFrom=0; tfFrom<ticketFieldsData.ticket_fields.length; tfFrom++) {
                             if (ticketFormsSelectList[i].ticket_field_ids[tf] == ticketFieldsData.ticket_fields[tfFrom].id) {
                               ticketFieldsFrom = ticketFieldsData.ticket_fields[tfFrom];
                             }
                           }
+                          console.log(ticketFieldsFrom);
                           for (var tfDest=0; tfDest<ticketFieldsDestData.ticket_fields.length; tfDest++){
                             if (ticketFieldsFrom.title == ticketFieldsDestData.ticket_fields[tfDest].title) {
                               ticketFieldsExist = true;
@@ -944,16 +1131,17 @@
                           } else {
                             ticketFieldsError = true;
                             console.log('===== have to create some ticket fields =====');
-
+                            updateProgress('Ticket Forms', ticketFormsSelectList[i].name + ' Error. Some ticket fields not exist: ' + ticketFieldsFrom.title);
                           }
                           ticketFieldsExist = false;
                         }
-                        if (ticketFieldsError) {
-                          errorMigrate.push({
-                            name: ticketFormsSelectList[i].name,
-                            error: 'some ticket fields not exist'
-                          });
-                        }
+                        // if (ticketFieldsError) {
+                        //   updateProgress('Ticket Forms', ticketFormsSelectList[i].name + ' Error. Some ticket fields not exist: ' + ticketFieldsFrom.title);
+                        //   errorMigrate.push({
+                        //     name: ticketFormsSelectList[i].name,
+                        //     error: 'some ticket fields not exist'
+                        //   });
+                        // }
                         (function(counterI){
                           if (ticketFieldsCounter == ticketFormsSelectList[i].ticket_field_ids.length) {
                             ticketFormsSelectList[i].ticket_field_ids = newTicketIds;
@@ -973,6 +1161,7 @@
                                   name: ticketFormsSelectList[counterI].name,
                                   error: createError
                                 });
+                                updateProgress('Ticket Forms', 'Error when create ticket forms: ' + ticketFormsSelectList[counterI].name);
                               });
                             newTicketIds = [];
                           }
@@ -1347,6 +1536,11 @@
                                         }
                                         if (!ticketFieldFound) {
                                           console.log('===== ticket field doest exist =====');
+                                          updateProgress('SLA', slaSelectList[counterI].title + ' Error. Some ticket fields not exist: ' + ticketFieldsData.ticket_field.title);
+                                          // errorMigrate.push({
+                                          //   name: 'SLA: ' + slaSelectList[counterI].title,
+                                          //   error: 'ticket field doesnt exist: ' + ticketFieldData.ticket_field.title
+                                          // });
                                         }
                                       },
                                       function(fieldOptionError){
@@ -1379,7 +1573,12 @@
                                       }
                                     }
                                     if (!brandsIsFound) {
-                                      console.log('===== brands not found =====');
+                                    console.log('===== brands not found =====');
+                                      updateProgress('SLA', slaSelectList[counterI].title + ' Error. Some brands not exist: ' + brands.brand.name);
+                                      // errorMigrate.push({
+                                      //   name: 'SLA: ' + slaSelectList[counterI].title,
+                                      //   error: 'brands doesnt exist: ' + brands.brand.name
+                                      // });
                                     }
                                   },
                                   function(brandsError){
@@ -1408,6 +1607,11 @@
                                     }
                                     if (!ticketFormFound) {
                                       console.log('===== ticket form not found =====');
+                                      updateProgress('SLA', slaSelectList[counterI].title + ' Error. Some ticket form not exist: ' + ticketForm.ticket_form.name);
+                                      // errorMigrate.push({
+                                      //   name: 'SLA: ' + slaSelectList[counterI].title,
+                                      //   error: 'ticket form doesnt exist: ' + ticketForm.ticket_form.name
+                                      // });
                                     }
                                   },
                                   function(ticketFormError){
@@ -1443,7 +1647,12 @@
                                             }
                                           }
                                         } else {
-                                          console.log('===== group not found =====')
+                                          console.log('===== group not found =====');
+                                          updateProgress('SLA', slaSelectList[counterI].title + ' Error. Some groups not exist: ' + groups.group.name);
+                                          // errorMigrate.push({
+                                          //   name: 'SLA: ' + slaSelectList[counterI].title,
+                                          //   error: 'group doesnt exist: ' + groups.group.name
+                                          // });
                                         }
                                       },
                                       function(srcGroupError){
@@ -1474,6 +1683,11 @@
                                           }
                                         } else {
                                           console.log('===== organization not found =====');
+                                          updateProgress('SLA', slaSelectList[counterI].title + ' Error. Some organizations not exist: ' + org.organization.name);
+                                          // errorMigrate.push({
+                                          //   name: 'SLA: ' + slaSelectList[counterI].title,
+                                          //   error: 'organization doesnt exist: ' + org.organization.name
+                                          // });
                                         }
                                       },
                                       function(orgDestError){
@@ -1513,6 +1727,7 @@
                           // if (slaSelectList[i].filter.all)
                         } else {
                           console.log('filter all null');
+                          filterFinish++;
                         }
 
                         if (slaSelectList[i].filter.any.length > 0) {
@@ -1563,6 +1778,11 @@
                                         }
                                         if (!ticketFieldFound) {
                                           console.log('===== ticket field doest exist =====');
+                                          updateProgress('SLA', slaSelectList[counterI].title + ' Error. Some ticket fields not exist: ' + ticketFieldData.ticket_field.title);
+                                          // errorMigrate.push({
+                                          //   name: 'SLA: ' + slaSelectList[counterI].title,
+                                          //   error: 'ticket field doesnt exist: ' + ticketFieldData.ticket_field.title
+                                          // });
                                         }
                                       },
                                       function(fieldOptionError){
@@ -1596,6 +1816,11 @@
                                     }
                                     if (!brandsIsFound) {
                                       console.log('===== brands not found =====');
+                                      updateProgress('SLA', slaSelectList[counterI].title + ' Error. Some brands not exist: ' + brands.brand.name);
+                                      // errorMigrate.push({
+                                      //   name: 'SLA: ' + slaSelectList[counterI].title,
+                                      //   error: 'brands doesnt exist: ' + brands.brand.name
+                                      // });
                                     }
                                   },
                                   function(brandsError){
@@ -1624,6 +1849,11 @@
                                     }
                                     if (!ticketFormFound) {
                                       console.log('===== ticket form not found =====');
+                                      updateProgress('SLA', slaSelectList[counterI].title + ' Error. Some ticket form not exist: ' + ticketForm.ticket_form.name);
+                                      // errorMigrate.push({
+                                      //   name: 'SLA: ' + slaSelectList[counterI].title,
+                                      //   error: 'ticket form doesnt exist: ' + ticketForm.ticket_form.name
+                                      // });
                                     }
                                   },
                                   function(ticketFormError){
@@ -1659,7 +1889,12 @@
                                             }
                                           }
                                         } else {
-                                          console.log('===== group not found =====')
+                                          console.log('===== group not found =====');
+                                          updateProgress('SLA', slaSelectList[counterI].title + ' Error. Some group not exist: ' + groups.group.name);
+                                          // errorMigrate.push({
+                                          //   name: 'SLA: ' + slaSelectList[counterI].title,
+                                          //   error: 'group doesnt exist: ' + groups.group.name
+                                          // });
                                         }
                                       },
                                       function(srcGroupError){
@@ -1690,6 +1925,11 @@
                                           }
                                         } else {
                                           console.log('===== organization not found =====');
+                                          updateProgress('SLA', slaSelectList[counterI].title + ' Error. Some organizations not exist: ' + org.organization.name);
+                                          // errorMigrate.push({
+                                          //   name: 'SLA: ' + slaSelectList[counterI].title,
+                                          //   error: 'organizations doesnt exist: ' + org.organization.name
+                                          // });
                                         }
                                       },
                                       function(orgDestError){
@@ -1728,6 +1968,7 @@
                           }
                         } else {
                           console.log('filter any null');
+                          filterFinish++;
                         }
                       })(i);
                     }
@@ -1756,7 +1997,7 @@
           (function(counterI){
             client.request(srcGroups_dest(groupSelectList[i].name)).then(
               function(srcGroupData){
-                console.log(srcGroupData);
+                // console.log(srcGroupData);
                 var isGroupExist = false;
                 var idGroup = '';
                 if (srcGroupData.results.length > 0) {
@@ -1789,12 +2030,13 @@
                     },
                     function(createGroupError){
                       console.log('=====failed create group=====');
-                      console.log(createGroupError);
-                      errorMigrate.push({
-                        name: groupSelectList[counterI],
-                        error: createGroupError,
-                        type: 'group'
-                      })
+                      updateProgress('Group', 'Error when creating group: ' + groupSelectList[counterI].name);
+                      // console.log(createGroupError);
+                      // errorMigrate.push({
+                      //   name: groupSelectList[counterI],
+                      //   error: createGroupError,
+                      //   type: 'group'
+                      // });
                     });
                   isGroupExist = false;
                 }
@@ -1806,10 +2048,429 @@
           })(i);
         }
       }
+
+      /*=====VIEWS=====*/
+      if (viewSelectList.length > 0) {
+        client.request(getViewsDest()).then(
+          function(viewsDest){
+            client.request(getAllBrandsDest()).then(
+              function(brandsDest){
+                client.request(getAllSharingAgreementDest()).then(
+                  function(shareDest){
+                    client.request(getTicketFields_dest()).then(
+                      function(ticketFieldDest){
+                        for (var i=0; i<viewSelectList.length; i++) {
+                          var viewExist = false;
+                          for (var v=0; v<viewsDest.views.length; v++) {
+                            if (viewSelectList[i].title == viewsDest.views[v].title) {
+                              viewExist = true;
+                            }
+                          }
+                          console.log(viewSelectList[i]);
+                          if (!viewExist) {
+                            var conditionCounter = 0;
+                            (function(counterI){
+                              if (viewSelectList[counterI].restriction != null || viewSelectList[counterI].restriction != '') {
+                                if (viewSelectList[counterI].restriction.type == 'Group') {
+                                  if (isNumeric(viewSelectList[counterI].restriction.id)) {
+                                    client.request(getGroups(viewSelectList[counterI].restriction.id)).then(
+                                      function(group){
+                                        client.request(srcGroups_dest(group.group.name)).then(
+                                          function(srcGroup){
+                                            if (srcGroup.results.length > 0) {
+                                              viewSelectList[counterI].restriction.id = srcGroup.results[0].id;
+                                            } else {
+                                              console.log('===== group not found =====');
+                                              updateProgress('Views', viewSelectList[counterI].title + ' Error, Group not found: ' + group.group.name);
+                                            }
+                                          },
+                                          function(srcGroupError){
+                                            console.log('===== srcGroupError =====');
+                                            console.log(srcGroupError);
+                                          });
+                                      },
+                                      function(groupError) {
+                                        console.log('===== groupError =====');
+                                        console.log(groupError);
+                                      });
+                                  } else {
+                                    conditionCounter++;
+                                    if (conditionCounter == 3) {
+                                      doCreateViews(viewSelectList[counterI]);
+                                    }
+                                  }
+                                }
+                              }
+
+                              if (viewSelectList[i].conditions.all.length > 0) {
+                                var allCounter = 0;
+                                for (var al=0; al<viewSelectList[i].conditions.all.length; al++) {
+                                  (function(counterAL){
+                                    if (viewSelectList[i].conditions.all[al].field == 'brand_id') {
+                                      client.request(getBrands(viewSelectList[i].conditions.all[al].value)).then(
+                                        function(brand){
+                                          var brandFound = false;
+                                          for (allbrands in brandsDest.brands.length) {
+                                            if (brand.brand.name == brandsDest.brands[allbrands].name) {
+                                              brandFound = true;
+                                              allCounter++;
+                                              viewSelectList[counterI].conditions.all[counterAL].value = brandsDest.brands[allbrands].id;
+                                              if (allCounter == viewSelectList[counterI].conditions.all.length) {
+                                                console.log('conditionsAll done');
+                                                conditionCounter++;
+                                                if (conditionCounter == 3) {
+                                                  doCreateViews(viewSelectList[counterI]);
+                                                }
+                                              }
+                                            }
+                                          }
+                                          if (!brandFound) {
+                                            updateProgress('Views', viewSelectList[counterI].title + ' Error, brands not found: ' + brand.brand.name);
+                                          }
+                                        },
+                                        function(brandError){
+                                          console.log('===== brandError =====');
+                                          console.log(brandError);
+                                        });
+                                    } else if (viewSelectList[i].conditions.all[al].field == 'assignee_id') {
+                                      if (isNumeric(viewSelectList[i].conditions.all[al].value)) {
+                                        client.request(getUsers(viewSelectList[i].conditions.all[al].value)).then(
+                                          function(user){
+                                            if (user.user.email != null || user.user.email != '') {
+                                              client.request(srcUserByEmail_dest(user.user.email)).then(
+                                                function(userSrc){
+                                                  if (userSrc.results.length > 0) {
+                                                    allCounter++;
+                                                    viewSelectList[counterI].conditions.all[counterAL].value = userSrc.results[0].id;
+                                                    if (allCounter == viewSelectList[counterI].conditions.all.length) {
+                                                      console.log('conditionsAll done');
+                                                      conditionCounter++;
+                                                      if (conditionCounter == 3) {
+                                                        doCreateViews(viewSelectList[counterI]);
+                                                      }
+                                                    }
+                                                  } else {
+                                                    updateProgress('Views', viewSelectList[counterI].title + ' Error, Assignee not found: ' + user.user.email);
+                                                  }
+                                                },
+                                                function(userSrcError){
+                                                  console.log('===== userSrcError =====');
+                                                  console.log(userSrcError);
+                                                });
+                                            }
+                                          },
+                                          function(userError){
+                                            console.log('===== userError ======');
+                                            console.log(userError);
+                                          });
+                                      } else {
+                                        allCounter++;
+                                        if (allCounter == viewSelectList[counterI].conditions.all.length) {
+                                          console.log('conditionsAll done');
+                                          conditionCounter++;
+                                          if (conditionCounter == 3) {
+                                            doCreateViews(viewSelectList[counterI]);
+                                          }
+                                        }
+                                      }
+                                    } else if (viewSelectList[i].conditions.all[al].field == 'received_from') {
+                                      client.request(getSharingAgreement(viewSelectList[i].conditions.all[al].value)).then(
+                                        function(share){
+                                          var shareFound = false;
+                                          for (var s=0; s<shareDest.sharing_agreements.length; s++){
+                                            if (share.sharing_agreement.name == shareDest.sharing_agreements[s].name) {
+                                              allCounter++;
+                                              shareFound = true;
+                                              viewSelectList[counterI].conditions.all[counterAL].value == shareDest.sharing_agreements[s].id;
+                                              if (allCounter == viewSelectList[counterI].conditions.all.length) {
+                                                console.log('conditionsAll done');
+                                                conditionCounter++;
+                                                if (conditionCounter == 3) {
+                                                  doCreateViews(viewSelectList[counterI]);
+                                                }
+                                              }
+                                            }
+                                          }
+                                          if (!shareFound) {
+                                            console.log('sharing not found');
+                                            updateProgress('Views', viewSelectList[counterI].title + ' Error, Sharing Aggreement not found: ' + share.sharing_agreement.name);
+                                          }
+                                        },
+                                        function(shareError){
+                                          console.log('===== shareError =====');
+                                          console.log(shareError);
+                                        });
+                                    } else if (viewSelectList[i].conditions.all[al].field == 'group_id') {
+                                      if (isNumeric(viewSelectList[i].conditions.all[al].value)){
+                                        client.request(getGroups(viewSelectList[i].conditions.all[al].value)).then(
+                                          function(group){
+                                            client.request(srcGroups_dest(group.group.name)).then(
+                                              function(groupSrc){
+                                                if (groupSrc.results.length > 0) {
+                                                  viewSelectList[counterI].conditions.all[counterAL].value = groupSrc.results[0].id;
+                                                  allCounter++;
+                                                  if (allCounter == viewSelectList[counterI].conditions.all.length) {
+                                                    console.log('conditionsAll done');
+                                                    conditionCounter++;
+                                                    if (conditionCounter == 3) {
+                                                      doCreateViews(viewSelectList[counterI]);
+                                                    }
+                                                  }
+                                                } else {
+                                                  updateProgress('Views', viewSelectList[counterI].title + ' Error, Group not found: ' + group.group.name);
+                                                }
+                                              },
+                                              function(groupSrcError){
+                                                console.log('===== groupSrcError =====');
+                                                console.log(groupSrcError);
+                                              });
+                                          },
+                                          function(groupError){
+                                            console.log('===== groupError =====');
+                                            console.log(groupError);
+                                          });
+                                      } else {
+                                        allCounter++;
+                                        if (allCounter == viewSelectList[counterI].conditions.all.length) {
+                                          console.log('conditionsAll done');
+                                          conditionCounter++;
+                                          if (conditionCounter == 3) {
+                                            doCreateViews(viewSelectList[counterI]);
+                                          }
+                                        }
+                                      }
+                                    } else if (viewSelectList[i].conditions.all[al].field == 'via_id') {
+                                      if (viewSelectList[i].conditions.all[al].value.includes('any_channel')) {
+                                        updateProgress('Views', viewSelectList[counterI].title + ' Error, System cannot understand condition on: ' + viewSelectList[i].conditions.all[al].value);
+                                      } else {
+                                        allCounter++;
+                                        if (allCounter == viewSelectList[counterI].conditions.all.length) {
+                                          console.log('conditionsAll done');
+                                          conditionCounter++;
+                                          if (conditionCounter == 3) {
+                                            doCreateViews(viewSelectList[counterI]);
+                                          }
+                                        }
+                                      }
+                                    } else if (viewSelectList[i].conditions.all[al].field.includes('custom_fields_')) {
+                                        var ticketId = viewSelectList[i].conditions.all[al].field.split('_');
+                                        client.request(getTicketFieldsbyId(ticketId[2])).then(
+                                          function(ticketField){
+                                            var ticketFieldFound = false;
+                                            for (var t=0; t<ticketFieldDest.ticket_fields.length; t++) {
+                                              if (ticketField.ticket_field.title == ticketFieldDest.ticket_fields[t].title) {
+                                                console.log('ticket_fields found with id: ' + ticketFieldDest.ticket_fields[t].id);
+                                                allCounter++
+                                                ticketFieldFound = true;
+                                                viewSelectList[counterI].conditions.all[counterAL].field = 'custom_fields_' + ticketFieldDest.ticket_fields[t].id;
+                                                if (allCounter == viewSelectList[counterI].conditions.all.length) {
+                                                  conditionCounter++;
+                                                  if (conditionCounter == 3) {
+                                                    doCreateViews(viewSelectList[counterI]);
+                                                  }
+                                                }
+                                              }
+                                            }
+                                            if (!ticketFieldFound) {
+                                              console.log('===== ticket field not found =====');
+                                              updateProgress('Views', viewSelectList[counterI].title + ' Error, Ticket field not found: ' + ticketField.ticket_field.title);
+                                            }
+                                          },
+                                          function(ticketFieldError){
+                                            console.log('===== ticketFieldError =====');
+                                            console.log(ticketFieldError);
+                                          });
+                                    } else if (viewSelectList[i].conditions.all[al].field == 'sent_to') {
+                                      client.request(getSharingAgreement(viewSelectList[i].conditions.all[al].value)).then(
+                                        function(share){
+                                          var shareFound = false;
+                                          for (var s=0; s<shareDest.sharing_agreements.length; s++) {
+                                            if (share.sharing_agreement.name == shareDest.sharing_agreements[s].name) {
+                                              shareFound = true;
+                                              allCounter++;
+                                              viewSelectList[counterI].conditions.all[counterAL].value == shareDest.sharing_agreements[s].id;
+                                              if (allCounter == viewSelectList[counterI].conditions.all.length) {
+                                                conditionCounter++;
+                                                if (conditionCounter == 3) {
+                                                  doCreateViews(viewSelectList[counterI]);
+                                                }
+                                              }
+                                            }
+                                          }
+                                          if (!shareFound) {
+                                            console.log('===== sharing agreement not found =====');
+                                            updateProgress('Views', viewSelectList[counterI].title + ' Error, Sharing Aggreement not found: ' + share.sharing_agreement.name);
+                                          }
+                                        },
+                                        function(shareError){
+                                          console.log('===== shareError =====');
+                                          console.log(shareError);
+                                        });
+                                    } else if (viewSelectList[i].conditions.all[al].field == 'via_subtype_id') {
+                                      // allCounter++;
+                                      viewSelectList[i].conditions.all.splice(al, 1);
+                                      if (allCounter == viewSelectList[counterI].conditions.all.length) {
+                                        conditionCounter++;
+                                        if (conditionCounter == 3) {
+                                          doCreateViews(viewSelectList[counterI]);
+                                        }
+                                      }
+                                    } else {
+                                      allCounter++;
+                                      if (allCounter == viewSelectList[counterI].conditions.all.length) {
+                                        console.log('conditionsAll done');
+                                        conditionCounter++;
+                                        if (conditionCounter == 3) {
+                                          doCreateViews(viewSelectList[counterI]);
+                                        }
+                                      }
+                                    }
+                                  })(al);
+                                }
+                              } else {
+                                conditionCounter++;
+                                if (conditionCounter == 3) {
+                                  doCreateViews(viewSelectList[counterI]);
+                                }
+                              }
+                              if (viewSelectList[i].conditions.any.length > 0) {
+                                /*ANY CONDITION PART*/
+                                conditionCounter++;
+                                if (conditionCounter == 3) {
+                                  doCreateViews(viewSelectList[counterI]);
+                                }
+                              } else {
+                                conditionCounter++;
+                                if (conditionCounter == 3) {
+                                  doCreateViews(viewSelectList[counterI]);
+                                }
+                              }
+                            })(i);
+                          } else {
+                            console.log('views exist');
+                          }
+                        }
+                      },
+                      function(ticketFieldDestError){
+                        console.log('===== ticketFieldDestError =====');
+                        console.log(ticketFieldDestError);
+                      });
+                  },
+                  function(shareDestError){
+                    console.log('===== shareDestError =====');
+                    console.log(shareDestError);
+                  });
+              },
+              function(brandsDestError){
+                console.log('brandsDestError');
+                console.log(brandsDestError);
+              });
+          },
+          function(viewsDestError){
+            console.log('===== viewsDestError =====');
+            console.log(viewsDestError);
+          });
+      }
+
+      /*=====BRANDS=====*/
+      if (brandsSelectList.length > 0) {
+        client.request(getTicketForms_dest()).then(
+          function(ticketDestForm){
+            client.request(getAllBrandsDest()).then(
+              function(brandsDest){
+                var brandsCounter = 0;
+                for (var i=0; i<brandsSelectList.length; i++) {
+                  var brandsFound = false;
+                  (function(counterI){
+                    for (var b=0; b<brandsDest.brands.length; b++) {
+                      if (brandsSelectList[i].name == brandsDest.brands[b].name) {
+                        brandsFound = true;
+                      }
+                    }
+                    if (!brandsFound) {
+                      if (brandsSelectList[i].ticket_form_ids.length > 0) {
+                        var newTicketFormIds = [];
+                        var ticketFormsCounter = 0;
+                        for (var t=0; t<brandsSelectList[i].ticket_form_ids.length; t++) {
+                          client.request(getTicketFormsById(brandsSelectList[i].ticket_form_ids[t])).then(
+                            function(ticketForm){
+                              var ticketFormFound = false;
+                              for (var tt=0; tt<ticketDestForm.ticket_forms.length; tt++) {
+                                if (ticketDestForm.ticket_forms[tt].name == ticketForm.ticket_form.name) {
+                                  newTicketFormIds.push(ticketDestForm.ticket_forms[tt].id);
+                                  ticketFormFound = true;
+                                  ticketFormsCounter++;
+                                  if (ticketFormsCounter == brandsSelectList[counterI].ticket_form_ids.length) {
+                                    console.log(newTicketFormIds);
+                                    brandsSelectList[counterI].ticket_form_ids = newTicketFormIds;
+                                    doCreateBrands(brandsSelectList[counterI]);
+                                  }
+                                }
+                              }
+                              if (!ticketFormFound) {
+                                updateProgress('Brands', brandsSelectList[counterI].name + ' Error, Ticket Form not found: ' + ticketForm.ticket_form.name);
+                              }
+                            },
+                            function(ticketFormError){
+                              console.log('===== ticketFormError =====');
+                              console.log(ticketFormError);
+                            });
+                        }
+                      } else {
+                        brandsCounter++;
+                        console.log('no ticket form found, begin create');
+                        doCreateBrands(brandsSelectList[i]);
+                      }
+                    } else {
+                      brandsCounter++;
+                      console.log('brands exist');
+                    }
+                  })(i);
+                }
+              },
+              function(brandsDestError) {
+                console.log('===== brandsDestError =====');
+                console.log(brandsDestError);
+              });
+          },
+          function(ticketDestFormError){
+            console.log('===== ticketDestFormError =====');
+            console.log(ticketDestFormError);
+          });
+      }
+    }
+
+    function doCreateBrands (brandsCreate) {
+      console.log(brandsCreate);
+      var newBrands = new Array ({brand:brandsCreate});
+      client.request(createBrands(JSON.stringify(newBrands[0]))).then(
+        function(create){
+          console.log('Create success');
+          console.log(create);
+        },
+        function(createBrandsError){
+          console.log('===== createViewError =====');
+          console.log(createBrandsError);
+          updateProgress('Brands', brandsCreate.name + ' Error, Something wrong with the parameter..');
+        });
     }
 
     function doCreateSla() {
       console.log('CILUK BA...!');
+    }
+
+    function doCreateViews(viewsCreate){
+      console.log(viewsCreate);
+      var newView = new Array ({view:viewsCreate});
+      client.request(createViews(JSON.stringify(newView[0]))).then(
+        function(create){
+          console.log('Create success');
+          console.log(create);
+        },
+        function(createViewError){
+          console.log('===== createViewError =====');
+          console.log(createViewError);
+        });
     }
 
     function doGenerateGroupMembership (groupIds) {
@@ -1944,15 +2605,13 @@
     }
 
     function showResult(migrateCounter, errorMigrate) {
-      $('.errorList').empty();
-      if (errorMigrate.length > 0) {
-        for (var i=0; i<errorMigrate.length; i++) {
-          $('<li><b>'+errorMigrate[i].name+'</b>: '+errorMigrate[i].errors+'</li>').appendTo('.errorList');
-        }
-      } else {
-        $('.spanError').text('Migret process is done.. !');
-      }
       $('#myModalResult').modal('show');
+    }
+
+    function updateProgress (type, message) {
+      var error = '';
+      error += '<tr><td>' + type + '</td><td>' + message + '</td><tr>';
+      $('.bodyMessage').append(error);
     }
 
     function deleteAllTicketFields () {
