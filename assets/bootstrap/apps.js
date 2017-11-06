@@ -1273,25 +1273,7 @@ function doMigrate () {
                                         console.log(counterArray);
                                         console.log('user found');
                                         automationsSelectList[counterI].actions[counterA].value[0] = srcUser.results[0].id;
-                                        var caCounter = 0;
-                                        for (c in counterArray) {
-                                          var aCounter = automationsSelectList[counterI].actions.length;
-                                          var alCounter = automationsSelectList[counterI].conditions.all.length;
-                                          var anCounter = automationsSelectList[counterI].conditions.any.length;
-                                          if (counterArray[c] == counterI) {
-                                            caCounter++;
-                                            if (caCounter == aCounter + alCounter + anCounter) {
-                                              doCreateAutomations(automationsSelectList[counterI]);
-                                            }
-                                          }
-                                        }
-                                        // actionCounter++;
-                                        // if (counterA == automationsSelectList[counterI].actions.length-1) {
-                                        //   processCounter++
-                                        //   if (processCounter == 3) {
-                                        //     doCreateAutomations(automationsSelectList[counterI]);
-                                        //   }
-                                        // }
+                                        checkQueAutomations(counterArray, counterI);
                                       } else {
                                         console.log('===== user not found =====');
                                         updateProgress('Automations', '<b>' + automationsSelectList[counterI].title + '</b> Error, Users not found: ' + user.user.name);
@@ -1309,25 +1291,7 @@ function doMigrate () {
                               });
                           } else {
                             counterArray.push(counterI);
-                            var caCounter = 0;
-                            for (c in counterArray) {
-                              var aCounter = automationsSelectList[counterI].actions.length;
-                              var alCounter = automationsSelectList[counterI].conditions.all.length;
-                              var anCounter = automationsSelectList[counterI].conditions.any.length;
-                              if (counterArray[c] == counterI) {
-                                caCounter++;
-                                if (caCounter == aCounter + alCounter + anCounter) {
-                                  doCreateAutomations(automationsSelectList[counterI]);
-                                }
-                              }
-                            }
-                            // actionCounter++;
-                            // if (counterA == automationsSelectList[counterI].actions.length-1) {
-                            //   processCounter++
-                            //   if (processCounter == 3) {
-                            //     doCreateAutomations(automationsSelectList[counterI]);
-                            //   }
-                            // }
+                            checkQueAutomations(counterArray, counterI);
                           }
                         } else if (automationsSelectList[i].actions[a].field == 'notification_group') {
                           if (isNumeric(automationsSelectList[i].actions[a].value[0])) {
@@ -1339,25 +1303,7 @@ function doMigrate () {
                                       counterArray.push(counterI);
                                       console.log(counterArray);
                                       automationsSelectList[counterI].actions[counterA].value[0] = srcGroup.results[0].id;
-                                      var caCounter = 0;
-                                      for (c in counterArray) {
-                                        var aCounter = automationsSelectList[counterI].actions.length;
-                                        var alCounter = automationsSelectList[counterI].conditions.all.length;
-                                        var anCounter = automationsSelectList[counterI].conditions.any.length;
-                                        if (counterArray[c] == counterI) {
-                                          caCounter++;
-                                          if (caCounter == aCounter + alCounter + anCounter) {
-                                            doCreateAutomations(automationsSelectList[counterI]);
-                                          }
-                                        }
-                                      }
-                                      // actionCounter++;
-                                      // if (counterA == automationsSelectList[counterI].actions.length-1) {
-                                      //   processCounter++
-                                      //   if (processCounter == 3) {
-                                      //     doCreateAutomations(automationsSelectList[counterI]);
-                                      //   }
-                                      // }
+                                      checkQueAutomations(counterArray, counterI);
                                     } else {
                                       console.log('===== group not found =====');
                                       updateProgress('Automations', '<b>' + automationsSelectList[counterI].title + '</b> Error, Group not found: ' + group.group.name);
@@ -1374,25 +1320,7 @@ function doMigrate () {
                               });
                           } else {
                             counterArray.push(counterI);
-                            var caCounter = 0;
-                            for (c in counterArray) {
-                              var aCounter = automationsSelectList[counterI].actions.length;
-                              var alCounter = automationsSelectList[counterI].conditions.all.length;
-                              var anCounter = automationsSelectList[counterI].conditions.any.length;
-                              if (counterArray[c] == counterI) {
-                                caCounter++;
-                                if (caCounter == aCounter + alCounter + anCounter) {
-                                  doCreateAutomations(automationsSelectList[counterI]);
-                                }
-                              }
-                            }
-                            // actionCounter++;
-                            // if (counterA == automationsSelectList[counterI].actions.length-1) {
-                            //   processCounter++
-                            //   if (processCounter == 3) {
-                            //     doCreateAutomations(automationsSelectList[counterI]);
-                            //   }
-                            // }
+                            checkQueAutomations(counterArray, counterI);
                           }
                         } else if (automationsSelectList[i].actions[a].field.includes('custom_fields_')) {
                           var ticketId = automationsSelectList[i].actions[a].field.split('_');
@@ -1410,25 +1338,7 @@ function doMigrate () {
                                 counterArray.push(counterI);
                                 console.log(counterArray);
                                 automationsSelectList[counterI].actions[counterA].field = 'custom_fields_' + ticketDestId;
-                                var caCounter = 0;
-                                for (c in counterArray) {
-                                  var aCounter = automationsSelectList[counterI].actions.length;
-                                  var alCounter = automationsSelectList[counterI].conditions.all.length;
-                                  var anCounter = automationsSelectList[counterI].conditions.any.length;
-                                  if (counterArray[c] == counterI) {
-                                    caCounter++;
-                                    if (caCounter == aCounter + alCounter + anCounter) {
-                                      doCreateAutomations(automationsSelectList[counterI]);
-                                    }
-                                  }
-                                }
-                                // actionCounter++;
-                                // if (counterA == automationsSelectList[counterI].actions.length-1) {
-                                //   processCounter++
-                                //   if (processCounter == 3) {
-                                //     doCreateAutomations(automationsSelectList[counterI]);
-                                //   }
-                                // }
+                                checkQueAutomations(counterArray, counterI);
                               } else {
                                 console.log('===== ticket field not found =====');
                                 updateProgress('Automations', '<b>' + automationsSelectList[counterI].title + '</b> Error, Ticket Field not found: ' + ticketField.ticket_field.title);
@@ -1439,299 +1349,33 @@ function doMigrate () {
                               console.log(ticketFieldError);
                             });
                         } else {
-                          var caCounter = 0;
-                          for (c in counterArray) {
-                            var aCounter = automationsSelectList[counterI].actions.length;
-                            var alCounter = automationsSelectList[counterI].conditions.all.length;
-                            var anCounter = automationsSelectList[counterI].conditions.any.length;
-                            if (counterArray[c] == counterI) {
-                              caCounter++;
-                              if (caCounter == aCounter + alCounter + anCounter) {
-                                doCreateAutomations(automationsSelectList[counterI]);
-                              }
-                            }
-                          }
-                          // actionCounter++;
-                          // if (counterA == automationsSelectList[counterI].actions.length-1) {
-                          //   processCounter++
-                          //   if (processCounter == 3) {
-                          //     doCreateAutomations(automationsSelectList[counterI]);
-                          //   }
-                          // }
+                          checkQueAutomations(counterArray, counterI);
                         }
                       })(a);
                     }
                   } else {
                     counterArray.push(counterI);
-                    var caCounter = 0;
-                    for (c in counterArray) {
-                      var aCounter = automationsSelectList[counterI].actions.length;
-                      var alCounter = automationsSelectList[counterI].conditions.all.length;
-                      var anCounter = automationsSelectList[counterI].conditions.any.length;
-                      if (counterArray[c] == counterI) {
-                        caCounter++;
-                        if (caCounter == aCounter + alCounter + anCounter) {
-                          doCreateAutomations(automationsSelectList[counterI]);
-                        }
-                      }
-                    }
-                    // processCounter++;
-                    // if (processCounter == 3) {
-                    //   doCreateAutomations(automationsSelectList[counterI]);
-                    // }
+                    checkQueAutomations(counterArray, counterI);
                   }
-
                   if (automationsSelectList[i].conditions.all.length > 0) {
                     counterArray.push(counterI);
-                    var caCounter = 0;
-                    for (c in counterArray) {
-                      var aCounter = automationsSelectList[counterI].actions.length;
-                      var alCounter = automationsSelectList[counterI].conditions.all.length;
-                      var anCounter = automationsSelectList[counterI].conditions.any.length;
-                      if (counterArray[c] == counterI) {
-                        caCounter++;
-                        if (caCounter == aCounter + alCounter + anCounter) {
-                          doCreateAutomations(automationsSelectList[counterI]);
-                        }
-                      }
-                    }
-                    // processCounter++;
-                    // if (processCounter == 3) {
-                    //   doCreateAutomations(automationsSelectList[counterI]);
-                    // }
+                    checkQueAutomations(counterArray, counterI);
                   } else {
                     counterArray.push(counterI);
-                    var caCounter = 0;
-                    for (c in counterArray) {
-                      var aCounter = automationsSelectList[counterI].actions.length;
-                      var alCounter = automationsSelectList[counterI].conditions.all.length;
-                      var anCounter = automationsSelectList[counterI].conditions.any.length;
-                      if (counterArray[c] == counterI) {
-                        caCounter++;
-                        if (caCounter == aCounter + alCounter + anCounter) {
-                          doCreateAutomations(automationsSelectList[counterI]);
-                        }
-                      }
-                    }
-                    // processCounter++;
-                    // if (processCounter == 3) {
-                    //   doCreateAutomations(automationsSelectList[counterI]);
-                    // }
+                    checkQueAutomations(counterArray, counterI);
                   }
 
                   if (automationsSelectList[i].conditions.any.length > 0) {
                     counterArray.push(counterI);
-                    var caCounter = 0;
-                    for (c in counterArray) {
-                      var aCounter = automationsSelectList[counterI].actions.length;
-                      var alCounter = automationsSelectList[counterI].conditions.all.length;
-                      var anCounter = automationsSelectList[counterI].conditions.any.length;
-                      if (counterArray[c] == counterI) {
-                        caCounter++;
-                        if (caCounter == aCounter + alCounter + anCounter) {
-                          doCreateAutomations(automationsSelectList[counterI]);
-                        }
-                      }
-                    }
-                    // processCounter++;
-                    // if (processCounter == 3) {
-                    //   doCreateAutomations(automationsSelectList[counterI]);
-                    // }
+                    checkQueAutomations(counterArray, counterI);
                   } else {
                     counterArray.push(counterI);
-                    var caCounter = 0;
-                    for (c in counterArray) {
-                      var aCounter = automationsSelectList[counterI].actions.length;
-                      var alCounter = automationsSelectList[counterI].conditions.all.length;
-                      var anCounter = automationsSelectList[counterI].conditions.any.length;
-                      if (counterArray[c] == counterI) {
-                        caCounter++;
-                        if (caCounter == aCounter + alCounter + anCounter) {
-                          doCreateAutomations(automationsSelectList[counterI]);
-                        }
-                      }
-                    }
-                    // processCounter++;
-                    // if (processCounter == 3) {
-                    //   doCreateAutomations(automationsSelectList[counterI]);
-                    // }
+                    checkQueAutomations(counterArray, counterI);
                   }
                 })(i);
               } else {
                 console.log('automations exist');
               }
-              // console.log(automationsSelectList[i]);
-              // if (automationsSelectList[i].conditions.all.length > 0){
-              //   (function(counterI){
-              //     for (var cll=0; cll<automationsSelectList[i].conditions.all.length; cll++) {
-              //       if (automationsSelectList[i].conditions.all[cll].field.includes('group_id')) {
-              //         (function(counterJ){
-              //           client.request(getGroups(automationsSelectList[i].conditions.all[cll].value)).then(
-              //             function(groupData){
-              //               if (groupData.group.name !== null) {
-              //                 client.request(srcGroups_dest(groupData.group.name)).then(
-              //                   function(srcGroupDataDest){
-              //                     automationsSelectList[counterI].conditions.all[counterJ].value = srcGroupDataDest.results[0].id;
-              //                   },
-              //                   function(srcGroupDataDestError){
-              //                     console.log('=== FAILED SEARCH GROUP ===');
-              //                     console.log(srcGroupDataDestError);
-              //                   });
-              //               }
-              //             },
-              //             function(groupError){
-              //               console.log('=== FAILED GET GROUP');
-              //               console.log(groupError);
-              //             });
-              //         })(cll);
-              //       }
-              //     }
-              //   })(i);
-              // }
-              // if (automationsSelectList[i].conditions.any.length > 0) {
-              //   (function(counterI){
-              //     for (var cll=0; cll<automationsSelectList[i].conditions.any.length; cll++) {
-              //       if (automationsSelectList[i].conditions.any[cll].field.includes('group_id')) {
-              //         (function(counterJ){
-              //           client.request(getGroups(automationsSelectList[i].conditions.any[cll].value)).then(
-              //             function(groupData){
-              //               if (groupData.group.name !== null) {
-              //                 client.request(srcGroups_dest(groupData.group.name)).then(
-              //                   function(srcGroupDataDest){
-              //                     automationsSelectList[counterI].conditions.any[counterJ].value = srcGroupDataDest.results[0].id;
-              //                   },
-              //                   function(srcGroupDataDestError){
-              //                     console.log('=== FAILED SEARCH GROUP ===');
-              //                     console.log(srcGroupDataDestError);
-              //                   });
-              //               }
-              //             },
-              //             function(groupError){
-              //               console.log('=== FAILED GET GROUP');
-              //               console.log(groupError);
-              //             });
-              //         })(cll); 
-              //       }
-              //     }
-              //   })(i);
-              // }
-              // if (automationsSelectList[i].actions.length > 0) {
-              //   (function(counterI){
-              //     var actionCounter = 0;
-              //     for (var j=0; j<automationsSelectList[i].actions.length; j++) {
-              //       (function(counterA){
-              //         if (automationsSelectList[i].actions[j].field == 'notification_user') {
-              //           if (isNumeric(automationsSelectList[i].actions[j].value[0])){
-              //             (function(counterJ){
-              //               client.request(getUsers(automationsSelectList[counterI].actions[j].value[0])).then(
-              //                 function(usersData){
-              //                   if (usersData.user.email !== null) {
-              //                     client.request(srcUserByEmail_dest(usersData.user.email)).then(
-              //                       function(srcUserData){
-              //                         if (srcUserData.results.length > 0) {
-              //                           actionCounter++;
-              //                           console.log('notif_user: ' + counterA);
-              //                           var userId = srcUserData.results[0].id;
-              //                           automationsSelectList[counterI].actions[counterJ].value[0] = userId;
-              //                           console.log('USER FOUND');
-              //                           if (actionCounter == automationsSelectList[counterI].actions.length) {
-              //                             console.log('AUTOMATIONS FINISH');
-              //                             console.log(automationsSelectList[counterI]);
-              //                           }
-              //                         } else {
-              //                           console.log('=== FAILED GET USER, USER DOESNT EXIST ===');
-              //                         }
-              //                       },
-              //                       function(srcUserDataError){
-              //                         console.log('=== FAILED SEARCH USERS ===');
-              //                         console.log(srcUserDataError);
-              //                       });
-              //                   }
-              //                 },
-              //                 function(usersError){
-              //                   console.log('=== FAILED GET USERS ===');
-              //                   console.log(usersError);
-              //                 });
-              //             })(j);
-              //           } else {
-              //             actionCounter++;
-              //             console.log('notif_user no id: ' + counterA);
-              //             if (actionCounter == automationsSelectList[counterI].actions.length) {
-              //               console.log('AUTOMATIONS NO USERS ID');
-              //               console.log(automationsSelectList[counterI]); 
-              //             }
-              //           }
-              //         }
-              //         if (automationsSelectList[i].actions[j].field == 'notification_group') {
-              //           if (isNumeric(automationsSelectList[i].actions[j].value[0])){
-              //             (function(counterJ){
-              //               client.request(getGroups(automationsSelectList[counterI].actions[j].value[0])).then(
-              //                 function(groupData){
-              //                   if (groupData.group.name !== null) {
-              //                     client.request(srcGroups_dest(groupData.group.name)).then(
-              //                       function(srcGroupData){                                  
-              //                         if (srcGroupData.results.length > 0) {
-              //                           actionCounter++;
-              //                           console.log('notif_group: ' + counterA);
-              //                           var userId = srcGroupData.results[0].id;
-              //                           automationsSelectList[counterI].actions[counterJ].value[0] = userId;
-              //                           console.log('GROUP FOUND');
-              //                           if (actionCounter == automationsSelectList[counterI].actions.length) {
-              //                             console.log('AUTOMATIONS FINISH');
-              //                             console.log(automationsSelectList[counterI]);
-              //                           }
-              //                         } else {
-              //                           console.log('=== FAILED GET GROUP, GROUP DOESNT EXIST ===');
-              //                         }
-              //                       },
-              //                       function(srcGroupDataError){
-              //                         console.log('=== FAILED SEARCH GROUP ===');
-              //                         console.log(srcUserDataError);
-              //                       });
-              //                   }
-              //                 },
-              //                 function(groupDataError){
-              //                   console.log('=== FAILED GET GROUP ===');
-              //                   console.log(groupDataError);
-              //                 });
-              //             })(j);
-              //           } else {
-              //             actionCounter++;
-              //             console.log('notif_group no id: ' + counterA);
-              //             if (actionCounter == automationsSelectList[counterI].actions.length) {
-              //               console.log('AUTOMATIONS NO GROUPS ID');
-              //               console.log(automationsSelectList[counterI]);
-              //             }
-              //           }
-              //         }
-              //         if (automationsSelectList[i].actions[j].field.includes('custom_fields_')) {
-              //           var ticketFieldsId = automationsSelectList[i].actions[j].field.split('_');
-              //           (function(counterJ){
-              //             client.request(getTicketFieldsbyId(ticketFieldsId[2])).then(
-              //               function(ticketFieldsData){
-              //                 for (var x=0; x<ticketFieldsDestData.ticket_fields.length; x++){
-              //                   if (ticketFieldsData.ticket_field.title == ticketFieldsDestData.ticket_fields[x].title){
-              //                     actionCounter++;
-              //                     automationsSelectList[counterI].actions[counterJ].field = 'custom_fields_' + ticketFieldsDestData.ticket_fields[x].id;
-              //                   }
-              //                 }
-              //                 if (actionCounter == automationsSelectList[counterI].actions.length) {
-              //                   console.log('AUTOMATIONS FINISH');
-              //                   console.log(automationsSelectList[counterI]);
-              //                 }
-              //               },
-              //               function(ticketFieldsError){
-              //                 console.log('=== FAILED GET TICKET FIELDS ===');
-              //                 console.log(ticketFieldsError);
-              //               });
-              //           })(j);
-              //         }
-              //       })(j);
-              //     }
-              //   })(i);
-              // } else {
-              //   console.log('automations has no actions');
-              // }
             }
           },
           function(automationsDestError){
@@ -2451,7 +2095,7 @@ function doMigrate () {
                                       function(srcGroup){
                                         if (srcGroup.results.length > 0) {
                                           viewSelectList[counterI].restriction.id = srcGroup.results[0].id;
-                                          checkQue (counterArray, viewSelectList, counterI);
+                                          checkQueViewSelectList (counterArray, viewSelectList, counterI);
                                         } else {
                                           console.log('===== group not found =====');
                                           updateProgress('Views', '<b>' + viewSelectList[counterI].title + '</b> Error, Group not found: ' + group.group.name);
@@ -2467,7 +2111,7 @@ function doMigrate () {
                                     console.log(groupError);
                                   });
                               } else {
-                                checkQue (counterArray, viewSelectList, counterI);
+                                checkQueViewSelectList (counterArray, viewSelectList, counterI);
                               }
                             }
                           }
@@ -2486,7 +2130,7 @@ function doMigrate () {
                                           brandFound = true;
                                           allCounter++;
                                           viewSelectList[counterI].conditions.all[counterAL].value = '' + brandsDest.brands[allbrands].id + '';
-                                          checkQue (counterArray, viewSelectList, counterI);
+                                          checkQueViewSelectList (counterArray, viewSelectList, counterI);
                                         }
                                       }
                                       if (!brandFound) {
@@ -2507,7 +2151,7 @@ function doMigrate () {
                                               if (userSrc.results.length > 0) {
                                                 allCounter++;
                                                 viewSelectList[counterI].conditions.all[counterAL].value = '' + userSrc.results[0].id + '';
-                                                checkQue (counterArray, viewSelectList, counterI);
+                                                checkQueViewSelectList (counterArray, viewSelectList, counterI);
                                               } else {
                                                 updateProgress('Views', '<b>' + viewSelectList[counterI].title + '</b> Error, Assignee not found: ' + user.user.email);
                                               }
@@ -2524,7 +2168,7 @@ function doMigrate () {
                                       });
                                   } else {
                                     allCounter++;
-                                    checkQue (counterArray, viewSelectList, counterI);
+                                    checkQueViewSelectList (counterArray, viewSelectList, counterI);
                                   }
                                 } else if (viewSelectList[i].conditions.all[al].field == 'received_from') {
                                   client.request(getSharingAgreement(viewSelectList[i].conditions.all[al].value)).then(
@@ -2535,7 +2179,7 @@ function doMigrate () {
                                           allCounter++;
                                           shareFound = true;
                                           viewSelectList[counterI].conditions.all[counterAL].value == '' + shareDest.sharing_agreements[s].id + '';
-                                          checkQue (counterArray, viewSelectList, counterI);
+                                          checkQueViewSelectList (counterArray, viewSelectList, counterI);
                                         }
                                       }
                                       if (!shareFound) {
@@ -2555,7 +2199,7 @@ function doMigrate () {
                                           function(groupSrc){
                                             if (groupSrc.results.length > 0) {
                                               viewSelectList[counterI].conditions.all[counterAL].value = '' + groupSrc.results[0].id + '';
-                                              checkQue (counterArray, viewSelectList, counterI);
+                                              checkQueViewSelectList (counterArray, viewSelectList, counterI);
                                             } else {
                                               updateProgress('Views', '<b>' + viewSelectList[counterI].title + '</b> Error, Group not found: ' + group.group.name);
                                             }
@@ -2571,14 +2215,14 @@ function doMigrate () {
                                       });
                                   } else {
                                     allCounter++;
-                                    checkQue (counterArray, viewSelectList, counterI);
+                                    checkQueViewSelectList (counterArray, viewSelectList, counterI);
                                   }
                                 } else if (viewSelectList[i].conditions.all[al].field == 'via_id') {
                                   if (viewSelectList[i].conditions.all[al].value.includes('any_channel')) {
                                     updateProgress('Views', '<b>' + viewSelectList[counterI].title + '</b> Error, System cannot understand condition on: ' + viewSelectList[i].conditions.all[al].value);
                                   } else {
                                     allCounter++;
-                                    checkQue (counterArray, viewSelectList, counterI);
+                                    checkQueViewSelectList (counterArray, viewSelectList, counterI);
                                   }
                                 } else if (viewSelectList[i].conditions.all[al].field.includes('custom_fields_')) {
                                     var ticketId = viewSelectList[i].conditions.all[al].field.split('_');
@@ -2591,7 +2235,7 @@ function doMigrate () {
                                             allCounter++
                                             ticketFieldFound = true;
                                             viewSelectList[counterI].conditions.all[counterAL].field = 'custom_fields_' + ticketFieldDest.ticket_fields[t].id;
-                                            checkQue (counterArray, viewSelectList, counterI);
+                                            checkQueViewSelectList (counterArray, viewSelectList, counterI);
                                           }
                                         }
                                         if (!ticketFieldFound) {
@@ -2612,7 +2256,7 @@ function doMigrate () {
                                           shareFound = true;
                                           allCounter++;
                                           viewSelectList[counterI].conditions.all[counterAL].value = '' + shareDest.sharing_agreements[s].id + '';
-                                          checkQue (counterArray, viewSelectList, counterI);
+                                          checkQueViewSelectList (counterArray, viewSelectList, counterI);
                                         }
                                       }
                                       if (!shareFound) {
@@ -2626,7 +2270,7 @@ function doMigrate () {
                                     });
                                 } else {
                                   allCounter++;
-                                  checkQue (counterArray, viewSelectList, counterI);
+                                  checkQueViewSelectList (counterArray, viewSelectList, counterI);
                                 }
                               })(al);
                             }
@@ -2646,7 +2290,7 @@ function doMigrate () {
                                           brandFound = true;
                                           anyCounter++;
                                           viewSelectList[counterI].conditions.any[counterAL].value = '' + brandsDest.brands[anybrands].id + '';
-                                          checkQue (counterArray, viewSelectList, counterI);
+                                          checkQueViewSelectList (counterArray, viewSelectList, counterI);
                                         }
                                       }
                                       if (!brandFound) {
@@ -2667,7 +2311,7 @@ function doMigrate () {
                                               if (userSrc.results.length > 0) {
                                                 anyCounter++;
                                                 viewSelectList[counterI].conditions.any[counterAL].value = '' + userSrc.results[0].id + '';
-                                                checkQue (counterArray, viewSelectList, counterI);
+                                                checkQueViewSelectList (counterArray, viewSelectList, counterI);
                                               } else {
                                                 updateProgress('Views', '<b>' + viewSelectList[counterI].title + '</b> Error, Assignee not found: ' + user.user.email);
                                               }
@@ -2684,7 +2328,7 @@ function doMigrate () {
                                       });
                                   } else {
                                     anyCounter++;
-                                    checkQue (counterArray, viewSelectList, counterI);
+                                    checkQueViewSelectList (counterArray, viewSelectList, counterI);
                                   }
                                 } else if (viewSelectList[i].conditions.any[al].field == 'received_from') {
                                   client.request(getSharingAgreement(viewSelectList[i].conditions.any[al].value)).then(
@@ -2695,7 +2339,7 @@ function doMigrate () {
                                           anyCounter++;
                                           shareFound = true;
                                           viewSelectList[counterI].conditions.any[counterAL].value = '' + shareDest.sharing_agreements[s].id + '';
-                                          checkQue (counterArray, viewSelectList, counterI);
+                                          checkQueViewSelectList (counterArray, viewSelectList, counterI);
                                         }
                                       }
                                       if (!shareFound) {
@@ -2716,7 +2360,7 @@ function doMigrate () {
                                             if (groupSrc.results.length > 0) {
                                               viewSelectList[counterI].conditions.any[counterAL].value = '' + groupSrc.results[0].id + '';
                                               anyCounter++;
-                                              checkQue (counterArray, viewSelectList, counterI);
+                                              checkQueViewSelectList (counterArray, viewSelectList, counterI);
                                             } else {
                                               updateProgress('Views', '<b>' + viewSelectList[counterI].title + '</b> Error, Group not found: ' + group.group.name);
                                             }
@@ -2732,14 +2376,14 @@ function doMigrate () {
                                       });
                                   } else {
                                     anyCounter++;
-                                    checkQue (counterArray, viewSelectList, counterI);
+                                    checkQueViewSelectList (counterArray, viewSelectList, counterI);
                                   }
                                 } else if (viewSelectList[i].conditions.any[al].field == 'via_id') {
                                   if (viewSelectList[i].conditions.any[al].value.includes('any_channel')) {
                                     updateProgress('Views', '<b>' + viewSelectList[counterI].title + '</b> Error, System cannot understand condition on: ' + viewSelectList[i].conditions.any[al].value);
                                   } else {
                                     anyCounter++;
-                                    checkQue (counterArray, viewSelectList, counterI);
+                                    checkQueViewSelectList (counterArray, viewSelectList, counterI);
                                   }
                                 } else if (viewSelectList[i].conditions.any[al].field.includes('custom_fields_')) {
                                     var ticketId = viewSelectList[i].conditions.any[al].field.split('_');
@@ -2752,7 +2396,7 @@ function doMigrate () {
                                             anyCounter++
                                             ticketFieldFound = true;
                                             viewSelectList[counterI].conditions.any[counterAL].field = 'custom_fields_' + ticketFieldDest.ticket_fields[t].id;
-                                            checkQue (counterArray, viewSelectList, counterI);
+                                            checkQueViewSelectList (counterArray, viewSelectList, counterI);
                                           }
                                         }
                                         if (!ticketFieldFound) {
@@ -2773,7 +2417,7 @@ function doMigrate () {
                                           shareFound = true;
                                           anyCounter++;
                                           viewSelectList[counterI].conditions.any[counterAL].value = '' + shareDest.sharing_agreements[s].id + '';
-                                          checkQue (counterArray, viewSelectList, counterI);
+                                          checkQueViewSelectList (counterArray, viewSelectList, counterI);
                                         }
                                       }
                                       if (!shareFound) {
@@ -2787,7 +2431,7 @@ function doMigrate () {
                                     });
                                 } else {
                                   anyCounter++;
-                                  checkQue (counterArray, viewSelectList, counterI);
+                                  checkQueViewSelectList (counterArray, viewSelectList, counterI);
                                 }
                               })(al);
                             }
@@ -2807,7 +2451,7 @@ function doMigrate () {
                                             viewSelectList[counterI].execution.columns[col].url = ticketFieldDest.ticket_fields[cfd].url;
                                           }
                                         }
-                                        checkQue (counterArray, viewSelectList, counterI);
+                                        checkQueViewSelectList (counterArray, viewSelectList, counterI);
                                       }
                                     }
                                   },
@@ -2826,7 +2470,7 @@ function doMigrate () {
                                     viewSelectList[counterI].execution.group.id = ticketFieldDest.ticket_fields[cfd].id;
                                     viewSelectList[counterI].execution.group.url = ticketFieldDest.ticket_fields[cfd].url;
                                     viewSelectList[counterI].execution.group_by = ticketFieldDest.ticket_fields[cfd].id;
-                                    checkQue (counterArray, viewSelectList, counterI);
+                                    checkQueViewSelectList (counterArray, viewSelectList, counterI);
                                   }
                                 }
                               },
@@ -2843,7 +2487,7 @@ function doMigrate () {
                                     viewSelectList[counterI].execution.sort.id = ticketFieldDest.ticket_fields[cfd].id;
                                     viewSelectList[counterI].execution.sort.url = ticketFieldDest.ticket_fields[cfd].url;
                                     viewSelectList[counterI].execution.sort = ticketFieldDest.ticket_fields[cfd].id;
-                                    checkQue (counterArray, viewSelectList, counterI);
+                                    checkQueViewSelectList (counterArray, viewSelectList, counterI);
                                   }
                                 }
                               },
@@ -3195,7 +2839,7 @@ function doMigrate () {
   }
 }
 
-function checkQue (counterArray, selectList, counterI) {
+function checkQueViewSelectList (counterArray, selectList, counterI) {
   counterArray.push(counterI);
   var caCounter = 0;
   var alCounter = selectList[counterI].conditions.all.length;
@@ -3216,6 +2860,21 @@ function checkQue (counterArray, selectList, counterI) {
       caCounter++;
       if (caCounter == allCounter) {
         doCreateViews(selectList[counterI]);
+      }
+    }
+  }
+}
+
+function checkQueAutomations (counterArray, counterI) {
+  var caCounter = 0;
+  for (c in counterArray) {
+    var aCounter = automationsSelectList[counterI].actions.length;
+    var alCounter = automationsSelectList[counterI].conditions.all.length;
+    var anCounter = automationsSelectList[counterI].conditions.any.length;
+    if (counterArray[c] == counterI) {
+      caCounter++;
+      if (caCounter == aCounter + alCounter + anCounter) {
+        doCreateAutomations(automationsSelectList[counterI]);
       }
     }
   }
