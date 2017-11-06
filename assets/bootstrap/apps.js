@@ -804,41 +804,41 @@
           console.log(errors);
         });
 
-      // client.request(getAutomations()).then(
-      //   function(automationsData){
-      //     console.log(automationsData);
-      //     automations = automationsData.automations;
-      //     for (var i=0; i<automationsData.automations.length; i++) {
-      //       automationsContent += '<tr id="' + automationsData.automations[i].id + '" class="'+i+'" onClick="editData(3, ' + automationsData.automations[i].id + ', ' + i + ')" style="cursor:pointer;">'
-      //       +'<td><input class="ticketFormInput" id="' + automationsData.automations[i].id + '" type="checkbox"></td>'
-      //       +'<td>' + automationsData.automations[i].raw_title +'</td>';
-      //     }
-      //     document.getElementById('loader').style.visibility = 'hidden';
-      //     document.getElementById('mainContent').style.visibility = 'visible';
-      //     $('.automationContent').append(automationsContent);
-      //   },
-      //   function(automationsError){
-      //     console.log('automationsError');
-      //     console.log(automationsError);
-      //   });
+      client.request(getAutomations()).then(
+        function(automationsData){
+          console.log(automationsData);
+          automations = automationsData.automations;
+          for (var i=0; i<automationsData.automations.length; i++) {
+            automationsContent += '<tr id="' + automationsData.automations[i].id + '" class="'+i+'" onClick="editData(3, ' + automationsData.automations[i].id + ', ' + i + ')" style="cursor:pointer;">'
+            +'<td><input class="ticketFormInput" id="' + automationsData.automations[i].id + '" type="checkbox"></td>'
+            +'<td>' + automationsData.automations[i].raw_title +'</td>';
+          }
+          document.getElementById('loader').style.visibility = 'hidden';
+          document.getElementById('mainContent').style.visibility = 'visible';
+          $('.automationContent').append(automationsContent);
+        },
+        function(automationsError){
+          console.log('automationsError');
+          console.log(automationsError);
+        });
 
-      // client.request(getSla()).then(
-      //   function(slaData){
-      //     console.log(slaData);
-      //     slas = slaData.sla_policies;
-      //     for (slases in slaData.sla_policies){
-      //       slaContent += '<tr id="' + slaData.sla_policies[slases].id + '" class="'+slases+'" onClick="editData(4, ' + slaData.sla_policies[slases].id + ', ' + slases + ')" style="cursor:pointer;">'
-      //       +'<td><input class="ticketFormInput" id="' + slaData.sla_policies[slases].id + '" type="checkbox"></td>'
-      //       +'<td>' + slaData.sla_policies[slases].title +'</td>';
-      //     }
-      //     document.getElementById('loader').style.visibility = 'hidden';
-      //     document.getElementById('mainContent').style.visibility = 'visible';
-      //     $('.slaContent').append(slaContent);
-      //   },
-      //   function(slaError){
-      //     console.log('slaError');
-      //     console.log(slaError);
-      //   });
+      client.request(getSla()).then(
+        function(slaData){
+          console.log(slaData);
+          slas = slaData.sla_policies;
+          for (slases in slaData.sla_policies){
+            slaContent += '<tr id="' + slaData.sla_policies[slases].id + '" class="'+slases+'" onClick="editData(4, ' + slaData.sla_policies[slases].id + ', ' + slases + ')" style="cursor:pointer;">'
+            +'<td><input class="ticketFormInput" id="' + slaData.sla_policies[slases].id + '" type="checkbox"></td>'
+            +'<td>' + slaData.sla_policies[slases].title +'</td>';
+          }
+          document.getElementById('loader').style.visibility = 'hidden';
+          document.getElementById('mainContent').style.visibility = 'visible';
+          $('.slaContent').append(slaContent);
+        },
+        function(slaError){
+          console.log('slaError');
+          console.log(slaError);
+        });
 
       client.request(getAllGroup()).then(
         function(groupData){
@@ -876,41 +876,41 @@
           console.log(viewsError);
         });
 
-      // client.request(getAllBrands()).then(
-      //   function(allBrands){
-      //     console.log(allBrands);
-      //     brands = allBrands.brands;
-      //     for (br in allBrands.brands){
-      //       brandsContent += '<tr id="' + allBrands.brands[br].id + '" class="'+br+'" onClick="editData(7, ' + allBrands.brands[br].id + ', ' + br + ')" style="cursor:pointer;">'
-      //       +'<td><input class="ticketFormInput" id="' + allBrands.brands[br].id + '" type="checkbox"></td>'
-      //       +'<td>' + allBrands.brands[br].name +'</td>';
-      //     }
-      //     document.getElementById('loader').style.visibility = 'hidden';
-      //     document.getElementById('mainContent').style.visibility = 'visible';
-      //     $('.brandsContent').append(brandsContent);
-      //   },
-      //   function(brandsError){
-      //     console.log('brandsError');
-      //     console.log(brandsError);
-      //   });
+      client.request(getAllBrands()).then(
+        function(allBrands){
+          console.log(allBrands);
+          brands = allBrands.brands;
+          for (br in allBrands.brands){
+            brandsContent += '<tr id="' + allBrands.brands[br].id + '" class="'+br+'" onClick="editData(7, ' + allBrands.brands[br].id + ', ' + br + ')" style="cursor:pointer;">'
+            +'<td><input class="ticketFormInput" id="' + allBrands.brands[br].id + '" type="checkbox"></td>'
+            +'<td>' + allBrands.brands[br].name +'</td>';
+          }
+          document.getElementById('loader').style.visibility = 'hidden';
+          document.getElementById('mainContent').style.visibility = 'visible';
+          $('.brandsContent').append(brandsContent);
+        },
+        function(brandsError){
+          console.log('brandsError');
+          console.log(brandsError);
+        });
 
-      // client.request(getMacros()).then(
-      //   function(macro){
-      //     console.log(macro);
-      //     macros = macro.macros;
-      //     for (br in macro.macros){
-      //       macrosContent += '<tr id="' + macro.macros[br].id + '" class="'+br+'" onClick="editData(8, ' + macro.macros[br].id + ', ' + br + ')" style="cursor:pointer;">'
-      //       +'<td><input class="ticketFormInput" id="' + macro.macros[br].id + '" type="checkbox"></td>'
-      //       +'<td>' + macro.macros[br].title +'</td>';
-      //     }
-      //     document.getElementById('loader').style.visibility = 'hidden';
-      //     document.getElementById('mainContent').style.visibility = 'visible';
-      //     $('.macrosContent').append(macrosContent);    
-      //   },
-      //   function(macroError){
-      //     console.log('macroError');
-      //     console.log(macroError);
-      //   });
+      client.request(getMacros()).then(
+        function(macro){
+          console.log(macro);
+          macros = macro.macros;
+          for (br in macro.macros){
+            macrosContent += '<tr id="' + macro.macros[br].id + '" class="'+br+'" onClick="editData(8, ' + macro.macros[br].id + ', ' + br + ')" style="cursor:pointer;">'
+            +'<td><input class="ticketFormInput" id="' + macro.macros[br].id + '" type="checkbox"></td>'
+            +'<td>' + macro.macros[br].title +'</td>';
+          }
+          document.getElementById('loader').style.visibility = 'hidden';
+          document.getElementById('mainContent').style.visibility = 'visible';
+          $('.macrosContent').append(macrosContent);    
+        },
+        function(macroError){
+          console.log('macroError');
+          console.log(macroError);
+        });
     }
 
     $("#selectallCheckTicketField").change(function () {
