@@ -804,41 +804,41 @@
           console.log(errors);
         });
 
-      client.request(getAutomations()).then(
-        function(automationsData){
-          console.log(automationsData);
-          automations = automationsData.automations;
-          for (var i=0; i<automationsData.automations.length; i++) {
-            automationsContent += '<tr id="' + automationsData.automations[i].id + '" class="'+i+'" onClick="editData(3, ' + automationsData.automations[i].id + ', ' + i + ')" style="cursor:pointer;">'
-            +'<td><input class="ticketFormInput" id="' + automationsData.automations[i].id + '" type="checkbox"></td>'
-            +'<td>' + automationsData.automations[i].raw_title +'</td>';
-          }
-          document.getElementById('loader').style.visibility = 'hidden';
-          document.getElementById('mainContent').style.visibility = 'visible';
-          $('.automationContent').append(automationsContent);
-        },
-        function(automationsError){
-          console.log('automationsError');
-          console.log(automationsError);
-        });
+      // client.request(getAutomations()).then(
+      //   function(automationsData){
+      //     console.log(automationsData);
+      //     automations = automationsData.automations;
+      //     for (var i=0; i<automationsData.automations.length; i++) {
+      //       automationsContent += '<tr id="' + automationsData.automations[i].id + '" class="'+i+'" onClick="editData(3, ' + automationsData.automations[i].id + ', ' + i + ')" style="cursor:pointer;">'
+      //       +'<td><input class="ticketFormInput" id="' + automationsData.automations[i].id + '" type="checkbox"></td>'
+      //       +'<td>' + automationsData.automations[i].raw_title +'</td>';
+      //     }
+      //     document.getElementById('loader').style.visibility = 'hidden';
+      //     document.getElementById('mainContent').style.visibility = 'visible';
+      //     $('.automationContent').append(automationsContent);
+      //   },
+      //   function(automationsError){
+      //     console.log('automationsError');
+      //     console.log(automationsError);
+      //   });
 
-      client.request(getSla()).then(
-        function(slaData){
-          console.log(slaData);
-          slas = slaData.sla_policies;
-          for (slases in slaData.sla_policies){
-            slaContent += '<tr id="' + slaData.sla_policies[slases].id + '" class="'+slases+'" onClick="editData(4, ' + slaData.sla_policies[slases].id + ', ' + slases + ')" style="cursor:pointer;">'
-            +'<td><input class="ticketFormInput" id="' + slaData.sla_policies[slases].id + '" type="checkbox"></td>'
-            +'<td>' + slaData.sla_policies[slases].title +'</td>';
-          }
-          document.getElementById('loader').style.visibility = 'hidden';
-          document.getElementById('mainContent').style.visibility = 'visible';
-          $('.slaContent').append(slaContent);
-        },
-        function(slaError){
-          console.log('slaError');
-          console.log(slaError);
-        });
+      // client.request(getSla()).then(
+      //   function(slaData){
+      //     console.log(slaData);
+      //     slas = slaData.sla_policies;
+      //     for (slases in slaData.sla_policies){
+      //       slaContent += '<tr id="' + slaData.sla_policies[slases].id + '" class="'+slases+'" onClick="editData(4, ' + slaData.sla_policies[slases].id + ', ' + slases + ')" style="cursor:pointer;">'
+      //       +'<td><input class="ticketFormInput" id="' + slaData.sla_policies[slases].id + '" type="checkbox"></td>'
+      //       +'<td>' + slaData.sla_policies[slases].title +'</td>';
+      //     }
+      //     document.getElementById('loader').style.visibility = 'hidden';
+      //     document.getElementById('mainContent').style.visibility = 'visible';
+      //     $('.slaContent').append(slaContent);
+      //   },
+      //   function(slaError){
+      //     console.log('slaError');
+      //     console.log(slaError);
+      //   });
 
       client.request(getAllGroup()).then(
         function(groupData){
@@ -876,41 +876,41 @@
           console.log(viewsError);
         });
 
-      client.request(getAllBrands()).then(
-        function(allBrands){
-          console.log(allBrands);
-          brands = allBrands.brands;
-          for (br in allBrands.brands){
-            brandsContent += '<tr id="' + allBrands.brands[br].id + '" class="'+br+'" onClick="editData(7, ' + allBrands.brands[br].id + ', ' + br + ')" style="cursor:pointer;">'
-            +'<td><input class="ticketFormInput" id="' + allBrands.brands[br].id + '" type="checkbox"></td>'
-            +'<td>' + allBrands.brands[br].name +'</td>';
-          }
-          document.getElementById('loader').style.visibility = 'hidden';
-          document.getElementById('mainContent').style.visibility = 'visible';
-          $('.brandsContent').append(brandsContent);
-        },
-        function(brandsError){
-          console.log('brandsError');
-          console.log(brandsError);
-        });
+      // client.request(getAllBrands()).then(
+      //   function(allBrands){
+      //     console.log(allBrands);
+      //     brands = allBrands.brands;
+      //     for (br in allBrands.brands){
+      //       brandsContent += '<tr id="' + allBrands.brands[br].id + '" class="'+br+'" onClick="editData(7, ' + allBrands.brands[br].id + ', ' + br + ')" style="cursor:pointer;">'
+      //       +'<td><input class="ticketFormInput" id="' + allBrands.brands[br].id + '" type="checkbox"></td>'
+      //       +'<td>' + allBrands.brands[br].name +'</td>';
+      //     }
+      //     document.getElementById('loader').style.visibility = 'hidden';
+      //     document.getElementById('mainContent').style.visibility = 'visible';
+      //     $('.brandsContent').append(brandsContent);
+      //   },
+      //   function(brandsError){
+      //     console.log('brandsError');
+      //     console.log(brandsError);
+      //   });
 
-      client.request(getMacros()).then(
-        function(macro){
-          console.log(macro);
-          macros = macro.macros;
-          for (br in macro.macros){
-            macrosContent += '<tr id="' + macro.macros[br].id + '" class="'+br+'" onClick="editData(8, ' + macro.macros[br].id + ', ' + br + ')" style="cursor:pointer;">'
-            +'<td><input class="ticketFormInput" id="' + macro.macros[br].id + '" type="checkbox"></td>'
-            +'<td>' + macro.macros[br].title +'</td>';
-          }
-          document.getElementById('loader').style.visibility = 'hidden';
-          document.getElementById('mainContent').style.visibility = 'visible';
-          $('.macrosContent').append(macrosContent);    
-        },
-        function(macroError){
-          console.log('macroError');
-          console.log(macroError);
-        });
+      // client.request(getMacros()).then(
+      //   function(macro){
+      //     console.log(macro);
+      //     macros = macro.macros;
+      //     for (br in macro.macros){
+      //       macrosContent += '<tr id="' + macro.macros[br].id + '" class="'+br+'" onClick="editData(8, ' + macro.macros[br].id + ', ' + br + ')" style="cursor:pointer;">'
+      //       +'<td><input class="ticketFormInput" id="' + macro.macros[br].id + '" type="checkbox"></td>'
+      //       +'<td>' + macro.macros[br].title +'</td>';
+      //     }
+      //     document.getElementById('loader').style.visibility = 'hidden';
+      //     document.getElementById('mainContent').style.visibility = 'visible';
+      //     $('.macrosContent').append(macrosContent);    
+      //   },
+      //   function(macroError){
+      //     console.log('macroError');
+      //     console.log(macroError);
+      //   });
     }
 
     $("#selectallCheckTicketField").change(function () {
@@ -2601,7 +2601,6 @@
                                   }
                                 }
                               }
-
                               if (viewSelectList[i].conditions.all.length > 0) {
                                 var allCounter = 0;
                                 for (var al=0; al<viewSelectList[i].conditions.all.length; al++) {
@@ -2830,11 +2829,6 @@
                                     }
                                   })(al);
                                 }
-                              } else {
-                                /*conditionCounter++;
-                                if (conditionCounter == 3) {
-                                  doCreateViews(viewSelectList[counterI]);
-                                }*/
                               }
                               if (viewSelectList[i].conditions.any.length > 0) {
                                 var anyCounter = 0;
@@ -3064,11 +3058,66 @@
                                     }
                                   })(al);
                                 }
-                              } else {
-                                // conditionCounter++;
-                                // if (conditionCounter == 3) {
-                                //   doCreateViews(viewSelectList[counterI]);
-                                // }
+                              }
+                              if (viewSelectList[i].execution.custom_fields.length > 0) {
+                                for (var cf=0; cf<viewSelectList[i].execution.custom_fields.length; cf++) {
+                                  (function(counterCF){
+                                    client.request(getTicketFieldsbyId(viewSelectList[i].execution.custom_fields[cf].id)).then(
+                                      function(ticketField){
+                                        for (var cfd=0; cfd<ticketFieldDest.ticket_fields.length; cfd++) {
+                                          if (ticketField.ticket_field.title == ticketFieldDest.ticket_fields[cfd].title) {
+                                            viewSelectList[counterI].execution.custom_fields[counterCF].id = ticketFieldDest.ticket_fields[cfd].id;
+                                            viewSelectList[counterI].execution.custom_fields[counterCF].url = ticketFieldDest.ticket_fields[cfd].url;
+                                            for (var col=0; col<viewSelectList[counterI].execution.columns.length; col++) {
+                                              if (viewSelectList[counterI].execution.columns[col].title == ticketFieldDest.ticket_fields[cfd].title) {
+                                                viewSelectList[counterI].execution.columns[col].id = ticketFieldDest.ticket_fields[cfd].id;
+                                                viewSelectList[counterI].execution.columns[col].url = ticketFieldDest.ticket_fields[cfd].url;
+                                              }
+                                            }
+                                            checkQue (counterArray, viewSelectList, counterI);
+                                          }
+                                        }
+                                      },
+                                      function(ticketFieldError){
+                                        console.log('===== ticketFieldError =====');
+                                        console.log(ticketFieldError);
+                                      });
+                                  })(cf);
+                                }
+                              }
+                              if (isNumeric(viewSelectList[i].execution.group.id)) {
+                                client.request(getTicketFieldsbyId(viewSelectList[i].execution.group.id)).then(
+                                  function(ticketField){
+                                    for (var cfd=0; cfd<ticketFieldDest.ticket_fields.length; cfd++) {
+                                      if (ticketField.ticket_field.title == ticketFieldDest.ticket_fields[cfd].title) {
+                                        viewSelectList[counterI].execution.group.id = ticketFieldDest.ticket_fields[cfd].id;
+                                        viewSelectList[counterI].execution.group.url = ticketFieldDest.ticket_fields[cfd].url;
+                                        viewSelectList[counterI].execution.group_by = ticketFieldDest.ticket_fields[cfd].id;
+                                        checkQue (counterArray, viewSelectList, counterI);
+                                      }
+                                    }
+                                  },
+                                  function(ticketFieldError){
+                                    console.log('===== ticketFieldError =====');
+                                    console.log(ticketFieldError);
+                                  });
+                              }
+                              if (isNumeric(viewSelectList[i].execution.sort.id)) {
+                                client.request(getTicketFieldsbyId(viewSelectList[i].execution.sort.id)).then(
+                                  function(ticketField){
+                                    for (var cfd=0; cfd<ticketFieldDest.ticket_fields.length; cfd++) {
+                                      if (ticketField.ticket_field.title == ticketFieldDest.ticket_fields[cfd].title) {
+                                        viewSelectList[counterI].execution.sort.id = ticketFieldDest.ticket_fields[cfd].id;
+                                        viewSelectList[counterI].execution.sort.url = ticketFieldDest.ticket_fields[cfd].url;
+                                        viewSelectList[counterI].execution.sort = ticketFieldDest.ticket_fields[cfd].id;
+                                        checkQue (counterArray, viewSelectList, counterI);
+                                      }
+                                    }
+                                  },
+                                  function(ticketFieldError){
+                                    console.log('===== ticketFieldError =====');
+                                    console.log(ticketFieldError);
+                                  });
                               }
                             })(i);
                           } else {
@@ -3418,7 +3467,14 @@
       var caCounter = 0;
       var alCounter = selectList[counterI].conditions.all.length;
       var anCounter = selectList[counterI].conditions.any.length;
-      allCounter = alCounter + anCounter;
+      var cfCounter = selectList[counterI].execution.custom_fields.length;
+      allCounter = alCounter + anCounter + cfCounter;
+      if (isNumeric(selectList[counterI].execution.group.id)) {
+        allCounter++;
+      }
+      if (isNumeric(selectList[counterI].execution.sort.id)) {
+        allCounter++;
+      }
       if (selectList[counterI].restriction !== null) {
         allCounter++;
       }
@@ -3482,15 +3538,15 @@
       console.log('Create View');
       console.log(viewsCreate);
       var newView = new Array ({view:viewsCreate});
-      client.request(createViews(JSON.stringify(newView[0]))).then(
-        function(create){
-          console.log('Create success');
-          console.log(create);
-        },
-        function(createViewError){
-          console.log('===== createViewError =====');
-          console.log(createViewError);
-        });
+      // client.request(createViews(JSON.stringify(newView[0]))).then(
+      //   function(create){
+      //     console.log('Create success');
+      //     console.log(create);
+      //   },
+      //   function(createViewError){
+      //     console.log('===== createViewError =====');
+      //     console.log(createViewError);
+      //   });
     }
 
     function doGenerateGroupMembership (groupIds) {
