@@ -1,5 +1,3 @@
-// Initialise the Zendesk JavaScript API client
-// https://developer.zendesk.com/apps/docs/apps-v2
 var client = ZAFClient.init();
 var triggerList = [];
 var triggerSelectList = [];
@@ -32,6 +30,7 @@ var membershipsList = [];
 var allUsers = [];
 
 var callCounter = 0;
+var currentCallCounter = 0;
 
 this.init();
 // this.initsss();
@@ -538,7 +537,7 @@ function getSla () {
   return getTickets;
 }
 
-function srcSla_dest () {
+function getSla_dest () {
   var getTickets = {
     url: ZD_DOMAIN + '/api/v2/slas/policies.json',
     type: 'GET',
@@ -717,6 +716,7 @@ function init () {
 }
 
 function customCall (url, dataType) {
+  currentCallCounter++;
   var ticketContent = '';
   var formContent = '';
   var automationsContent = '';
@@ -813,7 +813,7 @@ function customCall (url, dataType) {
     }).then(
     function(){
       callCounter++;
-      if (callCounter == 8) {
+      if (callCounter == currentCallCounter) {
         document.getElementById('loader').style.visibility = 'hidden';
         document.getElementById('mainContent').style.visibility = 'visible';
       }
@@ -854,7 +854,6 @@ function editData (type , id, position) {
       if (!isExist) {
         ticketFieldsSelectList.push(ticketFields[position]);
       }
-      
     } else if (type == 2){
       for (var j = 0; j<ticketFormsSelectList.length; j++) {
         if (ticketFormsSelectList[j].id == id) {
@@ -1755,576 +1754,595 @@ function doMigrate () {
           function(brandsDest){
             client.request(getTicketForms_dest()).then(
               function(ticketFormsDest){
-                var counterArray = [];
-                for (var i=0; i<slaSelectList.length; i++) {
-                  var filterFinish = 0;
-                  (function(counterI){
-                    if (slaSelectList[i].filter.all.length >0) {
-                      var filterAllCounter = 0;
-                      for (var f=0; f<slaSelectList[i].filter.all.length; f++) {
-                        (function(counterF){
-                          if (slaSelectList[i].filter.all[f].field.includes('ticket_fields_')) {
-                            var ticketId = slaSelectList[i].filter.all[f].field.split('_');
-                            client.request(getTicketFieldsbyId(ticketId[2])).then(
-                              function(ticketFieldData){
-                                client.request(getTicketFieldsbyIdOption(ticketFieldData.ticket_field.id)).then(
-                                  function(fieldOption){
-                                    var optionString = '';
-                                    for (var o=0; o<fieldOption.custom_field_options.length; o++) {
-                                      if (fieldOption.custom_field_options[o].id == slaSelectList[counterI].filter.all[counterF].value) {
-                                        optionString = fieldOption.custom_field_options[o].name;
-                                      }
-                                    }
-                                    var ticketFieldFound = false;
-                                    for (var d=0; d<ticketFieldDestData.ticket_fields.length; d++) {
-                                      (function(counterD){
-                                        if (ticketFieldData.ticket_field.title == ticketFieldDestData.ticket_fields[d].title) {
-                                          ticketFieldFound = true;
-                                          client.request(getTicketFieldsbyIdOptionDest(ticketFieldDestData.ticket_fields[d].id)).then(
-                                            function(fieldOptionDest){
-                                              for (var od=0; od<fieldOptionDest.custom_field_options.length; od++) {
-                                                filterAllCounter++;
-                                                if (fieldOptionDest.custom_field_options[od].name == optionString) {
-                                                  slaSelectList[counterI].filter.all[counterF].field = 'ticket_fields_' + ticketFieldDestData.ticket_fields[counterD].id;
-                                                  slaSelectList[counterI].filter.all[counterF].value = fieldOptionDest.custom_field_options[od].id;
-                                                  counterArray.push(counterI);
-                                                  var caCounter = 0;
-                                                  for (c in counterArray) {
-                                                    var alCounter = slaSelectList[counterI].filter.all.length;
-                                                    var anCounter = slaSelectList[counterI].filter.any.length;
-                                                    if (counterArray[c] == counterI) {
-                                                      caCounter++;
-                                                      if (caCounter == alCounter + anCounter) {
-                                                        doCreateSla(slaSelectList[counterI]);
-                                                      }
-                                                    }
-                                                  }
-                                                }
-                                                
-                                                // if (filterAllCounter == slaSelectList[counterI].filter.all.length) {
-                                                //   console.log('all filter has finish');
-                                                //   console.log(slaSelectList[counterI]);
-                                                //   filterFinish++;
-                                                //   if (filterFinish == 2) {
-                                                //     doCreateSla(slaSelectList[counterI]);
-                                                //   }
-                                                // }
-                                              }
-                                            },
-                                            function(fieldOptionDestError){
-                                              console.log('===== fieldOptionDestError =====');
-                                              console.log(fieldOptionDestError);
-                                            });
-                                        }
-                                      })(d);
-                                    }
-                                    if (!ticketFieldFound) {
-                                      console.log('===== ticket field doest exist =====');
-                                      updateProgress('SLA', '<b>' + slaSelectList[counterI].title + '</b> Error. Some ticket fields not exist: ' + ticketFieldsData.ticket_field.title);
-                                      // errorMigrate.push({
-                                      //   name: 'SLA: ' + slaSelectList[counterI].title,
-                                      //   error: 'ticket field doesnt exist: ' + ticketFieldData.ticket_field.title
-                                      // });
-                                    }
-                                  },
-                                  function(fieldOptionError){
-                                    console.log('fieldOptionError');
-                                    console.log(fieldOptionError);
-                                  });
-                              },
-                              function(ticketFieldsError){
-                                console.log('===== ticketFieldsError =====');
-                                console.log(ticketFieldsError);
-                              });
-                          } else if (slaSelectList[i].filter.all[f].field.includes('brand_id')) {
-                            client.request(getBrands(slaSelectList[i].filter.all[f].value)).then(
-                              function(brands){
-                                var brandsIsFound = false;
-                                for (var br=0; br<brandsDest.brands.length; br++) {
-                                  if (brands.brand.name == brandsDest.brands[br].name) {
-                                    brandsIsFound = true;
-                                    console.log('brands found');
-                                    filterAllCounter++;
-                                    slaSelectList[counterI].filter.all[counterF].value = brandsDest.brands[br].id;
-                                    // if (filterAllCounter == slaSelectList[counterI].filter.all.length) {
-                                    //   console.log('all filter has finish');
-                                    //   console.log(slaSelectList[counterI]);
-                                    //   filterFinish++;
-                                    //   if (filterFinish == 2) {
-                                    //     doCreateSla(slaSelectList[counterI]);
-                                    //   }
-                                    // }
-                                    counterArray.push(counterI);
-                                    var caCounter = 0;
-                                    for (c in counterArray) {
-                                      var alCounter = slaSelectList[counterI].filter.all.length;
-                                      var anCounter = slaSelectList[counterI].filter.any.length;
-                                      if (counterArray[c] == counterI) {
-                                        caCounter++;
-                                        if (caCounter == alCounter + anCounter) {
-                                          doCreateSla(slaSelectList[counterI]);
-                                        }
-                                      }
-                                    }
-                                  }
-                                }
-                                if (!brandsIsFound) {
-                                console.log('===== brands not found =====');
-                                  updateProgress('SLA', '<b>' + slaSelectList[counterI].title + '</b> Error. Some brands not exist: ' + brands.brand.name);
-                                  // errorMigrate.push({
-                                  //   name: 'SLA: ' + slaSelectList[counterI].title,
-                                  //   error: 'brands doesnt exist: ' + brands.brand.name
-                                  // });
-                                }
-                              },
-                              function(brandsError){
-                                console.log('===== brandsError =====');
-                                console.log(brandsError);
-                              });
-                          } else if (slaSelectList[i].filter.all[f].field.includes('ticket_form_id')) {
-                            client.request(getTicketFormsById(slaSelectList[i].filter.all[f].value)).then(
-                              function(ticketForm){
-                                var ticketFormFound = false;
-                                for (var tf=0; tf<ticketFormsDest.ticket_forms.length; tf++){
-                                  if (ticketForm.ticket_form.name == ticketFormsDest.ticket_forms[tf].name) {
-                                    ticketFormFound = true;
-                                    console.log('===== ticket forms found =====');
-                                    filterAllCounter++;
-                                    slaSelectList[counterI].filter.all[counterF].value = ticketFormsDest.ticket_forms[tf].id;
-                                    // if (filterAllCounter == slaSelectList[counterI].filter.all.length) {
-                                    //   console.log('all filter has finish');
-                                    //   console.log(slaSelectList[counterI]);
-                                    //   filterFinish++;
-                                    //   if (filterFinish == 2) {
-                                    //     doCreateSla(slaSelectList[counterI]);
-                                    //   }
-                                    // }
-                                    counterArray.push(counterI);
-                                    var caCounter = 0;
-                                    for (c in counterArray) {
-                                      var alCounter = slaSelectList[counterI].filter.all.length;
-                                      var anCounter = slaSelectList[counterI].filter.any.length;
-                                      if (counterArray[c] == counterI) {
-                                        caCounter++;
-                                        if (caCounter == alCounter + anCounter) {
-                                          doCreateSla(slaSelectList[counterI]);
-                                        }
-                                      }
-                                    }
-                                  }
-                                }
-                                if (!ticketFormFound) {
-                                  console.log('===== ticket form not found =====');
-                                  updateProgress('SLA', '<b>' + slaSelectList[counterI].title + '</b> Error. Some ticket form not exist: ' + ticketForm.ticket_form.name);
-                                  // errorMigrate.push({
-                                  //   name: 'SLA: ' + slaSelectList[counterI].title,
-                                  //   error: 'ticket form doesnt exist: ' + ticketForm.ticket_form.name
-                                  // });
-                                }
-                              },
-                              function(ticketFormError){
-                                console.log('===== ticketFormError =====');
-                                console.log(ticketFormError);
-                              });
-                          } else if (slaSelectList[i].filter.all[f].field.includes('group_id')) {
-                            client.request(getGroups(slaSelectList[i].filter.all[f].value)).then(
-                              function(groups){
-                                client.request(srcGroups_dest(groups.group.name)).then(
-                                  function(srcGroup){
-                                    if (srcGroup.results.length > 0) {
-                                      console.log('===== group found =====');
-                                      filterAllCounter++;
-                                      slaSelectList[counterI].filter.all[counterF].value = srcGroup.results[0].id;
-                                      // if (filterAllCounter == slaSelectList[counterI].filter.all.length) {
-                                      //   console.log('all filter has finish');
-                                      //   console.log(slaSelectList[counterI]);
-                                      //   filterFinish++;
-                                      //   if (filterFinish == 2) {
-                                      //     doCreateSla(slaSelectList[counterI]);
-                                      //   }
-                                      // }
-                                      counterArray.push(counterI);
-                                      var caCounter = 0;
-                                      for (c in counterArray) {
-                                        var alCounter = slaSelectList[counterI].filter.all.length;
-                                        var anCounter = slaSelectList[counterI].filter.any.length;
-                                        if (counterArray[c] == counterI) {
-                                          caCounter++;
-                                          if (caCounter == alCounter + anCounter) {
-                                            doCreateSla(slaSelectList[counterI]);
-                                          }
-                                        }
-                                      }
-                                    } else {
-                                      console.log('===== group not found =====');
-                                      updateProgress('SLA', '<b>' + slaSelectList[counterI].title + '</b> Error. Some groups not exist: ' + groups.group.name);
-                                      // errorMigrate.push({
-                                      //   name: 'SLA: ' + slaSelectList[counterI].title,
-                                      //   error: 'group doesnt exist: ' + groups.group.name
-                                      // });
-                                    }
-                                  },
-                                  function(srcGroupError){
-                                    console.log('===== srcGroupError =====');
-                                    console.log(srcGroupError);
-                                  });
-                              },
-                              function(groupsError){
-                                console.log('===== groupsError =====');
-                                console.log(groupsError);
-                              });
-                          } else if (slaSelectList[i].filter.all[f].field.includes('organization_id')) {
-                            client.request(getOrganizationsById(slaSelectList[i].filter.all[f].value)).then(
-                              function(org){
-                                client.request(srcOrganizationDest(org.organization.name)).then(
-                                  function(orgDest){
-                                    if (orgDest.results.length > 0) {
-                                      console.log('===== organization found =====');
-                                      slaSelectList[counterI].filter.all[counterF].value = orgDest.results[0].id;
-                                      filterAllCounter++;
-                                      // if (filterAllCounter == slaSelectList[counterI].filter.all.length) {
-                                      //   console.log('all filter has finish');
-                                      //   console.log(slaSelectList[counterI]);
-                                      //   filterFinish++;
-                                      //   if (filterFinish == 2) {
-                                      //     doCreateSla(slaSelectList[counterI]);
-                                      //   }
-                                      // }
-                                      counterArray.push(counterI);
-                                      var caCounter = 0;
-                                      for (c in counterArray) {
-                                        var alCounter = slaSelectList[counterI].filter.all.length;
-                                        var anCounter = slaSelectList[counterI].filter.any.length;
-                                        if (counterArray[c] == counterI) {
-                                          caCounter++;
-                                          if (caCounter == alCounter + anCounter) {
-                                            doCreateSla(slaSelectList[counterI]);
-                                          }
-                                        }
-                                      }
-                                    } else {
-                                      console.log('===== organization not found =====');
-                                      updateProgress('SLA', '<b>' + slaSelectList[counterI].title + '</b> Error. Some organizations not exist: ' + org.organization.name);
-                                      // errorMigrate.push({
-                                      //   name: 'SLA: ' + slaSelectList[counterI].title,
-                                      //   error: 'organization doesnt exist: ' + org.organization.name
-                                      // });
-                                    }
-                                  },
-                                  function(orgDestError){
-                                    console.log('===== orgDestError =====');
-                                    console.log(orgDestError);
-                                  });
-                              },
-                              function(orgError){
-                                console.log('===== orgError =====');
-                                console.log(orgError);
-                              });
-                          } else {
-                            counterArray.push(counterI);
-                            var caCounter = 0;
-                            for (c in counterArray) {
-                              var alCounter = slaSelectList[counterI].filter.all.length;
-                              var anCounter = slaSelectList[counterI].filter.any.length;
-                              if (counterArray[c] == counterI) {
-                                caCounter++;
-                                if (caCounter == alCounter + anCounter) {
-                                  doCreateSla(slaSelectList[counterI]);
-                                }
-                              }
-                            }
-                          }
-                        })(f);
+                client.request(getSla_dest()).then(
+                  function(slaDest){
+                    var counterArray = [];
+                    for (var i=0; i<slaSelectList.length; i++) {
+                      var slaExist = false;
+                      for (var sd=0; sd<slaDest.sla_policies.length; sd++) {
+                        if (slaSelectList[i].title == slaDest.sla_policies[sd].title) {
+                          slaExist = true;
+                        }
                       }
-                      // if (slaSelectList[i].filter.all)
-                    } else {
-                      console.log('filter all null');
-                      filterFinish++;
-                    }
+                      if (!slaExist) {
+                        console.log('sla not exist');
+                        var filterFinish = 0;
+                        (function(counterI){
+                          if (slaSelectList[i].filter.all.length >0) {
+                            var filterAllCounter = 0;
+                            for (var f=0; f<slaSelectList[i].filter.all.length; f++) {
+                              (function(counterF){
+                                if (slaSelectList[i].filter.all[f].field.includes('ticket_fields_')) {
+                                  var ticketId = slaSelectList[i].filter.all[f].field.split('_');
+                                  client.request(getTicketFieldsbyId(ticketId[2])).then(
+                                    function(ticketFieldData){
+                                      client.request(getTicketFieldsbyIdOption(ticketFieldData.ticket_field.id)).then(
+                                        function(fieldOption){
+                                          var optionString = '';
+                                          for (var o=0; o<fieldOption.custom_field_options.length; o++) {
+                                            if (fieldOption.custom_field_options[o].id == slaSelectList[counterI].filter.all[counterF].value) {
+                                              optionString = fieldOption.custom_field_options[o].name;
+                                            }
+                                          }
+                                          var ticketFieldFound = false;
+                                          for (var d=0; d<ticketFieldDestData.ticket_fields.length; d++) {
+                                            (function(counterD){
+                                              if (ticketFieldData.ticket_field.title == ticketFieldDestData.ticket_fields[d].title) {
+                                                ticketFieldFound = true;
+                                                client.request(getTicketFieldsbyIdOptionDest(ticketFieldDestData.ticket_fields[d].id)).then(
+                                                  function(fieldOptionDest){
+                                                    for (var od=0; od<fieldOptionDest.custom_field_options.length; od++) {
+                                                      filterAllCounter++;
+                                                      if (fieldOptionDest.custom_field_options[od].name == optionString) {
+                                                        slaSelectList[counterI].filter.all[counterF].field = 'ticket_fields_' + ticketFieldDestData.ticket_fields[counterD].id;
+                                                        slaSelectList[counterI].filter.all[counterF].value = fieldOptionDest.custom_field_options[od].id;
+                                                        counterArray.push(counterI);
+                                                        var caCounter = 0;
+                                                        for (c in counterArray) {
+                                                          var alCounter = slaSelectList[counterI].filter.all.length;
+                                                          var anCounter = slaSelectList[counterI].filter.any.length;
+                                                          if (counterArray[c] == counterI) {
+                                                            caCounter++;
+                                                            if (caCounter == alCounter + anCounter) {
+                                                              doCreateSla(slaSelectList[counterI]);
+                                                            }
+                                                          }
+                                                        }
+                                                      }
+                                                      
+                                                      // if (filterAllCounter == slaSelectList[counterI].filter.all.length) {
+                                                      //   console.log('all filter has finish');
+                                                      //   console.log(slaSelectList[counterI]);
+                                                      //   filterFinish++;
+                                                      //   if (filterFinish == 2) {
+                                                      //     doCreateSla(slaSelectList[counterI]);
+                                                      //   }
+                                                      // }
+                                                    }
+                                                  },
+                                                  function(fieldOptionDestError){
+                                                    console.log('===== fieldOptionDestError =====');
+                                                    console.log(fieldOptionDestError);
+                                                  });
+                                              }
+                                            })(d);
+                                          }
+                                          if (!ticketFieldFound) {
+                                            console.log('===== ticket field doest exist =====');
+                                            updateProgress('SLA', '<b>' + slaSelectList[counterI].title + '</b> Error. Some ticket fields not exist: ' + ticketFieldsData.ticket_field.title);
+                                            // errorMigrate.push({
+                                            //   name: 'SLA: ' + slaSelectList[counterI].title,
+                                            //   error: 'ticket field doesnt exist: ' + ticketFieldData.ticket_field.title
+                                            // });
+                                          }
+                                        },
+                                        function(fieldOptionError){
+                                          console.log('fieldOptionError');
+                                          console.log(fieldOptionError);
+                                        });
+                                    },
+                                    function(ticketFieldsError){
+                                      console.log('===== ticketFieldsError =====');
+                                      console.log(ticketFieldsError);
+                                    });
+                                } else if (slaSelectList[i].filter.all[f].field.includes('brand_id')) {
+                                  client.request(getBrands(slaSelectList[i].filter.all[f].value)).then(
+                                    function(brands){
+                                      var brandsIsFound = false;
+                                      for (var br=0; br<brandsDest.brands.length; br++) {
+                                        if (brands.brand.name == brandsDest.brands[br].name) {
+                                          brandsIsFound = true;
+                                          console.log('brands found');
+                                          filterAllCounter++;
+                                          slaSelectList[counterI].filter.all[counterF].value = brandsDest.brands[br].id;
+                                          // if (filterAllCounter == slaSelectList[counterI].filter.all.length) {
+                                          //   console.log('all filter has finish');
+                                          //   console.log(slaSelectList[counterI]);
+                                          //   filterFinish++;
+                                          //   if (filterFinish == 2) {
+                                          //     doCreateSla(slaSelectList[counterI]);
+                                          //   }
+                                          // }
+                                          counterArray.push(counterI);
+                                          var caCounter = 0;
+                                          for (c in counterArray) {
+                                            var alCounter = slaSelectList[counterI].filter.all.length;
+                                            var anCounter = slaSelectList[counterI].filter.any.length;
+                                            if (counterArray[c] == counterI) {
+                                              caCounter++;
+                                              if (caCounter == alCounter + anCounter) {
+                                                doCreateSla(slaSelectList[counterI]);
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                      if (!brandsIsFound) {
+                                      console.log('===== brands not found =====');
+                                        updateProgress('SLA', '<b>' + slaSelectList[counterI].title + '</b> Error. Some brands not exist: ' + brands.brand.name);
+                                        // errorMigrate.push({
+                                        //   name: 'SLA: ' + slaSelectList[counterI].title,
+                                        //   error: 'brands doesnt exist: ' + brands.brand.name
+                                        // });
+                                      }
+                                    },
+                                    function(brandsError){
+                                      console.log('===== brandsError =====');
+                                      console.log(brandsError);
+                                    });
+                                } else if (slaSelectList[i].filter.all[f].field.includes('ticket_form_id')) {
+                                  client.request(getTicketFormsById(slaSelectList[i].filter.all[f].value)).then(
+                                    function(ticketForm){
+                                      var ticketFormFound = false;
+                                      for (var tf=0; tf<ticketFormsDest.ticket_forms.length; tf++){
+                                        if (ticketForm.ticket_form.name == ticketFormsDest.ticket_forms[tf].name) {
+                                          ticketFormFound = true;
+                                          console.log('===== ticket forms found =====');
+                                          filterAllCounter++;
+                                          slaSelectList[counterI].filter.all[counterF].value = ticketFormsDest.ticket_forms[tf].id;
+                                          // if (filterAllCounter == slaSelectList[counterI].filter.all.length) {
+                                          //   console.log('all filter has finish');
+                                          //   console.log(slaSelectList[counterI]);
+                                          //   filterFinish++;
+                                          //   if (filterFinish == 2) {
+                                          //     doCreateSla(slaSelectList[counterI]);
+                                          //   }
+                                          // }
+                                          counterArray.push(counterI);
+                                          var caCounter = 0;
+                                          for (c in counterArray) {
+                                            var alCounter = slaSelectList[counterI].filter.all.length;
+                                            var anCounter = slaSelectList[counterI].filter.any.length;
+                                            if (counterArray[c] == counterI) {
+                                              caCounter++;
+                                              if (caCounter == alCounter + anCounter) {
+                                                doCreateSla(slaSelectList[counterI]);
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                      if (!ticketFormFound) {
+                                        console.log('===== ticket form not found =====');
+                                        updateProgress('SLA', '<b>' + slaSelectList[counterI].title + '</b> Error. Some ticket form not exist: ' + ticketForm.ticket_form.name);
+                                        // errorMigrate.push({
+                                        //   name: 'SLA: ' + slaSelectList[counterI].title,
+                                        //   error: 'ticket form doesnt exist: ' + ticketForm.ticket_form.name
+                                        // });
+                                      }
+                                    },
+                                    function(ticketFormError){
+                                      console.log('===== ticketFormError =====');
+                                      console.log(ticketFormError);
+                                    });
+                                } else if (slaSelectList[i].filter.all[f].field.includes('group_id')) {
+                                  client.request(getGroups(slaSelectList[i].filter.all[f].value)).then(
+                                    function(groups){
+                                      client.request(srcGroups_dest(groups.group.name)).then(
+                                        function(srcGroup){
+                                          if (srcGroup.results.length > 0) {
+                                            console.log('===== group found =====');
+                                            filterAllCounter++;
+                                            slaSelectList[counterI].filter.all[counterF].value = srcGroup.results[0].id;
+                                            // if (filterAllCounter == slaSelectList[counterI].filter.all.length) {
+                                            //   console.log('all filter has finish');
+                                            //   console.log(slaSelectList[counterI]);
+                                            //   filterFinish++;
+                                            //   if (filterFinish == 2) {
+                                            //     doCreateSla(slaSelectList[counterI]);
+                                            //   }
+                                            // }
+                                            counterArray.push(counterI);
+                                            var caCounter = 0;
+                                            for (c in counterArray) {
+                                              var alCounter = slaSelectList[counterI].filter.all.length;
+                                              var anCounter = slaSelectList[counterI].filter.any.length;
+                                              if (counterArray[c] == counterI) {
+                                                caCounter++;
+                                                if (caCounter == alCounter + anCounter) {
+                                                  doCreateSla(slaSelectList[counterI]);
+                                                }
+                                              }
+                                            }
+                                          } else {
+                                            console.log('===== group not found =====');
+                                            updateProgress('SLA', '<b>' + slaSelectList[counterI].title + '</b> Error. Some groups not exist: ' + groups.group.name);
+                                            // errorMigrate.push({
+                                            //   name: 'SLA: ' + slaSelectList[counterI].title,
+                                            //   error: 'group doesnt exist: ' + groups.group.name
+                                            // });
+                                          }
+                                        },
+                                        function(srcGroupError){
+                                          console.log('===== srcGroupError =====');
+                                          console.log(srcGroupError);
+                                        });
+                                    },
+                                    function(groupsError){
+                                      console.log('===== groupsError =====');
+                                      console.log(groupsError);
+                                    });
+                                } else if (slaSelectList[i].filter.all[f].field.includes('organization_id')) {
+                                  client.request(getOrganizationsById(slaSelectList[i].filter.all[f].value)).then(
+                                    function(org){
+                                      client.request(srcOrganizationDest(org.organization.name)).then(
+                                        function(orgDest){
+                                          if (orgDest.results.length > 0) {
+                                            console.log('===== organization found =====');
+                                            slaSelectList[counterI].filter.all[counterF].value = orgDest.results[0].id;
+                                            filterAllCounter++;
+                                            // if (filterAllCounter == slaSelectList[counterI].filter.all.length) {
+                                            //   console.log('all filter has finish');
+                                            //   console.log(slaSelectList[counterI]);
+                                            //   filterFinish++;
+                                            //   if (filterFinish == 2) {
+                                            //     doCreateSla(slaSelectList[counterI]);
+                                            //   }
+                                            // }
+                                            counterArray.push(counterI);
+                                            var caCounter = 0;
+                                            for (c in counterArray) {
+                                              var alCounter = slaSelectList[counterI].filter.all.length;
+                                              var anCounter = slaSelectList[counterI].filter.any.length;
+                                              if (counterArray[c] == counterI) {
+                                                caCounter++;
+                                                if (caCounter == alCounter + anCounter) {
+                                                  doCreateSla(slaSelectList[counterI]);
+                                                }
+                                              }
+                                            }
+                                          } else {
+                                            console.log('===== organization not found =====');
+                                            updateProgress('SLA', '<b>' + slaSelectList[counterI].title + '</b> Error. Some organizations not exist: ' + org.organization.name);
+                                            // errorMigrate.push({
+                                            //   name: 'SLA: ' + slaSelectList[counterI].title,
+                                            //   error: 'organization doesnt exist: ' + org.organization.name
+                                            // });
+                                          }
+                                        },
+                                        function(orgDestError){
+                                          console.log('===== orgDestError =====');
+                                          console.log(orgDestError);
+                                        });
+                                    },
+                                    function(orgError){
+                                      console.log('===== orgError =====');
+                                      console.log(orgError);
+                                    });
+                                } else {
+                                  counterArray.push(counterI);
+                                  var caCounter = 0;
+                                  for (c in counterArray) {
+                                    var alCounter = slaSelectList[counterI].filter.all.length;
+                                    var anCounter = slaSelectList[counterI].filter.any.length;
+                                    if (counterArray[c] == counterI) {
+                                      caCounter++;
+                                      if (caCounter == alCounter + anCounter) {
+                                        doCreateSla(slaSelectList[counterI]);
+                                      }
+                                    }
+                                  }
+                                }
+                              })(f);
+                            }
+                            // if (slaSelectList[i].filter.all)
+                          } else {
+                            console.log('filter all null');
+                            filterFinish++;
+                          }
 
-                    if (slaSelectList[i].filter.any.length > 0) {
-                      var filterAnyCounter = 0;
-                      for (var f=0; f<slaSelectList[i].filter.any.length; f++) {
-                        (function(counterF){
-                          if (slaSelectList[i].filter.any[f].field.includes('ticket_fields_')) {
-                            var ticketId = slaSelectList[i].filter.any[f].field.split('_');
-                            client.request(getTicketFieldsbyId(ticketId[2])).then(
-                              function(ticketFieldData){
-                                client.request(getTicketFieldsbyIdOption(ticketFieldData.ticket_field.id)).then(
-                                  function(fieldOption){
-                                    var optionString = '';
-                                    for (var o=0; o<fieldOption.custom_field_options.length; o++) {
-                                      if (fieldOption.custom_field_options[o].id == slaSelectList[counterI].filter.any[counterF].value) {
-                                        optionString = fieldOption.custom_field_options[o].name;
-                                      }
-                                    }
-                                    var ticketFieldFound = false;
-                                    for (var d=0; d<ticketFieldDestData.ticket_fields.length; d++) {
-                                      (function(counterD){
-                                        if (ticketFieldData.ticket_field.title == ticketFieldDestData.ticket_fields[d].title) {
-                                          ticketFieldFound = true;
-                                          client.request(getTicketFieldsbyIdOptionDest(ticketFieldDestData.ticket_fields[d].id)).then(
-                                            function(fieldOptionDest){
-                                              for (var od=0; od<fieldOptionDest.custom_field_options.length; od++) {
-                                                filterAnyCounter++;
-                                                if (fieldOptionDest.custom_field_options[od].name == optionString) {
-                                                  slaSelectList[counterI].filter.any[counterF].field = 'ticket_fields_' + ticketFieldDestData.ticket_fields[counterD].id;
-                                                  slaSelectList[counterI].filter.any[counterF].value = fieldOptionDest.custom_field_options[od].id;
-                                                  counterArray.push(counterI);
-                                                  var caCounter = 0;
-                                                  console.log(counterArray);
-                                                  for (c in counterArray) {
-                                                    var alCounter = slaSelectList[counterI].filter.all.length;
-                                                    var anCounter = slaSelectList[counterI].filter.any.length;
-                                                    if (counterArray[c] == counterI) {
-                                                      caCounter++;
-                                                      if (caCounter == alCounter + anCounter) {
-                                                        doCreateSla(slaSelectList[counterI]);
+                          if (slaSelectList[i].filter.any.length > 0) {
+                            var filterAnyCounter = 0;
+                            for (var f=0; f<slaSelectList[i].filter.any.length; f++) {
+                              (function(counterF){
+                                if (slaSelectList[i].filter.any[f].field.includes('ticket_fields_')) {
+                                  var ticketId = slaSelectList[i].filter.any[f].field.split('_');
+                                  client.request(getTicketFieldsbyId(ticketId[2])).then(
+                                    function(ticketFieldData){
+                                      client.request(getTicketFieldsbyIdOption(ticketFieldData.ticket_field.id)).then(
+                                        function(fieldOption){
+                                          var optionString = '';
+                                          for (var o=0; o<fieldOption.custom_field_options.length; o++) {
+                                            if (fieldOption.custom_field_options[o].id == slaSelectList[counterI].filter.any[counterF].value) {
+                                              optionString = fieldOption.custom_field_options[o].name;
+                                            }
+                                          }
+                                          var ticketFieldFound = false;
+                                          for (var d=0; d<ticketFieldDestData.ticket_fields.length; d++) {
+                                            (function(counterD){
+                                              if (ticketFieldData.ticket_field.title == ticketFieldDestData.ticket_fields[d].title) {
+                                                ticketFieldFound = true;
+                                                client.request(getTicketFieldsbyIdOptionDest(ticketFieldDestData.ticket_fields[d].id)).then(
+                                                  function(fieldOptionDest){
+                                                    for (var od=0; od<fieldOptionDest.custom_field_options.length; od++) {
+                                                      filterAnyCounter++;
+                                                      if (fieldOptionDest.custom_field_options[od].name == optionString) {
+                                                        slaSelectList[counterI].filter.any[counterF].field = 'ticket_fields_' + ticketFieldDestData.ticket_fields[counterD].id;
+                                                        slaSelectList[counterI].filter.any[counterF].value = fieldOptionDest.custom_field_options[od].id;
+                                                        counterArray.push(counterI);
+                                                        var caCounter = 0;
+                                                        console.log(counterArray);
+                                                        for (c in counterArray) {
+                                                          var alCounter = slaSelectList[counterI].filter.all.length;
+                                                          var anCounter = slaSelectList[counterI].filter.any.length;
+                                                          if (counterArray[c] == counterI) {
+                                                            caCounter++;
+                                                            if (caCounter == alCounter + anCounter) {
+                                                              doCreateSla(slaSelectList[counterI]);
+                                                            }
+                                                          }
+                                                        }
                                                       }
+                                                      // if (filterAnyCounter == slaSelectList[counterI].filter.any.length) {
+                                                      //   console.log('any filter has finish');
+                                                      //   console.log(slaSelectList[counterI]);
+                                                      //   filterFinish++;
+                                                      //   if (filterFinish == 2) {
+                                                      //     doCreateSla(slaSelectList[counterI]);
+                                                      //   }
+                                                      // }
                                                     }
-                                                  }
-                                                }
-                                                // if (filterAnyCounter == slaSelectList[counterI].filter.any.length) {
-                                                //   console.log('any filter has finish');
-                                                //   console.log(slaSelectList[counterI]);
-                                                //   filterFinish++;
-                                                //   if (filterFinish == 2) {
-                                                //     doCreateSla(slaSelectList[counterI]);
-                                                //   }
-                                                // }
+                                                  },
+                                                  function(fieldOptionDestError){
+                                                    console.log('===== fieldOptionDestError =====');
+                                                    console.log(fieldOptionDestError);
+                                                  });
                                               }
-                                            },
-                                            function(fieldOptionDestError){
-                                              console.log('===== fieldOptionDestError =====');
-                                              console.log(fieldOptionDestError);
-                                            });
+                                            })(d);
+                                          }
+                                          if (!ticketFieldFound) {
+                                            console.log('===== ticket field doest exist =====');
+                                            updateProgress('SLA', '<b>' + slaSelectList[counterI].title + '</b> Error. Some ticket fields not exist: ' + ticketFieldData.ticket_field.title);
+                                            // errorMigrate.push({
+                                            //   name: 'SLA: ' + slaSelectList[counterI].title,
+                                            //   error: 'ticket field doesnt exist: ' + ticketFieldData.ticket_field.title
+                                            // });
+                                          }
+                                        },
+                                        function(fieldOptionError){
+                                          console.log('fieldOptionError');
+                                          console.log(fieldOptionError);
+                                        });
+                                    },
+                                    function(ticketFieldsError){
+                                      console.log('===== ticketFieldsError =====');
+                                      console.log(ticketFieldsError);
+                                    });
+                                } else if (slaSelectList[i].filter.any[f].field.includes('brand_id')) {
+                                  client.request(getBrands(slaSelectList[i].filter.any[f].value)).then(
+                                    function(brands){
+                                      var brandsIsFound = false;
+                                      for (var br=0; br<brandsDest.brands.length; br++) {
+                                        if (brands.brand.name == brandsDest.brands[br].name) {
+                                          brandsIsFound = true;
+                                          console.log('brands found');
+                                          filterAnyCounter++;
+                                          slaSelectList[counterI].filter.any[counterF].value = brandsDest.brands[br].id;
+                                          // if (filterAnyCounter == slaSelectList[counterI].filter.any.length) {
+                                          //   console.log('any filter has finish');
+                                          //   console.log(slaSelectList[counterI]);
+                                          //   filterFinish++;
+                                          //   if (filterFinish == 2) {
+                                          //     doCreateSla(slaSelectList[counterI]);
+                                          //   }
+                                          // }
+                                          counterArray.push(counterI);
+                                          var caCounter = 0;
+                                          for (c in counterArray) {
+                                            var alCounter = slaSelectList[counterI].filter.all.length;
+                                            var anCounter = slaSelectList[counterI].filter.any.length;
+                                            if (counterArray[c] == counterI) {
+                                              caCounter++;
+                                              if (caCounter == alCounter + anCounter) {
+                                                doCreateSla(slaSelectList[counterI]);
+                                              }
+                                            }
+                                          }
                                         }
-                                      })(d);
-                                    }
-                                    if (!ticketFieldFound) {
-                                      console.log('===== ticket field doest exist =====');
-                                      updateProgress('SLA', '<b>' + slaSelectList[counterI].title + '</b> Error. Some ticket fields not exist: ' + ticketFieldData.ticket_field.title);
-                                      // errorMigrate.push({
-                                      //   name: 'SLA: ' + slaSelectList[counterI].title,
-                                      //   error: 'ticket field doesnt exist: ' + ticketFieldData.ticket_field.title
-                                      // });
-                                    }
-                                  },
-                                  function(fieldOptionError){
-                                    console.log('fieldOptionError');
-                                    console.log(fieldOptionError);
-                                  });
-                              },
-                              function(ticketFieldsError){
-                                console.log('===== ticketFieldsError =====');
-                                console.log(ticketFieldsError);
-                              });
-                          } else if (slaSelectList[i].filter.any[f].field.includes('brand_id')) {
-                            client.request(getBrands(slaSelectList[i].filter.any[f].value)).then(
-                              function(brands){
-                                var brandsIsFound = false;
-                                for (var br=0; br<brandsDest.brands.length; br++) {
-                                  if (brands.brand.name == brandsDest.brands[br].name) {
-                                    brandsIsFound = true;
-                                    console.log('brands found');
-                                    filterAnyCounter++;
-                                    slaSelectList[counterI].filter.any[counterF].value = brandsDest.brands[br].id;
-                                    // if (filterAnyCounter == slaSelectList[counterI].filter.any.length) {
-                                    //   console.log('any filter has finish');
-                                    //   console.log(slaSelectList[counterI]);
-                                    //   filterFinish++;
-                                    //   if (filterFinish == 2) {
-                                    //     doCreateSla(slaSelectList[counterI]);
-                                    //   }
-                                    // }
-                                    counterArray.push(counterI);
-                                    var caCounter = 0;
-                                    for (c in counterArray) {
-                                      var alCounter = slaSelectList[counterI].filter.all.length;
-                                      var anCounter = slaSelectList[counterI].filter.any.length;
-                                      if (counterArray[c] == counterI) {
-                                        caCounter++;
-                                        if (caCounter == alCounter + anCounter) {
-                                          doCreateSla(slaSelectList[counterI]);
+                                      }
+                                      if (!brandsIsFound) {
+                                        console.log('===== brands not found =====');
+                                        updateProgress('SLA', '<b>' + slaSelectList[counterI].title + '</b> Error. Some brands not exist: ' + brands.brand.name);
+                                        // errorMigrate.push({
+                                        //   name: 'SLA: ' + slaSelectList[counterI].title,
+                                        //   error: 'brands doesnt exist: ' + brands.brand.name
+                                        // });
+                                      }
+                                    },
+                                    function(brandsError){
+                                      console.log('===== brandsError =====');
+                                      console.log(brandsError);
+                                    });
+                                } else if (slaSelectList[i].filter.any[f].field.includes('ticket_form_id')) {
+                                  client.request(getTicketFormsById(slaSelectList[i].filter.any[f].value)).then(
+                                    function(ticketForm){
+                                      var ticketFormFound = false;
+                                      for (var tf=0; tf<ticketFormsDest.ticket_forms.length; tf++){
+                                        if (ticketForm.ticket_form.name == ticketFormsDest.ticket_forms[tf].name) {
+                                          ticketFormFound = true;
+                                          console.log('===== ticket forms found =====');
+                                          filterAnyCounter++;
+                                          slaSelectList[counterI].filter.any[counterF].value = ticketFormsDest.ticket_forms[tf].id;
+                                          // if (filterAnyCounter == slaSelectList[counterI].filter.any.length) {
+                                          //   console.log('any filter has finish');
+                                          //   console.log(slaSelectList[counterI]);
+                                          //   filterFinish++;
+                                          //   if (filterFinish == 2) {
+                                          //     doCreateSla(slaSelectList[counterI]);
+                                          //   }
+                                          // }
+                                          counterArray.push(counterI);
+                                          var caCounter = 0;
+                                          for (c in counterArray) {
+                                            var alCounter = slaSelectList[counterI].filter.all.length;
+                                            var anCounter = slaSelectList[counterI].filter.any.length;
+                                            if (counterArray[c] == counterI) {
+                                              caCounter++;
+                                              if (caCounter == alCounter + anCounter) {
+                                                doCreateSla(slaSelectList[counterI]);
+                                              }
+                                            }
+                                          }
                                         }
+                                      }
+                                      if (!ticketFormFound) {
+                                        console.log('===== ticket form not found =====');
+                                        updateProgress('SLA', '<b>' + slaSelectList[counterI].title + '</b> Error. Some ticket form not exist: ' + ticketForm.ticket_form.name);
+                                        // errorMigrate.push({
+                                        //   name: 'SLA: ' + slaSelectList[counterI].title,
+                                        //   error: 'ticket form doesnt exist: ' + ticketForm.ticket_form.name
+                                        // });
+                                      }
+                                    },
+                                    function(ticketFormError){
+                                      console.log('===== ticketFormError =====');
+                                      console.log(ticketFormError);
+                                    });
+                                } else if (slaSelectList[i].filter.any[f].field.includes('group_id')) {
+                                  client.request(getGroups(slaSelectList[i].filter.any[f].value)).then(
+                                    function(groups){
+                                      client.request(srcGroups_dest(groups.group.name)).then(
+                                        function(srcGroup){
+                                          if (srcGroup.results.length > 0) {
+                                            console.log('===== group found =====');
+                                            filterAnyCounter++;
+                                            slaSelectList[counterI].filter.any[counterF].value = srcGroup.results[0].id;
+                                            // if (filterAnyCounter == slaSelectList[counterI].filter.any.length) {
+                                            //   console.log('any filter has finish');
+                                            //   console.log(slaSelectList[counterI]);
+                                            //   filterFinish++;
+                                            //   if (filterFinish == 2) {
+                                            //     doCreateSla(slaSelectList[counterI]);
+                                            //   }
+                                            // }
+                                            counterArray.push(counterI);
+                                            var caCounter = 0;
+                                            for (c in counterArray) {
+                                              var alCounter = slaSelectList[counterI].filter.all.length;
+                                              var anCounter = slaSelectList[counterI].filter.any.length;
+                                              if (counterArray[c] == counterI) {
+                                                caCounter++;
+                                                if (caCounter == alCounter + anCounter) {
+                                                  doCreateSla(slaSelectList[counterI]);
+                                                }
+                                              }
+                                            }
+                                          } else {
+                                            console.log('===== group not found =====');
+                                            updateProgress('SLA', '<b>' + slaSelectList[counterI].title + '</b> Error. Some group not exist: ' + groups.group.name);
+                                            // errorMigrate.push({
+                                            //   name: 'SLA: ' + slaSelectList[counterI].title,
+                                            //   error: 'group doesnt exist: ' + groups.group.name
+                                            // });
+                                          }
+                                        },
+                                        function(srcGroupError){
+                                          console.log('===== srcGroupError =====');
+                                          console.log(srcGroupError);
+                                        });
+                                    },
+                                    function(groupsError){
+                                      console.log('===== groupsError =====');
+                                      console.log(groupsError);
+                                    });
+                                } else if (slaSelectList[i].filter.any[f].field.includes('organization_id')) {
+                                  client.request(getOrganizationsById(slaSelectList[i].filter.any[f].value)).then(
+                                    function(org){
+                                      client.request(srcOrganizationDest(org.organization.name)).then(
+                                        function(orgDest){
+                                          if (orgDest.results.length > 0) {
+                                            console.log('===== organization found =====');
+                                            slaSelectList[counterI].filter.any[counterF].value = orgDest.results[0].id;
+                                            filterAnyCounter++;
+                                            // if (filterAnyCounter == slaSelectList[counterI].filter.any.length) {
+                                            //   console.log('any filter has finish');
+                                            //   console.log(slaSelectList[counterI]);
+                                            //   filterFinish++;
+                                            //   if (filterFinish == 2) {
+                                            //     doCreateSla(slaSelectList[counterI]);
+                                            //   }
+                                            // }
+                                            counterArray.push(counterI);
+                                            var caCounter = 0;
+                                            for (c in counterArray) {
+                                              var alCounter = slaSelectList[counterI].filter.all.length;
+                                              var anCounter = slaSelectList[counterI].filter.any.length;
+                                              if (counterArray[c] == counterI) {
+                                                caCounter++;
+                                                if (caCounter == alCounter + anCounter) {
+                                                  doCreateSla(slaSelectList[counterI]);
+                                                }
+                                              }
+                                            }
+                                          } else {
+                                            console.log('===== organization not found =====');
+                                            updateProgress('SLA', '<b>' + slaSelectList[counterI].title + '</b> Error. Some organizations not exist: ' + org.organization.name);
+                                            // errorMigrate.push({
+                                            //   name: 'SLA: ' + slaSelectList[counterI].title,
+                                            //   error: 'organizations doesnt exist: ' + org.organization.name
+                                            // });
+                                          }
+                                        },
+                                        function(orgDestError){
+                                          console.log('===== orgDestError =====');
+                                          console.log(orgDestError);
+                                        });
+                                    },
+                                    function(orgError){
+                                      console.log('===== orgError =====');
+                                      console.log(orgError);
+                                    });
+                                } else {
+                                  counterArray.push(counterI);
+                                  var caCounter = 0;
+                                  for (c in counterArray) {
+                                    var alCounter = slaSelectList[counterI].filter.all.length;
+                                    var anCounter = slaSelectList[counterI].filter.any.length;
+                                    if (counterArray[c] == counterI) {
+                                      caCounter++;
+                                      if (caCounter == alCounter + anCounter) {
+                                        doCreateSla(slaSelectList[counterI]);
                                       }
                                     }
                                   }
                                 }
-                                if (!brandsIsFound) {
-                                  console.log('===== brands not found =====');
-                                  updateProgress('SLA', '<b>' + slaSelectList[counterI].title + '</b> Error. Some brands not exist: ' + brands.brand.name);
-                                  // errorMigrate.push({
-                                  //   name: 'SLA: ' + slaSelectList[counterI].title,
-                                  //   error: 'brands doesnt exist: ' + brands.brand.name
-                                  // });
-                                }
-                              },
-                              function(brandsError){
-                                console.log('===== brandsError =====');
-                                console.log(brandsError);
-                              });
-                          } else if (slaSelectList[i].filter.any[f].field.includes('ticket_form_id')) {
-                            client.request(getTicketFormsById(slaSelectList[i].filter.any[f].value)).then(
-                              function(ticketForm){
-                                var ticketFormFound = false;
-                                for (var tf=0; tf<ticketFormsDest.ticket_forms.length; tf++){
-                                  if (ticketForm.ticket_form.name == ticketFormsDest.ticket_forms[tf].name) {
-                                    ticketFormFound = true;
-                                    console.log('===== ticket forms found =====');
-                                    filterAnyCounter++;
-                                    slaSelectList[counterI].filter.any[counterF].value = ticketFormsDest.ticket_forms[tf].id;
-                                    // if (filterAnyCounter == slaSelectList[counterI].filter.any.length) {
-                                    //   console.log('any filter has finish');
-                                    //   console.log(slaSelectList[counterI]);
-                                    //   filterFinish++;
-                                    //   if (filterFinish == 2) {
-                                    //     doCreateSla(slaSelectList[counterI]);
-                                    //   }
-                                    // }
-                                    counterArray.push(counterI);
-                                    var caCounter = 0;
-                                    for (c in counterArray) {
-                                      var alCounter = slaSelectList[counterI].filter.all.length;
-                                      var anCounter = slaSelectList[counterI].filter.any.length;
-                                      if (counterArray[c] == counterI) {
-                                        caCounter++;
-                                        if (caCounter == alCounter + anCounter) {
-                                          doCreateSla(slaSelectList[counterI]);
-                                        }
-                                      }
-                                    }
-                                  }
-                                }
-                                if (!ticketFormFound) {
-                                  console.log('===== ticket form not found =====');
-                                  updateProgress('SLA', '<b>' + slaSelectList[counterI].title + '</b> Error. Some ticket form not exist: ' + ticketForm.ticket_form.name);
-                                  // errorMigrate.push({
-                                  //   name: 'SLA: ' + slaSelectList[counterI].title,
-                                  //   error: 'ticket form doesnt exist: ' + ticketForm.ticket_form.name
-                                  // });
-                                }
-                              },
-                              function(ticketFormError){
-                                console.log('===== ticketFormError =====');
-                                console.log(ticketFormError);
-                              });
-                          } else if (slaSelectList[i].filter.any[f].field.includes('group_id')) {
-                            client.request(getGroups(slaSelectList[i].filter.any[f].value)).then(
-                              function(groups){
-                                client.request(srcGroups_dest(groups.group.name)).then(
-                                  function(srcGroup){
-                                    if (srcGroup.results.length > 0) {
-                                      console.log('===== group found =====');
-                                      filterAnyCounter++;
-                                      slaSelectList[counterI].filter.any[counterF].value = srcGroup.results[0].id;
-                                      // if (filterAnyCounter == slaSelectList[counterI].filter.any.length) {
-                                      //   console.log('any filter has finish');
-                                      //   console.log(slaSelectList[counterI]);
-                                      //   filterFinish++;
-                                      //   if (filterFinish == 2) {
-                                      //     doCreateSla(slaSelectList[counterI]);
-                                      //   }
-                                      // }
-                                      counterArray.push(counterI);
-                                      var caCounter = 0;
-                                      for (c in counterArray) {
-                                        var alCounter = slaSelectList[counterI].filter.all.length;
-                                        var anCounter = slaSelectList[counterI].filter.any.length;
-                                        if (counterArray[c] == counterI) {
-                                          caCounter++;
-                                          if (caCounter == alCounter + anCounter) {
-                                            doCreateSla(slaSelectList[counterI]);
-                                          }
-                                        }
-                                      }
-                                    } else {
-                                      console.log('===== group not found =====');
-                                      updateProgress('SLA', '<b>' + slaSelectList[counterI].title + '</b> Error. Some group not exist: ' + groups.group.name);
-                                      // errorMigrate.push({
-                                      //   name: 'SLA: ' + slaSelectList[counterI].title,
-                                      //   error: 'group doesnt exist: ' + groups.group.name
-                                      // });
-                                    }
-                                  },
-                                  function(srcGroupError){
-                                    console.log('===== srcGroupError =====');
-                                    console.log(srcGroupError);
-                                  });
-                              },
-                              function(groupsError){
-                                console.log('===== groupsError =====');
-                                console.log(groupsError);
-                              });
-                          } else if (slaSelectList[i].filter.any[f].field.includes('organization_id')) {
-                            client.request(getOrganizationsById(slaSelectList[i].filter.any[f].value)).then(
-                              function(org){
-                                client.request(srcOrganizationDest(org.organization.name)).then(
-                                  function(orgDest){
-                                    if (orgDest.results.length > 0) {
-                                      console.log('===== organization found =====');
-                                      slaSelectList[counterI].filter.any[counterF].value = orgDest.results[0].id;
-                                      filterAnyCounter++;
-                                      // if (filterAnyCounter == slaSelectList[counterI].filter.any.length) {
-                                      //   console.log('any filter has finish');
-                                      //   console.log(slaSelectList[counterI]);
-                                      //   filterFinish++;
-                                      //   if (filterFinish == 2) {
-                                      //     doCreateSla(slaSelectList[counterI]);
-                                      //   }
-                                      // }
-                                      counterArray.push(counterI);
-                                      var caCounter = 0;
-                                      for (c in counterArray) {
-                                        var alCounter = slaSelectList[counterI].filter.all.length;
-                                        var anCounter = slaSelectList[counterI].filter.any.length;
-                                        if (counterArray[c] == counterI) {
-                                          caCounter++;
-                                          if (caCounter == alCounter + anCounter) {
-                                            doCreateSla(slaSelectList[counterI]);
-                                          }
-                                        }
-                                      }
-                                    } else {
-                                      console.log('===== organization not found =====');
-                                      updateProgress('SLA', '<b>' + slaSelectList[counterI].title + '</b> Error. Some organizations not exist: ' + org.organization.name);
-                                      // errorMigrate.push({
-                                      //   name: 'SLA: ' + slaSelectList[counterI].title,
-                                      //   error: 'organizations doesnt exist: ' + org.organization.name
-                                      // });
-                                    }
-                                  },
-                                  function(orgDestError){
-                                    console.log('===== orgDestError =====');
-                                    console.log(orgDestError);
-                                  });
-                              },
-                              function(orgError){
-                                console.log('===== orgError =====');
-                                console.log(orgError);
-                              });
-                          } else {
-                            counterArray.push(counterI);
-                            var caCounter = 0;
-                            for (c in counterArray) {
-                              var alCounter = slaSelectList[counterI].filter.all.length;
-                              var anCounter = slaSelectList[counterI].filter.any.length;
-                              if (counterArray[c] == counterI) {
-                                caCounter++;
-                                if (caCounter == alCounter + anCounter) {
-                                  doCreateSla(slaSelectList[counterI]);
-                                }
-                              }
+                              })(f);
                             }
+                          } else {
+                            console.log('filter any null');
+                            filterFinish++;
                           }
-                        })(f);
+                        })(i);
+                      } else {
+                        console.log('SLA Exist');
                       }
-                    } else {
-                      console.log('filter any null');
-                      filterFinish++;
                     }
-                  })(i);
-                }
+                  },
+                  function(slaDestError){
+                    console.log('===== slaDestError =====');
+                    console.log(slaDestError);
+                  });
+                
               },
               function(ticketFormsDestError){
                 console.log('===== ticketFormsDestError =====');
@@ -2433,10 +2451,6 @@ function doMigrate () {
                                       function(srcGroup){
                                         if (srcGroup.results.length > 0) {
                                           viewSelectList[counterI].restriction.id = srcGroup.results[0].id;
-                                          // conditionCounter++;
-                                          // if (conditionCounter == 3) {
-                                          //   doCreateViews(viewSelectList[counterI]);
-                                          // }
                                           checkQue (counterArray, viewSelectList, counterI);
                                         } else {
                                           console.log('===== group not found =====');
@@ -2453,10 +2467,6 @@ function doMigrate () {
                                     console.log(groupError);
                                   });
                               } else {
-                                // conditionCounter++;
-                                // if (conditionCounter == 3) {
-                                //   doCreateViews(viewSelectList[counterI]);
-                                // }
                                 checkQue (counterArray, viewSelectList, counterI);
                               }
                             }
@@ -2476,13 +2486,6 @@ function doMigrate () {
                                           brandFound = true;
                                           allCounter++;
                                           viewSelectList[counterI].conditions.all[counterAL].value = '' + brandsDest.brands[allbrands].id + '';
-                                          // if (allCounter == viewSelectList[counterI].conditions.all.length) {
-                                          //   console.log('conditionsAll done');
-                                          //   conditionCounter++;
-                                          //   if (conditionCounter == 3) {
-                                          //     doCreateViews(viewSelectList[counterI]);
-                                          //   }
-                                          // }
                                           checkQue (counterArray, viewSelectList, counterI);
                                         }
                                       }
@@ -2504,13 +2507,6 @@ function doMigrate () {
                                               if (userSrc.results.length > 0) {
                                                 allCounter++;
                                                 viewSelectList[counterI].conditions.all[counterAL].value = '' + userSrc.results[0].id + '';
-                                                // if (allCounter == viewSelectList[counterI].conditions.all.length) {
-                                                //   console.log('conditionsAll done');
-                                                //   conditionCounter++;
-                                                //   if (conditionCounter == 3) {
-                                                //     doCreateViews(viewSelectList[counterI]);
-                                                //   }
-                                                // }
                                                 checkQue (counterArray, viewSelectList, counterI);
                                               } else {
                                                 updateProgress('Views', '<b>' + viewSelectList[counterI].title + '</b> Error, Assignee not found: ' + user.user.email);
@@ -2528,13 +2524,6 @@ function doMigrate () {
                                       });
                                   } else {
                                     allCounter++;
-                                    // if (allCounter == viewSelectList[counterI].conditions.all.length) {
-                                    //   console.log('conditionsAll done');
-                                    //   conditionCounter++;
-                                    //   if (conditionCounter == 3) {
-                                    //     doCreateViews(viewSelectList[counterI]);
-                                    //   }
-                                    // }
                                     checkQue (counterArray, viewSelectList, counterI);
                                   }
                                 } else if (viewSelectList[i].conditions.all[al].field == 'received_from') {
@@ -2546,13 +2535,6 @@ function doMigrate () {
                                           allCounter++;
                                           shareFound = true;
                                           viewSelectList[counterI].conditions.all[counterAL].value == '' + shareDest.sharing_agreements[s].id + '';
-                                          // if (allCounter == viewSelectList[counterI].conditions.all.length) {
-                                          //   console.log('conditionsAll done');
-                                          //   conditionCounter++;
-                                          //   if (conditionCounter == 3) {
-                                          //     doCreateViews(viewSelectList[counterI]);
-                                          //   }
-                                          // }
                                           checkQue (counterArray, viewSelectList, counterI);
                                         }
                                       }
@@ -2573,14 +2555,6 @@ function doMigrate () {
                                           function(groupSrc){
                                             if (groupSrc.results.length > 0) {
                                               viewSelectList[counterI].conditions.all[counterAL].value = '' + groupSrc.results[0].id + '';
-                                              allCounter++;
-                                              // if (allCounter == viewSelectList[counterI].conditions.all.length) {
-                                              //   console.log('conditionsAll done');
-                                              //   conditionCounter++;
-                                              //   if (conditionCounter == 3) {
-                                              //     doCreateViews(viewSelectList[counterI]);
-                                              //   }
-                                              // }
                                               checkQue (counterArray, viewSelectList, counterI);
                                             } else {
                                               updateProgress('Views', '<b>' + viewSelectList[counterI].title + '</b> Error, Group not found: ' + group.group.name);
@@ -2597,13 +2571,6 @@ function doMigrate () {
                                       });
                                   } else {
                                     allCounter++;
-                                    // if (allCounter == viewSelectList[counterI].conditions.all.length) {
-                                    //   console.log('conditionsAll done');
-                                    //   conditionCounter++;
-                                    //   if (conditionCounter == 3) {
-                                    //     doCreateViews(viewSelectList[counterI]);
-                                    //   }
-                                    // }
                                     checkQue (counterArray, viewSelectList, counterI);
                                   }
                                 } else if (viewSelectList[i].conditions.all[al].field == 'via_id') {
@@ -2611,13 +2578,6 @@ function doMigrate () {
                                     updateProgress('Views', '<b>' + viewSelectList[counterI].title + '</b> Error, System cannot understand condition on: ' + viewSelectList[i].conditions.all[al].value);
                                   } else {
                                     allCounter++;
-                                    // if (allCounter == viewSelectList[counterI].conditions.all.length) {
-                                    //   console.log('conditionsAll done');
-                                    //   conditionCounter++;
-                                    //   if (conditionCounter == 3) {
-                                    //     doCreateViews(viewSelectList[counterI]);
-                                    //   }
-                                    // }
                                     checkQue (counterArray, viewSelectList, counterI);
                                   }
                                 } else if (viewSelectList[i].conditions.all[al].field.includes('custom_fields_')) {
@@ -2631,12 +2591,6 @@ function doMigrate () {
                                             allCounter++
                                             ticketFieldFound = true;
                                             viewSelectList[counterI].conditions.all[counterAL].field = 'custom_fields_' + ticketFieldDest.ticket_fields[t].id;
-                                            // if (allCounter == viewSelectList[counterI].conditions.all.length) {
-                                            //   conditionCounter++;
-                                            //   if (conditionCounter == 3) {
-                                            //     doCreateViews(viewSelectList[counterI]);
-                                            //   }
-                                            // }
                                             checkQue (counterArray, viewSelectList, counterI);
                                           }
                                         }
@@ -2658,12 +2612,6 @@ function doMigrate () {
                                           shareFound = true;
                                           allCounter++;
                                           viewSelectList[counterI].conditions.all[counterAL].value = '' + shareDest.sharing_agreements[s].id + '';
-                                          // if (allCounter == viewSelectList[counterI].conditions.all.length) {
-                                          //   conditionCounter++;
-                                          //   if (conditionCounter == 3) {
-                                          //     doCreateViews(viewSelectList[counterI]);
-                                          //   }
-                                          // }
                                           checkQue (counterArray, viewSelectList, counterI);
                                         }
                                       }
@@ -2678,13 +2626,6 @@ function doMigrate () {
                                     });
                                 } else {
                                   allCounter++;
-                                  // if (allCounter == viewSelectList[counterI].conditions.all.length) {
-                                  //   console.log('conditionsAll done');
-                                  //   conditionCounter++;
-                                  //   if (conditionCounter == 3) {
-                                  //     doCreateViews(viewSelectList[counterI]);
-                                  //   }
-                                  // }
                                   checkQue (counterArray, viewSelectList, counterI);
                                 }
                               })(al);
@@ -2705,13 +2646,6 @@ function doMigrate () {
                                           brandFound = true;
                                           anyCounter++;
                                           viewSelectList[counterI].conditions.any[counterAL].value = '' + brandsDest.brands[anybrands].id + '';
-                                          // if (anyCounter == viewSelectList[counterI].conditions.any.length) {
-                                          //   console.log('conditionsAll done');
-                                          //   conditionCounter++;
-                                          //   if (conditionCounter == 3) {
-                                          //     doCreateViews(viewSelectList[counterI]);
-                                          //   }
-                                          // }
                                           checkQue (counterArray, viewSelectList, counterI);
                                         }
                                       }
@@ -2733,13 +2667,6 @@ function doMigrate () {
                                               if (userSrc.results.length > 0) {
                                                 anyCounter++;
                                                 viewSelectList[counterI].conditions.any[counterAL].value = '' + userSrc.results[0].id + '';
-                                                // if (anyCounter == viewSelectList[counterI].conditions.any.length) {
-                                                //   console.log('conditionsAll done');
-                                                //   conditionCounter++;
-                                                //   if (conditionCounter == 3) {
-                                                //     doCreateViews(viewSelectList[counterI]);
-                                                //   }
-                                                // }
                                                 checkQue (counterArray, viewSelectList, counterI);
                                               } else {
                                                 updateProgress('Views', '<b>' + viewSelectList[counterI].title + '</b> Error, Assignee not found: ' + user.user.email);
@@ -2757,13 +2684,6 @@ function doMigrate () {
                                       });
                                   } else {
                                     anyCounter++;
-                                    // if (anyCounter == viewSelectList[counterI].conditions.any.length) {
-                                    //   console.log('conditionsAll done');
-                                    //   conditionCounter++;
-                                    //   if (conditionCounter == 3) {
-                                    //     doCreateViews(viewSelectList[counterI]);
-                                    //   }
-                                    // }
                                     checkQue (counterArray, viewSelectList, counterI);
                                   }
                                 } else if (viewSelectList[i].conditions.any[al].field == 'received_from') {
@@ -2775,13 +2695,6 @@ function doMigrate () {
                                           anyCounter++;
                                           shareFound = true;
                                           viewSelectList[counterI].conditions.any[counterAL].value = '' + shareDest.sharing_agreements[s].id + '';
-                                          // if (anyCounter == viewSelectList[counterI].conditions.any.length) {
-                                          //   console.log('conditionsAll done');
-                                          //   conditionCounter++;
-                                          //   if (conditionCounter == 3) {
-                                          //     doCreateViews(viewSelectList[counterI]);
-                                          //   }
-                                          // }
                                           checkQue (counterArray, viewSelectList, counterI);
                                         }
                                       }
@@ -2803,13 +2716,6 @@ function doMigrate () {
                                             if (groupSrc.results.length > 0) {
                                               viewSelectList[counterI].conditions.any[counterAL].value = '' + groupSrc.results[0].id + '';
                                               anyCounter++;
-                                              // if (anyCounter == viewSelectList[counterI].conditions.any.length) {
-                                              //   console.log('conditionsAll done');
-                                              //   conditionCounter++;
-                                              //   if (conditionCounter == 3) {
-                                              //     doCreateViews(viewSelectList[counterI]);
-                                              //   }
-                                              // }
                                               checkQue (counterArray, viewSelectList, counterI);
                                             } else {
                                               updateProgress('Views', '<b>' + viewSelectList[counterI].title + '</b> Error, Group not found: ' + group.group.name);
@@ -2826,13 +2732,6 @@ function doMigrate () {
                                       });
                                   } else {
                                     anyCounter++;
-                                    // if (anyCounter == viewSelectList[counterI].conditions.any.length) {
-                                    //   console.log('conditionsAll done');
-                                    //   conditionCounter++;
-                                    //   if (conditionCounter == 3) {
-                                    //     doCreateViews(viewSelectList[counterI]);
-                                    //   }
-                                    // }
                                     checkQue (counterArray, viewSelectList, counterI);
                                   }
                                 } else if (viewSelectList[i].conditions.any[al].field == 'via_id') {
@@ -2840,13 +2739,6 @@ function doMigrate () {
                                     updateProgress('Views', '<b>' + viewSelectList[counterI].title + '</b> Error, System cannot understand condition on: ' + viewSelectList[i].conditions.any[al].value);
                                   } else {
                                     anyCounter++;
-                                    // if (anyCounter == viewSelectList[counterI].conditions.any.length) {
-                                    //   console.log('conditionsAll done');
-                                    //   conditionCounter++;
-                                    //   if (conditionCounter == 3) {
-                                    //     doCreateViews(viewSelectList[counterI]);
-                                    //   }
-                                    // }
                                     checkQue (counterArray, viewSelectList, counterI);
                                   }
                                 } else if (viewSelectList[i].conditions.any[al].field.includes('custom_fields_')) {
@@ -2860,12 +2752,6 @@ function doMigrate () {
                                             anyCounter++
                                             ticketFieldFound = true;
                                             viewSelectList[counterI].conditions.any[counterAL].field = 'custom_fields_' + ticketFieldDest.ticket_fields[t].id;
-                                            // if (anyCounter == viewSelectList[counterI].conditions.any.length) {
-                                            //   conditionCounter++;
-                                            //   if (conditionCounter == 3) {
-                                            //     doCreateViews(viewSelectList[counterI]);
-                                            //   }
-                                            // }
                                             checkQue (counterArray, viewSelectList, counterI);
                                           }
                                         }
@@ -2887,12 +2773,6 @@ function doMigrate () {
                                           shareFound = true;
                                           anyCounter++;
                                           viewSelectList[counterI].conditions.any[counterAL].value = '' + shareDest.sharing_agreements[s].id + '';
-                                          // if (anyCounter == viewSelectList[counterI].conditions.any.length) {
-                                          //   conditionCounter++;
-                                          //   if (conditionCounter == 3) {
-                                          //     doCreateViews(viewSelectList[counterI]);
-                                          //   }
-                                          // }
                                           checkQue (counterArray, viewSelectList, counterI);
                                         }
                                       }
@@ -2907,13 +2787,6 @@ function doMigrate () {
                                     });
                                 } else {
                                   anyCounter++;
-                                  // if (anyCounter == viewSelectList[counterI].conditions.any.length) {
-                                  //   console.log('conditionsAll done');
-                                  //   conditionCounter++;
-                                  //   if (conditionCounter == 3) {
-                                  //     doCreateViews(viewSelectList[counterI]);
-                                  //   }
-                                  // }
                                   checkQue (counterArray, viewSelectList, counterI);
                                 }
                               })(al);
@@ -3530,16 +3403,6 @@ function deleteAllTicketFields () {
   //   function (errorData){
   //     console.log(errorData);
   //   });
-}
-
-function doLoading (type, message) {
-  /*CHECK IF MODAL SHOWN OR HIDDEN*/
-  if ($('#modal_loading').hasClass('in')) {
-    $('.spanLoadMsg').text('Processing:  ' + message);
-    $('.spanLoadType').text(type);
-  } else {
-    $('#modal_loading').modal('show');
-  }
 }
 
 function isNumeric(n) {
