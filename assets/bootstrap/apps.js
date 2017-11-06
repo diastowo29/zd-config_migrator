@@ -1127,6 +1127,7 @@
       errorMigrate = [];
       showResult();
       $(".bodyMessage").empty();
+
       /*=====TICKET FIELDS=====*/
       if (ticketFieldsSelectList.length > 0) {
         var tfCounter = 0;
@@ -1375,7 +1376,6 @@
 
       /*=====TRIGGERS=====*/
       if (triggerSelectList.length > 0) {
-        
       }
 
       /*=====AUTOMATIONS=====*/
@@ -1884,7 +1884,6 @@
             console.log('===== FAILED GET TICKET DEST DATA =====');
             console.log(ticketFieldsDestError);
           });
-        
       }
 
       /*=====SLA======*/
@@ -3538,15 +3537,15 @@
       console.log('Create View');
       console.log(viewsCreate);
       var newView = new Array ({view:viewsCreate});
-      // client.request(createViews(JSON.stringify(newView[0]))).then(
-      //   function(create){
-      //     console.log('Create success');
-      //     console.log(create);
-      //   },
-      //   function(createViewError){
-      //     console.log('===== createViewError =====');
-      //     console.log(createViewError);
-      //   });
+      client.request(createViews(JSON.stringify(newView[0]))).then(
+        function(create){
+          console.log('Create success');
+          console.log(create);
+        },
+        function(createViewError){
+          console.log('===== createViewError =====');
+          console.log(createViewError);
+        });
     }
 
     function doGenerateGroupMembership (groupIds) {
