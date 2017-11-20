@@ -40,15 +40,14 @@ this.init();
 // // // // // // // // this.deleteAllTicketFields();
 /*====== ** ======*/
 
-var ZD_DOMAIN = "";
-var ZD_TOKEN = "";
-// var ZD_DOMAIN = "https://treesdemo11496822632.zendesk.com";
-// var ZD_DOMAIN = "https://treesdemo1.zendesk.com";
-// var ZD_TOKEN = "basic ZWxkaWVuLmhhc21hbnRvQHRyZWVzc29sdXRpb25zLmNvbTpXM2xjb21lMTIz";
+// var ZD_DOMAIN = "";
+// var ZD_TOKEN = "";
+var ZD_DOMAIN = "https://treesdemo11496822632.zendesk.com";
+var ZD_TOKEN = "basic ZWxkaWVuLmhhc21hbnRvQHRyZWVzc29sdXRpb25zLmNvbTpXM2xjb21lMTIz";
 // var ZD_DOMAIN = "https://testmigrate.zendesk.com";
 // var ZD_TOKEN = "basic dHJlZXMuemVuZGVza0BnbWFpbC5jb206VzNsY29tZTEyMw==";
-$('.migrate_button').attr("disabled", "disabled");
-$('#myModal').modal('show');
+// $('.migrate_button').attr("disabled", "disabled");
+// $('#myModal').modal('show');
 
 /*=============API PART============*/
 
@@ -136,6 +135,34 @@ function getBrands (id) {
   var getTickets = {
     url: '/api/v2/brands/' + id + '.json',
     type: 'GET',
+    dataType : "json",
+    contentType: "application/json; charset=utf-8",
+    async: false,
+  }
+  console.log(getTickets);
+  return getTickets;
+}
+
+function getTargets (id) {
+  var getTickets = {
+    url: '/api/v2/targets/' + id + '.json',
+    type: 'GET',
+    dataType : "json",
+    contentType: "application/json; charset=utf-8",
+    async: false,
+  }
+  console.log(getTickets);
+  return getTickets;
+}
+
+function getAllTargetsDest (id) {
+  var getTickets = {
+    url: ZD_DOMAIN + '/api/v2/targets.json',
+    type: 'GET',
+    headers: {
+      "Authorization": ZD_TOKEN
+    },
+    cors: true,
     dataType : "json",
     contentType: "application/json; charset=utf-8",
     async: false,
@@ -723,13 +750,13 @@ function init () {
   document.getElementById('loader').style.visibility = 'visible';
   document.getElementById('mainContent').style.visibility = 'hidden';
 
-  this.customCall(ticketFieldUrl, 'ticket_fields');
-  this.customCall(ticketFormsUrl, 'ticket_forms');
-  this.customCall(macrosUrl, 'macros');
+  // this.customCall(ticketFieldUrl, 'ticket_fields');
+  // this.customCall(ticketFormsUrl, 'ticket_forms');
+  // this.customCall(macrosUrl, 'macros');
   this.customCall(automationsUrl, 'automations');
-  this.customCall(slaUrl, 'sla_policies');
-  this.customCall(viewsUrl, 'views');
-  this.customCall(groupsUrl, 'groups');
+  // this.customCall(slaUrl, 'sla_policies');
+  // this.customCall(viewsUrl, 'views');
+  // this.customCall(groupsUrl, 'groups');
   this.customCall(brandsUrl, 'brands');
 }
 
@@ -1145,232 +1172,295 @@ function doMigrate () {
       function(ticketFieldsDestData){
         client.request(getAutomations_dest()).then(
           function(automationsDest){
-            var processCounter = 0;
-            var counterArray = [];
-            for (var i=0; i<automationsSelectList.length; i++) {
-              var automationsExist = false;
-              var processCounter = 0;
-              for (var td=0; td<automationsDest.automations.length; td++) {
-                if (automationsSelectList[i].title == automationsDest.automations[td].title) {
-                  automationsExist = true;
-                }
-              }
-              if (!automationsExist) {
-                (function(counterI){
-                  if (automationsSelectList[i].actions.length > 0) {
-                    var actionCounter = 0;
-                    for (var a=0; a<automationsSelectList[i].actions.length; a++) {
-                      (function(counterA){
-                        if (automationsSelectList[i].actions[a].field == 'notification_user') {
-                          if (isNumeric(automationsSelectList[i].actions[a].value[0])) {
+            client.request(getAllBrandsDest()).then(
+              function(brandsDest){
+                client.request(getAllTargetsDest()).then(
+                  function(targetsDest){
+                    var processCounter = 0;
+                    var counterArray = [];
+                    for (var i=0; i<automationsSelectList.length; i++) {
+                      var automationsExist = false;
+                      var processCounter = 0;
+                      for (var td=0; td<automationsDest.automations.length; td++) {
+                        if (automationsSelectList[i].title == automationsDest.automations[td].title) {
+                          automationsExist = true;
+                        }
+                      }
+                      if (!automationsExist) {
+                        (function(counterI){
+                          if (automationsSelectList[i].actions.length > 0) {
+                            var actionCounter = 0;
+                            for (var a=0; a<automationsSelectList[i].actions.length; a++) {
+                              (function(counterA){
+                                if (automationsSelectList[i].actions[a].field == 'notification_user') {
+                                  if (isNumeric(automationsSelectList[i].actions[a].value[0])) {
 
-                            client.request(getUsers(automationsSelectList[i].actions[a].value[0])).then(
-                              function(user){
-                                if (user.user.email !== null) {
-                                  client.request(srcUserByEmail_dest(user.user.email)).then(
-                                    function(srcUser){
-                                      if (srcUser.results.length > 0) {
+                                    client.request(getUsers(automationsSelectList[i].actions[a].value[0])).then(
+                                      function(user){
+                                        if (user.user.email !== null) {
+                                          client.request(srcUserByEmail_dest(user.user.email)).then(
+                                            function(srcUser){
+                                              if (srcUser.results.length > 0) {
+                                                counterArray.push(counterI);
+                                                console.log(counterArray);
+                                                console.log('user found');
+                                                automationsSelectList[counterI].actions[counterA].value[0] = srcUser.results[0].id;
+                                                checkQueAutomations(counterArray, counterI);
+                                              } else {
+                                                console.log('===== user not found =====');
+                                                updateProgress('Automations', '<b>' + automationsSelectList[counterI].title + '</b> Error, Users not found: ' + user.user.name);
+                                              }
+                                            },
+                                            function(srcUserError){
+                                              console.log('===== srcUserError =====');
+                                              console.log(srcUserError);
+                                            });
+                                        }
+                                      },
+                                      function(userError){
+                                        console.log('===== userError =====');
+                                        console.log(userError);
+                                      });
+                                  } else {
+                                    counterArray.push(counterI);
+                                    checkQueAutomations(counterArray, counterI);
+                                  }
+                                } else if (automationsSelectList[i].actions[a].field == 'notification_group') {
+                                  if (isNumeric(automationsSelectList[i].actions[a].value[0])) {
+                                    client.request(getGroups(automationsSelectList[i].actions[a].value[0])).then(
+                                      function(group){
+                                        client.request(srcGroups_dest(group.group.name)).then(
+                                          function(srcGroup){
+                                            if (srcGroup.results.length > 0) {
+                                              counterArray.push(counterI);
+                                              console.log(counterArray);
+                                              automationsSelectList[counterI].actions[counterA].value[0] = srcGroup.results[0].id;
+                                              checkQueAutomations(counterArray, counterI);
+                                            } else {
+                                              console.log('===== group not found =====');
+                                              updateProgress('Automations', '<b>' + automationsSelectList[counterI].title + '</b> Error, Group not found: ' + group.group.name);
+                                            }
+                                          },
+                                          function(srcGroupError){
+                                            console.log('===== srcGroupError =====');
+                                            console.log(srcGroupError);
+                                          });
+                                      },
+                                      function(groupError){
+                                        console.log('===== groupError =====');
+                                        console.log(groupError);
+                                      });
+                                  } else {
+                                    counterArray.push(counterI);
+                                    checkQueAutomations(counterArray, counterI);
+                                  }
+                                } else if (automationsSelectList[i].actions[a].field == 'notification_target') {
+                                  if (isNumeric(automationsSelectList[i].actions[a].value[0])) {
+                                    client.request(getTargets(automationsSelectList[i].actions[a].value[0])).then(
+                                      function(targets){
+                                        var targetFound = false;
+                                        for (var t=0;t<targetsDest.targets.length; t++) {
+                                          if (targets.target.title == targetsDest.targets[t].title) {
+                                            targetFound = true;
+                                            automationsSelectList[counterI].actions[counterA].value[0] = '' + targetsDest.targets[t].id;
+                                            counterArray.push(counterI);
+                                            checkQueAutomations(counterArray, counterI);
+                                          }
+                                        }
+                                        if (!targetFound) {
+                                          updateProgress('Automations', '<b>' + automationsSelectList[counterI].title + '</b> Error, Target not found: ' + targets.target.title);
+                                        }
+                                      },
+                                      function(targetsError){
+                                        console.log('===== targetsError =====');
+                                        console.log(targetsError);
+                                      });
+
+                                    // client.request(getGroups(automationsSelectList[i].actions[a].value[0])).then(
+                                    //   function(group){
+                                    //     client.request(srcGroups_dest(group.group.name)).then(
+                                    //       function(srcGroup){
+                                    //         if (srcGroup.results.length > 0) {
+                                    //           counterArray.push(counterI);
+                                    //           console.log(counterArray);
+                                    //           automationsSelectList[counterI].actions[counterA].value[0] = srcGroup.results[0].id;
+                                    //           checkQueAutomations(counterArray, counterI);
+                                    //         } else {
+                                    //           console.log('===== group not found =====');
+                                    //           updateProgress('Automations', '<b>' + automationsSelectList[counterI].title + '</b> Error, Group not found: ' + group.group.name);
+                                    //         }
+                                    //       },
+                                    //       function(srcGroupError){
+                                    //         console.log('===== srcGroupError =====');
+                                    //         console.log(srcGroupError);
+                                    //       });
+                                    //   },
+                                    //   function(groupError){
+                                    //     console.log('===== groupError =====');
+                                    //     console.log(groupError);
+                                    //   });
+                                  } else {
+                                    counterArray.push(counterI);
+                                    checkQueAutomations(counterArray, counterI);
+                                  }
+                                } else if (automationsSelectList[i].actions[a].field.includes('custom_fields_')) {
+                                  var ticketId = automationsSelectList[i].actions[a].field.split('_');
+                                  client.request(getTicketFieldsbyId(ticketId[2])).then(
+                                    function(ticketField){
+                                      var ticketFieldFound = false;
+                                      var ticketDestId = '';
+                                      for (var t=0; t<ticketFieldsDestData.ticket_fields.length; t++) {
+                                        if (ticketField.ticket_field.title == ticketFieldsDestData.ticket_fields[t].title) {
+                                          ticketFieldFound = true;
+                                          ticketDestId = ticketFieldsDestData.ticket_fields[t].id;
+                                        }
+                                      }
+                                      if (ticketFieldFound) {
                                         counterArray.push(counterI);
                                         console.log(counterArray);
-                                        console.log('user found');
-                                        automationsSelectList[counterI].actions[counterA].value[0] = srcUser.results[0].id;
+                                        automationsSelectList[counterI].actions[counterA].field = 'custom_fields_' + ticketDestId;
                                         checkQueAutomations(counterArray, counterI);
                                       } else {
-                                        console.log('===== user not found =====');
-                                        updateProgress('Automations', '<b>' + automationsSelectList[counterI].title + '</b> Error, Users not found: ' + user.user.name);
+                                        console.log('===== ticket field not found =====');
+                                        updateProgress('Automations', '<b>' + automationsSelectList[counterI].title + '</b> Error, Ticket Field not found: ' + ticketField.ticket_field.title);
                                       }
                                     },
-                                    function(srcUserError){
-                                      console.log('===== srcUserError =====');
-                                      console.log(srcUserError);
+                                    function(ticketFieldError){
+                                      console.log('===== ticketFieldError =====');
+                                      console.log(ticketFieldError);
                                     });
+                                } else {
+                                  counterArray.push(counterI);
+                                  checkQueAutomations(counterArray, counterI);
                                 }
-                              },
-                              function(userError){
-                                console.log('===== userError =====');
-                                console.log(userError);
-                              });
+                              })(a);
+                            }
                           } else {
-                            counterArray.push(counterI);
                             checkQueAutomations(counterArray, counterI);
                           }
-                        } else if (automationsSelectList[i].actions[a].field == 'notification_group') {
-                          if (isNumeric(automationsSelectList[i].actions[a].value[0])) {
-                            client.request(getGroups(automationsSelectList[i].actions[a].value[0])).then(
-                              function(group){
-                                client.request(srcGroups_dest(group.group.name)).then(
-                                  function(srcGroup){
-                                    if (srcGroup.results.length > 0) {
-                                      counterArray.push(counterI);
-                                      console.log(counterArray);
-                                      automationsSelectList[counterI].actions[counterA].value[0] = srcGroup.results[0].id;
-                                      checkQueAutomations(counterArray, counterI);
-                                    } else {
-                                      console.log('===== group not found =====');
-                                      updateProgress('Automations', '<b>' + automationsSelectList[counterI].title + '</b> Error, Group not found: ' + group.group.name);
-                                    }
-                                  },
-                                  function(srcGroupError){
-                                    console.log('===== srcGroupError =====');
-                                    console.log(srcGroupError);
-                                  });
-                              },
-                              function(groupError){
-                                console.log('===== groupError =====');
-                                console.log(groupError);
-                              });
-                          } else {
-                            counterArray.push(counterI);
-                            checkQueAutomations(counterArray, counterI);
-                          }
-                        } else if (automationsSelectList[i].actions[a].field == 'notification_target') {
-                          if (isNumeric(automationsSelectList[i].actions[a].value[0])) {
-                            // client.request(getGroups(automationsSelectList[i].actions[a].value[0])).then(
-                            //   function(group){
-                            //     client.request(srcGroups_dest(group.group.name)).then(
-                            //       function(srcGroup){
-                            //         if (srcGroup.results.length > 0) {
-                            //           counterArray.push(counterI);
-                            //           console.log(counterArray);
-                            //           automationsSelectList[counterI].actions[counterA].value[0] = srcGroup.results[0].id;
-                            //           checkQueAutomations(counterArray, counterI);
-                            //         } else {
-                            //           console.log('===== group not found =====');
-                            //           updateProgress('Automations', '<b>' + automationsSelectList[counterI].title + '</b> Error, Group not found: ' + group.group.name);
-                            //         }
-                            //       },
-                            //       function(srcGroupError){
-                            //         console.log('===== srcGroupError =====');
-                            //         console.log(srcGroupError);
-                            //       });
-                            //   },
-                            //   function(groupError){
-                            //     console.log('===== groupError =====');
-                            //     console.log(groupError);
-                            //   });
-                          } else {
-                            counterArray.push(counterI);
-                            checkQueAutomations(counterArray, counterI);
-                          }
-                        } else if (automationsSelectList[i].actions[a].field.includes('custom_fields_')) {
-                          var ticketId = automationsSelectList[i].actions[a].field.split('_');
-                          client.request(getTicketFieldsbyId(ticketId[2])).then(
-                            function(ticketField){
-                              var ticketFieldFound = false;
-                              var ticketDestId = '';
-                              for (var t=0; t<ticketFieldsDestData.ticket_fields.length; t++) {
-                                if (ticketField.ticket_field.title == ticketFieldsDestData.ticket_fields[t].title) {
-                                  ticketFieldFound = true;
-                                  ticketDestId = ticketFieldsDestData.ticket_fields[t].id;
+                          if (automationsSelectList[i].conditions.all.length > 0) {
+                            for (var al=0; al<automationsSelectList[i].conditions.all.length; al++) {
+                              (function(counterAL){
+                                if (automationsSelectList[i].conditions.all[al].field == 'group_id') {
+                                  if (isNumeric(automationsSelectList[i].conditions.all[al].value)) {
+                                    client.request(getGroups(automationsSelectList[i].conditions.all[al].value)).then(
+                                      function(group){
+                                        client.request(srcGroups_dest(group.group.name)).then(
+                                          function(srcGroup){
+                                            if (srcGroup.results.length > 0) {
+                                              automationsSelectList[counterI].conditions.all[counterAL].value = '' + srcGroup.results[0].id + '';
+                                              counterArray.push(counterI);
+                                              checkQueAutomations(counterArray, counterI);
+                                            } else {
+                                              updateProgress('Automations', '<b>' + automationsSelectList[counterI].title + '</b> Error, Group not found: ' + group.group.name);
+                                            }
+                                          },
+                                          function(srcGroupError){
+                                            console.log('===== srcGroupError =====');
+                                            console.log(srcGroupError);
+                                          });
+                                      },
+                                      function(groupError){
+                                        console.log('===== groupError =====');
+                                        console.log(groupError);
+                                      });
+                                  } else {
+                                    counterArray.push(counterI);
+                                    checkQueAutomations(counterArray, counterI);
+                                  }
+                                } else if (automationsSelectList[i].conditions.all[al].field == 'brand_id') {
+                                  if (isNumeric(automationsSelectList[i].conditions.all[al].value)) {
+                                    client.request(getBrands(automationsSelectList[i].conditions.all[al].value)).then(
+                                      function(brand){
+                                        var brandFound = false;
+                                        console.log(brand);
+                                        console.log(brandsDest);
+                                        for (allbrands in brandsDest.brands) {
+                                          if (brand.brand.name == brandsDest.brands[allbrands].name) {
+                                            brandFound = true;
+                                            automationsSelectList[counterI].conditions.all[counterAL].value = '' + brandsDest.brands[allbrands].id + '';
+                                            counterArray.push(counterI);
+                                            checkQueAutomations(counterArray, counterI);
+                                          }
+                                        }
+                                        if (!brandFound) {
+                                          updateProgress('Automations', '<b>' + automationsSelectList[counterI].title + '</b> Error, brands not found: ' + brand.brand.name);
+                                        }
+                                      },
+                                      function(brandError){
+                                        console.log('===== brandError =====');
+                                        console.log(brandError);
+                                      });
+                                  } else {
+                                    counterArray.push(counterI);
+                                    checkQueAutomations(counterArray, counterI);
+                                  }
+                                } else {
+                                  counterArray.push(counterI);
+                                  checkQueAutomations(counterArray, counterI);
                                 }
-                              }
-                              if (ticketFieldFound) {
-                                counterArray.push(counterI);
-                                console.log(counterArray);
-                                automationsSelectList[counterI].actions[counterA].field = 'custom_fields_' + ticketDestId;
-                                checkQueAutomations(counterArray, counterI);
-                              } else {
-                                console.log('===== ticket field not found =====');
-                                updateProgress('Automations', '<b>' + automationsSelectList[counterI].title + '</b> Error, Ticket Field not found: ' + ticketField.ticket_field.title);
-                              }
-                            },
-                            function(ticketFieldError){
-                              console.log('===== ticketFieldError =====');
-                              console.log(ticketFieldError);
-                            });
-                        } else {
-                          counterArray.push(counterI);
-                          checkQueAutomations(counterArray, counterI);
-                        }
-                      })(a);
-                    }
-                  } else {
-                    checkQueAutomations(counterArray, counterI);
-                  }
-                  if (automationsSelectList[i].conditions.all.length > 0) {
-                    for (var al=0; al<automationsSelectList[i].conditions.all.length; al++) {
-                      (function(counterAL){
-                        if (automationsSelectList[i].conditions.all[al].field == 'group_id') {
-                          if (isNumeric(automationsSelectList[i].conditions.all[al].value)) {
-                            client.request(getGroups(automationsSelectList[i].conditions.all[al].value)).then(
-                              function(group){
-                                client.request(srcGroups_dest(group.group.name)).then(
-                                  function(srcGroup){
-                                    if (srcGroup.results.length > 0) {
-                                      automationsSelectList[counterI].conditions.all[counterAL].value = '' + srcGroup.results[0].id + '';
-                                      counterArray.push(counterI);
-                                      checkQueAutomations(counterArray, counterI);
-                                    } else {
-                                      updateProgress('Automations', '<b>' + automationsSelectList[counterI].title + '</b> Error, Group not found: ' + group.group.name);
-                                    }
-                                  },
-                                  function(srcGroupError){
-                                    console.log('===== srcGroupError =====');
-                                    console.log(srcGroupError);
-                                  });
-                              },
-                              function(groupError){
-                                console.log('===== groupError =====');
-                                console.log(groupError);
-                              });
+                              })(al);
+                            }
                           } else {
-                            counterArray.push(counterI);
                             checkQueAutomations(counterArray, counterI);
                           }
-                        } else {
-                          counterArray.push(counterI);
-                          checkQueAutomations(counterArray, counterI);
-                        }
-                      })(al);
-                    }
-                  } else {
-                    checkQueAutomations(counterArray, counterI);
-                  }
 
-                  if (automationsSelectList[i].conditions.any.length > 0) {
-                    for (var al=0; al<automationsSelectList[i].conditions.any.length; al++) {
-                      (function(counterAL){
-                        if (automationsSelectList[i].conditions.any[al].field == 'group_id') {
-                          if (isNumeric(automationsSelectList[i].conditions.any[al].value)) {
-                            client.request(getGroups(automationsSelectList[i].conditions.any[al].value)).then(
-                              function(group){
-                                client.request(srcGroups_dest(group.group.name)).then(
-                                  function(srcGroup){
-                                    if (srcGroup.results.length > 0) {
-                                      automationsSelectList[counterI].conditions.any[counterAL].value = '' + srcGroup.results[0].id + '';
-                                      counterArray.push(counterI);
-                                      checkQueAutomations(counterArray, counterI);
-                                    } else {
-                                      updateProgress('Automations', '<b>' + automationsSelectList[counterI].title + '</b> Error, Group not found: ' + group.group.name);
-                                    }
-                                  },
-                                  function(srcGroupError){
-                                    console.log('===== srcGroupError =====');
-                                    console.log(srcGroupError);
-                                  });
-                              },
-                              function(groupError){
-                                console.log('===== groupError =====');
-                                console.log(groupError);
-                              });
+                          if (automationsSelectList[i].conditions.any.length > 0) {
+                            for (var al=0; al<automationsSelectList[i].conditions.any.length; al++) {
+                              (function(counterAL){
+                                if (automationsSelectList[i].conditions.any[al].field == 'group_id') {
+                                  if (isNumeric(automationsSelectList[i].conditions.any[al].value)) {
+                                    client.request(getGroups(automationsSelectList[i].conditions.any[al].value)).then(
+                                      function(group){
+                                        client.request(srcGroups_dest(group.group.name)).then(
+                                          function(srcGroup){
+                                            if (srcGroup.results.length > 0) {
+                                              automationsSelectList[counterI].conditions.any[counterAL].value = '' + srcGroup.results[0].id + '';
+                                              counterArray.push(counterI);
+                                              checkQueAutomations(counterArray, counterI);
+                                            } else {
+                                              updateProgress('Automations', '<b>' + automationsSelectList[counterI].title + '</b> Error, Group not found: ' + group.group.name);
+                                            }
+                                          },
+                                          function(srcGroupError){
+                                            console.log('===== srcGroupError =====');
+                                            console.log(srcGroupError);
+                                          });
+                                      },
+                                      function(groupError){
+                                        console.log('===== groupError =====');
+                                        console.log(groupError);
+                                      });
+                                  } else {
+                                    counterArray.push(counterI);
+                                    checkQueAutomations(counterArray, counterI);
+                                  }
+                                } else {
+                                  counterArray.push(counterI);
+                                  checkQueAutomations(counterArray, counterI);
+                                }
+                              })(al);
+                            }
                           } else {
-                            counterArray.push(counterI);
                             checkQueAutomations(counterArray, counterI);
                           }
-                        } else {
-                          counterArray.push(counterI);
-                          checkQueAutomations(counterArray, counterI);
-                        }
-                      })(al);
+                        })(i);
+                      } else {
+                        updateProgress('Automations', 'Automations exist: ' + automationsSelectList[i].title);
+                      }
                     }
-                  } else {
-                    checkQueAutomations(counterArray, counterI);
-                  }
-                })(i);
-              } else {
-                updateProgress('Automations', 'Automations exist: ' + automationsSelectList[i].title);
-              }
-            }
+                  },
+                  function(targetsDestError){
+                    console.log('===== targetsDestError =====');
+                    console.log(targetsDestError);
+                  });
+                
+              },
+              function(brandsDestError){
+                console.log('===== brandsDestError =====');
+                console.log(brandsDestError);
+              });
+            
           },
           function(automationsDestError){
             console.log('automationsDestError');
@@ -2755,7 +2845,9 @@ function checkQueAutomations (counterArray, counterI) {
     if (counterArray[c] == counterI) {
       caCounter++;
       if (caCounter == aCounter + alCounter + anCounter) {
-        doCreateAutomations(automationsSelectList[counterI]);
+        console.log('AUTOAMTIONS CREATE')
+        console.log(automationsSelectList[counterI]);
+        // doCreateAutomations(automationsSelectList[counterI]);
       }
     }
   }
