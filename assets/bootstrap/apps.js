@@ -32,6 +32,8 @@ var allUsers = [];
 var callCounter = 0;
 var currentCallCounter = 0;
 
+var finishKey = ' has finish';
+
 this.init();
 // console.log('loaded');
 // this.initsss();
@@ -750,14 +752,14 @@ function init () {
   document.getElementById('loader').style.visibility = 'visible';
   document.getElementById('mainContent').style.visibility = 'hidden';
 
-  // this.customCall(ticketFieldUrl, 'ticket_fields');
+  this.customCall(ticketFieldUrl, 'ticket_fields');
   // this.customCall(ticketFormsUrl, 'ticket_forms');
   // this.customCall(macrosUrl, 'macros');
-  this.customCall(automationsUrl, 'automations');
+  // this.customCall(automationsUrl, 'automations');
   // this.customCall(slaUrl, 'sla_policies');
   // this.customCall(viewsUrl, 'views');
   // this.customCall(groupsUrl, 'groups');
-  this.customCall(brandsUrl, 'brands');
+  // this.customCall(brandsUrl, 'brands');
 }
 
 function customCall (url, dataType) {
@@ -1051,6 +1053,7 @@ function doMigrate () {
     client.request(getTicketFields_dest()).then(
       function (data){
         // console.log('get ticket_fields dest');
+        var ticketFieldsCounter = 0;
         for (var i=0; i<ticketFieldsSelectList.length; i++) {
           var ticketFieldsExist = false;
           for (var j = 0; j< data.ticket_fields.length; j++) {
@@ -1060,11 +1063,15 @@ function doMigrate () {
           }
           (function(counterI){
             if (!ticketFieldsExist) {
-              // console.log('ticket_fields notExist');
               var ticketData = new Array({ticket_field:ticketFieldsSelectList[i]});
               client.request(createTicketFields(JSON.stringify(ticketData[0]))).then(
                 function (createData){
                   updateProgress('Ticket Fields', 'Ticket field created: ' + ticketFieldsSelectList[counterI].title);
+                  ticketFieldsCounter++;
+                  if (ticketFieldsCounter == ticketFieldsSelectList.length) {
+                    // console.log('TICKET FIELDS FINISH');
+                    updateProgress('Ticket Fields', 'Ticket field' + finishKey);
+                  }
                 },
                 function (errorCreateData){
                   console.log('===== error create ticket_fields dest ======');
@@ -1073,6 +1080,11 @@ function doMigrate () {
                 });
             } else {
               updateProgress('Ticket Fields', 'Ticket field exist: ' + ticketFieldsSelectList[counterI].title);
+              ticketFieldsCounter++;
+              if (ticketFieldsCounter == ticketFieldsSelectList.length) {
+                // console.log('TICKET FIELDS FINISH');
+                updateProgress('Ticket Fields', 'Ticket field' + finishKey);
+              }
             }
           })(i);
         }
@@ -3055,9 +3067,13 @@ function showResult(migrateCounter, errorMigrate) {
 }
 
 function updateProgress (type, message) {
-  var error = '';
-  error += '<tr><td>' + type + '</td><td>' + message + '</td><tr>';
-  $('.bodyMessage').append(error);
+  if (message.includes(finishKey)) {
+    $('.spanError').text(message);
+  } else {
+    var error = '';
+    error += '<tr><td>' + type + '</td><td>' + message + '</td><tr>';
+    $('.bodyMessage').append(error); 
+  }
 }
 
 function deleteAllTicketFields () {
