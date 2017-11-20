@@ -2821,9 +2821,9 @@ function checkQueAutomations (counterArray, counterI) {
     if (counterArray[c] == counterI) {
       caCounter++;
       if (caCounter == aCounter + alCounter + anCounter) {
-        console.log('AUTOAMTIONS CREATE')
-        console.log(automationsSelectList[counterI]);
-        // doCreateAutomations(automationsSelectList[counterI]);
+        // console.log('AUTOAMTIONS CREATE')
+        // console.log(automationsSelectList[counterI]);
+        doCreateAutomations(automationsSelectList[counterI]);
       }
     }
   }
