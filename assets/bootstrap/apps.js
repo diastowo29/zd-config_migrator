@@ -1275,30 +1275,6 @@ function doMigrate () {
                                         console.log('===== targetsError =====');
                                         console.log(targetsError);
                                       });
-
-                                    // client.request(getGroups(automationsSelectList[i].actions[a].value[0])).then(
-                                    //   function(group){
-                                    //     client.request(srcGroups_dest(group.group.name)).then(
-                                    //       function(srcGroup){
-                                    //         if (srcGroup.results.length > 0) {
-                                    //           counterArray.push(counterI);
-                                    //           console.log(counterArray);
-                                    //           automationsSelectList[counterI].actions[counterA].value[0] = srcGroup.results[0].id;
-                                    //           checkQueAutomations(counterArray, counterI);
-                                    //         } else {
-                                    //           console.log('===== group not found =====');
-                                    //           updateProgress('Automations', '<b>' + automationsSelectList[counterI].title + '</b> Error, Group not found: ' + group.group.name);
-                                    //         }
-                                    //       },
-                                    //       function(srcGroupError){
-                                    //         console.log('===== srcGroupError =====');
-                                    //         console.log(srcGroupError);
-                                    //       });
-                                    //   },
-                                    //   function(groupError){
-                                    //     console.log('===== groupError =====');
-                                    //     console.log(groupError);
-                                    //   });
                                   } else {
                                     counterArray.push(counterI);
                                     checkQueAutomations(counterArray, counterI);
